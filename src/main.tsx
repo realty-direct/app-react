@@ -2,14 +2,14 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Root from "./routes/root";
+import RootView from "./routes/RootView";
 import Signin from "./routes/singin";
 import Signup from "./routes/signup";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root />,
+    element: <RootView />,
   },
   {
     path: "/signin",

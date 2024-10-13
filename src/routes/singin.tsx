@@ -1,4 +1,4 @@
-import Input from "../components/Input";
+import RealtyFormInput from "../components/RealtyFormInput";
 
 export default function Signin(): JSX.Element {
   return (
@@ -17,14 +17,14 @@ export default function Signin(): JSX.Element {
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
           <form action="#" method="POST" className="space-y-6">
-            <Input
+            <RealtyFormInput
               id="email"
               label="Email address"
               type="email"
               required
               autoComplete="email"
             />
-            <Input
+            <RealtyFormInput
               id="password"
               label="Password"
               type="password"

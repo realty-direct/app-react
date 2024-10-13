@@ -1,4 +1,4 @@
-export default function Input({
+export default function RealtyFormInput({
   id,
   label,
   type,
