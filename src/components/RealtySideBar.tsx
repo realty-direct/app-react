@@ -1,51 +1,75 @@
+import MenuIcon from "@mui/icons-material/Menu";
 import {
   Box,
   Drawer,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
   ListItemText,
 } from "@mui/material";
-import { useLocation } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import logo from "../assets/Realty_Direct_Logo.png";
 
-export default function RealtySideBar({
-  isOpen,
-  toggleSidebar,
-}: {
+export interface SidebarProps {
   isOpen: boolean;
   toggleSidebar: () => void;
-}): JSX.Element {
-  const location = useLocation();
-  const hideSidebarPaths = ["/signin", "/signup"];
-  const shouldHideSidebar = hideSidebarPaths.includes(location.pathname);
-  console.log(shouldHideSidebar);
-  const drawerOptions = ["test1", "test2", "test3", "test4"];
+  drawerOptions: string[];
+}
 
-  if (shouldHideSidebar) {
-    return <></>;
-  }
+const Sidebar = ({ isOpen, toggleSidebar, drawerOptions }: SidebarProps) => {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <Drawer
-      open={isOpen}
-      onClose={toggleSidebar}
-      variant="persistent" // Use "temporary" for mobile
-      sx={{ width: 240 }}
-    >
-      <Box sx={{ width: 240 }}>
-        <List>
-          {drawerOptions.map((text, index) => (
-            <ListItem key={index} disablePadding>
-              <ListItemButton>
-                {/* <ListItemIcon>
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                    </ListItemIcon> */}
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Box>
-    </Drawer>
+    <>
+      {/* Button to open sidebar on small screens */}
+      {isSmallScreen && (
+        <IconButton
+          onClick={toggleSidebar}
+          sx={{ position: "fixed", top: 16, left: 16, zIndex: 1300 }}
+        >
+          <MenuIcon />
+        </IconButton>
+      )}
+
+      <Drawer
+        open={isOpen || !isSmallScreen}
+        onClose={toggleSidebar}
+        variant={isSmallScreen ? "temporary" : "persistent"}
+        sx={{
+          width: isSmallScreen ? "auto" : 240,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: isSmallScreen ? "80%" : 240,
+          },
+        }}
+      >
+        <div
+          className="logo-container"
+          style={{ textAlign: "center", width: "100%" }}
+        >
+          <img
+            src={logo}
+            alt="App Logo"
+            style={{ maxWidth: "100%", height: "auto" }}
+          />
+        </div>
+        <Box sx={{ width: "100%" }}>
+          <List>
+            {drawerOptions.map((text, index) => (
+              <ListItem key={index} disablePadding>
+                <ListItemButton>
+                  <ListItemText primary={text} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      </Drawer>
+    </>
   );
-}
+};
+
+export default Sidebar;

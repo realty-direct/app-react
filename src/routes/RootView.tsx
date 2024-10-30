@@ -8,6 +8,7 @@ import Signin from "./Singin";
 
 export default function RootView(): JSX.Element {
   const [isSideBarOpen, setIsSideBarOpen] = useState(true);
+  const drawerOptions = ["Home", "Sign In", "Sign Up"];
 
   return (
     <BrowserRouter>
@@ -15,6 +16,7 @@ export default function RootView(): JSX.Element {
         <RealtySideBar
           isOpen={isSideBarOpen}
           toggleSidebar={() => setIsSideBarOpen(!isSideBarOpen)}
+          drawerOptions={drawerOptions}
         />
 
         {/* Routed content */}
