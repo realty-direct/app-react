@@ -29,20 +29,27 @@ const Sidebar = ({ isOpen, toggleSidebar, drawerOptions }: SidebarProps) => {
         width: isSmallScreen ? "auto" : 240,
         flexShrink: 0,
         "& .MuiDrawer-paper": {
-          width: isSmallScreen ? "80%" : 240,
+          width: isSmallScreen ? "50%" : 240,
         },
       }}
     >
-      <div
-        className="logo-container"
-        style={{ textAlign: "center", width: "100%" }}
+      <Box
+        sx={{
+          textAlign: "center",
+          height: "5vh", // Adjust to match header height
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 0,
+        }}
       >
         <img
           src={logo}
           alt="App Logo"
-          style={{ maxWidth: "100%", height: "auto" }}
+          style={{ height: "100%", width: "100%" }} // Ensures full height utilization
         />
-      </div>
+      </Box>
+
       <Box sx={{ width: "100%" }}>
         <List>
           {drawerOptions.map((text, index) => (
