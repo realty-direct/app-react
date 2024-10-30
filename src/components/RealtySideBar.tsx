@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import logo from "../assets/Realty_Direct_Logo.png";
+import logo from "../assets/logo.png";
 
 export interface SidebarProps {
   isOpen: boolean;

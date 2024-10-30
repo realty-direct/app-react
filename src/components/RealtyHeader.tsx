@@ -1,6 +1,6 @@
 import MenuIcon from "@mui/icons-material/Menu";
-import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
-
+import { AppBar, Box, IconButton, Toolbar } from "@mui/material";
+import logo from "../assets/logo_white.png";
 interface HeaderProps {
   isSmallScreen: boolean;
   toggleSidebar: () => void;
@@ -8,14 +8,42 @@ interface HeaderProps {
 
 const Header = ({ isSmallScreen, toggleSidebar }: HeaderProps) => (
   <AppBar position="static" sx={{ height: "5vh" }}>
-    {/* Example: 10% of viewport height */}
     <Toolbar sx={{ minHeight: "100%", alignItems: "center", px: 2 }}>
       {isSmallScreen && (
-        <IconButton edge="start" color="inherit" onClick={toggleSidebar}>
-          <MenuIcon />
-        </IconButton>
+        <>
+          <IconButton edge="start" color="inherit" onClick={toggleSidebar}>
+            <MenuIcon />
+          </IconButton>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+            }}
+          >
+            <Box
+              sx={{
+                textAlign: "center",
+                height: "5vh", // Matches header height
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 0,
+              }}
+            >
+              <img
+                src={logo}
+                alt="App Logo"
+                style={{
+                  height: "100%",
+                  width: "auto",
+                }}
+              />
+            </Box>
+          </Box>
+        </>
       )}
-      <Typography variant="h6">App Title</Typography>
     </Toolbar>
   </AppBar>
 );
