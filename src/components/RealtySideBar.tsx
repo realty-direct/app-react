@@ -4,9 +4,9 @@ import {
   List,
   ListItem,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
 } from "@mui/material";
+import { useLocation } from "react-router-dom";
 
 export default function RealtySideBar({
   isOpen,
@@ -15,7 +15,15 @@ export default function RealtySideBar({
   isOpen: boolean;
   toggleSidebar: () => void;
 }): JSX.Element {
+  const location = useLocation();
+  const hideSidebarPaths = ["/signin", "/signup"];
+  const shouldHideSidebar = hideSidebarPaths.includes(location.pathname);
+  console.log(shouldHideSidebar);
   const drawerOptions = ["test1", "test2", "test3", "test4"];
+
+  if (shouldHideSidebar) {
+    return <></>;
+  }
 
   return (
     <Drawer

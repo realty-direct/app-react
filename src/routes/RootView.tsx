@@ -1,10 +1,10 @@
+import { Box } from "@mui/material";
 import { useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import RealtySideBar from "../components/RealtySideBar";
-import { Box, Typography } from "@mui/material";
-import { BrowserRouter, Route, Router, Routes } from "react-router-dom";
-import Signin from "./singin";
-import Signup from "./signup";
 import Home from "./Home";
+import Signup from "./Signup";
+import Signin from "./Singin";
 
 export default function RootView(): JSX.Element {
   const [isSideBarOpen, setIsSideBarOpen] = useState(true);
