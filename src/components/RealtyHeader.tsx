@@ -8,13 +8,15 @@ interface HeaderProps {
 
 const Header = ({ isSmallScreen, toggleSidebar }: HeaderProps) => (
   <AppBar position="static">
-    <Toolbar>
+    <Toolbar sx={{ display: "flex", alignItems: "center" }}>
       {isSmallScreen && (
         <IconButton edge="start" color="inherit" onClick={toggleSidebar}>
           <MenuIcon />
         </IconButton>
       )}
-      <Typography variant="h6">App Title</Typography>
+      <Typography variant="h6" sx={{ ml: isSmallScreen ? 1 : 0 }}>
+        App Title
+      </Typography>
     </Toolbar>
   </AppBar>
 );
