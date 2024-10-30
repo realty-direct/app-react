@@ -15,28 +15,24 @@ export default function RootView(): JSX.Element {
 
   const toggleSidebar = () => setIsSideBarOpen(!isSideBarOpen);
 
-  // Close sidebar on small screens
+  // Close sidebar on small screens automatically
   useEffect(() => {
     if (isSmallScreen) setIsSideBarOpen(false);
+    if (!isSmallScreen) setIsSideBarOpen(true);
   }, [isSmallScreen]);
 
   return (
     <BrowserRouter>
       <Box sx={{ display: "flex", height: "100vh" }}>
-        {/* Sidebar should only appear on larger screens */}
-        {!isSmallScreen && (
-          <RealtySideBar
-            isOpen={isSideBarOpen || !isSmallScreen}
-            toggleSidebar={toggleSidebar}
-            drawerOptions={drawerOptions}
-          />
-        )}
+        {/* Sidebar appears on larger screens or toggles on small screens */}
+        <RealtySideBar
+          isOpen={isSideBarOpen}
+          toggleSidebar={toggleSidebar}
+          drawerOptions={drawerOptions}
+        />
 
         <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-          {/* Header */}
           <Header isSmallScreen={isSmallScreen} toggleSidebar={toggleSidebar} />
-
-          {/* Main content area */}
           <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
             <Routes>
               <Route path="/" element={<Home />} />
