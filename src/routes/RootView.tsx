@@ -1,3 +1,4 @@
+import { Home as HomeIcon, Login, PersonAdd } from "@mui/icons-material";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -7,8 +8,17 @@ import Home from "./Home";
 import Signup from "./Signup";
 import Signin from "./Singin";
 
+export interface DrawerOptions {
+  text: string;
+  icon: JSX.Element;
+}
+
 export default function RootView(): JSX.Element {
-  const drawerOptions = ["Home", "Sign In", "Sign Up"];
+  const drawerOptions = [
+    { text: "Properties", icon: <HomeIcon color="primary" /> },
+    { text: "Sign In", icon: <Login color="primary" /> },
+    { text: "Sign Up", icon: <PersonAdd color="primary" /> },
+  ];
   const [isSideBarOpen, setIsSideBarOpen] = useState(false);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));

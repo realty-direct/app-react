@@ -1,13 +1,21 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import { AppBar, Box, IconButton, Toolbar } from "@mui/material";
-import logo from "../assets/logo_white.png";
+import logo from "../assets/logo.png";
 interface HeaderProps {
   isSmallScreen: boolean;
   toggleSidebar: () => void;
 }
 
 const Header = ({ isSmallScreen, toggleSidebar }: HeaderProps) => (
-  <AppBar position="static" sx={{ height: "5vh" }}>
+  <AppBar
+    position="static"
+    sx={{
+      height: "5vh",
+      bgcolor: "white",
+      color: "text.primary",
+      borderBottom: "1px solid #ccc",
+    }}
+  >
     <Toolbar sx={{ minHeight: "100%", alignItems: "center", px: 2 }}>
       {isSmallScreen && (
         <>
