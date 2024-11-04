@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Drawer,
+  Link,
   List,
   ListItem,
   ListItemButton,
@@ -11,7 +12,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import logo from "../assets/logo.png";
-import { DrawerOptions } from "../routes/RootView";
+import type { DrawerOptions } from "../routes/RootView";
 
 export interface SidebarProps {
   isOpen: boolean;
@@ -49,33 +50,43 @@ const Sidebar = ({ isOpen, toggleSidebar, drawerOptions }: SidebarProps) => {
           alignItems: "center",
           justifyContent: "center",
           padding: 0,
+          borderBottom: "1px solid #ccc",
         }}
       >
         <img
           src={logo}
           alt="App Logo"
-          style={{ height: "100%", width: "100%" }} // Ensures full height utilization
+          style={{ height: "100%", width: "100%" }}
+
+          // Ensures full height utilization
         />
       </Box>
 
       <Box sx={{ width: "100%", flexGrow: 1 }}>
         <List>
-          {drawerOptions.map((option, index) => (
-            <ListItem key={index} disablePadding>
-              <ListItemButton
-                sx={{ display: "flex", alignItems: "center", gap: 2 }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                  }}
+          {drawerOptions.map((option) => (
+            <Link
+              key={option.id}
+              href={option.href}
+              color="inherit"
+              underline="none"
+            >
+              <ListItem disablePadding>
+                <ListItemButton
+                  sx={{ display: "flex", alignItems: "center", gap: 2 }}
                 >
-                  {option.icon}
-                </Box>
-                <ListItemText primary={option.text} />
-              </ListItemButton>
-            </ListItem>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    {option.icon}
+                  </Box>
+                  <ListItemText primary={option.text} />
+                </ListItemButton>
+              </ListItem>
+            </Link>
           ))}
         </List>
       </Box>

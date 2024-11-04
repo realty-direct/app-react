@@ -5,21 +5,39 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Header from "../components/RealtyHeader";
 import RealtySideBar from "../components/RealtySideBar";
 import Home from "./Home";
+import Property from "./Property";
 import Signup from "./Signup";
 import Signin from "./Singin";
 
 export interface DrawerOptions {
   text: string;
   icon: JSX.Element;
+  href: string;
+  id: number;
 }
 
 export default function RootView(): JSX.Element {
   const drawerOptions = [
-    { text: "Properties", icon: <HomeIcon color="primary" /> },
-    { text: "Sign In", icon: <Login color="primary" /> },
-    { text: "Sign Up", icon: <PersonAdd color="primary" /> },
+    {
+      id: 1,
+      text: "Properties",
+      icon: <HomeIcon color="primary" />,
+      href: "/",
+    },
+    {
+      id: 2,
+      text: "Sign In",
+      icon: <Login color="primary" />,
+      href: "/signin",
+    },
+    {
+      id: 3,
+      text: "Sign Up",
+      icon: <PersonAdd color="primary" />,
+      href: "/signup",
+    },
   ];
-  const [isSideBarOpen, setIsSideBarOpen] = useState(false);
+  const [isSideBarOpen, setIsSideBarOpen] = useState(true);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -43,11 +61,24 @@ export default function RootView(): JSX.Element {
 
         <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Header isSmallScreen={isSmallScreen} toggleSidebar={toggleSidebar} />
-          <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
+
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              height: "100vh",
+              backgroundColor: "#f8fafc",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              overflowY: "auto",
+            }}
+          >
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/signin" element={<Signin />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/property/:id" element={<Property />} />
             </Routes>
           </Box>
         </Box>

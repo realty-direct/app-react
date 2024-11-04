@@ -1,4 +1,4 @@
-import { Box, Typography, Card, CardContent } from "@mui/material";
+import { Box, Card, CardContent, Link, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
 export default function Home(): JSX.Element {
@@ -27,17 +27,21 @@ export default function Home(): JSX.Element {
 
       <Grid container spacing={3} mt={4} justifyContent="center">
         {properties.map((property) => (
-          <Card key={property.id}>
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                {property.name}
-              </Typography>
-              <Typography variant="body1">Price: ${property.price}</Typography>
-              <Typography variant="body2">
-                Location: {property.location}
-              </Typography>
-            </CardContent>
-          </Card>
+          <Link key={property.id} href={`/property/${property.id}`}>
+            <Card key={property.id}>
+              <CardContent>
+                <Typography variant="h5" gutterBottom>
+                  {property.name}
+                </Typography>
+                <Typography variant="body1">
+                  Price: ${property.price}
+                </Typography>
+                <Typography variant="body2">
+                  Location: {property.location}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </Grid>
     </Box>
