@@ -1,4 +1,4 @@
-import { Home as HomeIcon, Login, PersonAdd } from "@mui/icons-material";
+import { Download, Home as HomeIcon } from "@mui/icons-material";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -20,21 +20,15 @@ export default function RootView(): JSX.Element {
   const drawerOptions = [
     {
       id: 1,
-      text: "Properties",
+      text: "Home",
       icon: <HomeIcon color="primary" />,
       href: "/",
     },
     {
       id: 2,
-      text: "Sign In",
-      icon: <Login color="primary" />,
-      href: "/signin",
-    },
-    {
-      id: 3,
-      text: "Sign Up",
-      icon: <PersonAdd color="primary" />,
-      href: "/signup",
+      text: "Forms",
+      icon: <Download color="primary" />,
+      href: "/forms",
     },
   ];
   const [isSideBarOpen, setIsSideBarOpen] = useState(true);
