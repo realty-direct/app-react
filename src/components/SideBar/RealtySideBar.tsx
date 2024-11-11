@@ -1,26 +1,18 @@
-import {
-  Box,
-  Button,
-  Drawer,
-  Link,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Drawer, List, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import logo from "../assets/logo.png";
-import type { DrawerOptions } from "../routes/RootView";
+import logo from "../../assets/logo.png";
+import SideBarOptions from "./SideBarOptions";
 
 export interface SidebarProps {
   isOpen: boolean;
   toggleSidebar: () => void;
-  drawerOptions: DrawerOptions[];
 }
 
-const Sidebar = ({ isOpen, toggleSidebar, drawerOptions }: SidebarProps) => {
+export default function Sidebar({
+  isOpen,
+  toggleSidebar,
+}: SidebarProps): JSX.Element {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const onLogout = () => {
@@ -64,30 +56,7 @@ const Sidebar = ({ isOpen, toggleSidebar, drawerOptions }: SidebarProps) => {
 
       <Box sx={{ width: "100%", flexGrow: 1 }}>
         <List>
-          {drawerOptions.map((option) => (
-            <Link
-              key={option.id}
-              href={option.href}
-              color="inherit"
-              underline="none"
-            >
-              <ListItem disablePadding>
-                <ListItemButton
-                  sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    {option.icon}
-                  </Box>
-                  <ListItemText primary={option.text} />
-                </ListItemButton>
-              </ListItem>
-            </Link>
-          ))}
+          <SideBarOptions />
         </List>
       </Box>
       <Box
@@ -111,6 +80,4 @@ const Sidebar = ({ isOpen, toggleSidebar, drawerOptions }: SidebarProps) => {
       </Box>
     </Drawer>
   );
-};
-
-export default Sidebar;
+}

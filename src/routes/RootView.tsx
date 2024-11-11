@@ -1,9 +1,8 @@
-import { Download, Home as HomeIcon } from "@mui/icons-material";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Header from "../components/RealtyHeader";
-import RealtySideBar from "../components/RealtySideBar";
+import RealtySideBar from "../components/SideBar/RealtySideBar";
 import Home from "./Home";
 import Property from "./Property";
 import Signup from "./Signup";
@@ -17,20 +16,6 @@ export interface DrawerOptions {
 }
 
 export default function RootView(): JSX.Element {
-  const drawerOptions = [
-    {
-      id: 1,
-      text: "Home",
-      icon: <HomeIcon color="primary" />,
-      href: "/",
-    },
-    {
-      id: 2,
-      text: "Forms",
-      icon: <Download color="primary" />,
-      href: "/forms",
-    },
-  ];
   const [isSideBarOpen, setIsSideBarOpen] = useState(true);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -47,11 +32,7 @@ export default function RootView(): JSX.Element {
     <BrowserRouter>
       <Box sx={{ display: "flex", height: "100vh" }}>
         {/* Sidebar appears on larger screens or toggles on small screens */}
-        <RealtySideBar
-          isOpen={isSideBarOpen}
-          toggleSidebar={toggleSidebar}
-          drawerOptions={drawerOptions}
-        />
+        <RealtySideBar isOpen={isSideBarOpen} toggleSidebar={toggleSidebar} />
 
         <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Header isSmallScreen={isSmallScreen} toggleSidebar={toggleSidebar} />

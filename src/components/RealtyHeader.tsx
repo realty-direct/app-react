@@ -6,54 +6,57 @@ interface HeaderProps {
   toggleSidebar: () => void;
 }
 
-const Header = ({ isSmallScreen, toggleSidebar }: HeaderProps) => (
-  <AppBar
-    position="static"
-    sx={{
-      height: "5vh",
-      bgcolor: "white",
-      color: "text.primary",
-      borderBottom: "1px solid #ccc",
-    }}
-  >
-    <Toolbar sx={{ minHeight: "100%", alignItems: "center", px: 2 }}>
-      {isSmallScreen && (
-        <>
-          <IconButton edge="start" color="inherit" onClick={toggleSidebar}>
-            <MenuIcon />
-          </IconButton>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-            }}
-          >
+export default function Header({
+  isSmallScreen,
+  toggleSidebar,
+}: HeaderProps): JSX.Element {
+  return (
+    <AppBar
+      position="static"
+      sx={{
+        height: "5vh",
+        bgcolor: "white",
+        color: "text.primary",
+        borderBottom: "1px solid #ccc",
+      }}
+    >
+      <Toolbar sx={{ minHeight: "100%", alignItems: "center", px: 2 }}>
+        {isSmallScreen && (
+          <>
+            <IconButton edge="start" color="inherit" onClick={toggleSidebar}>
+              <MenuIcon />
+            </IconButton>
             <Box
               sx={{
-                textAlign: "center",
-                height: "5vh", // Matches header height
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: 0,
+                width: "100%",
               }}
             >
-              <img
-                src={logo}
-                alt="App Logo"
-                style={{
-                  height: "100%",
-                  width: "auto",
+              <Box
+                sx={{
+                  textAlign: "center",
+                  height: "5vh", // Matches header height
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 0,
                 }}
-              />
+              >
+                <img
+                  src={logo}
+                  alt="App Logo"
+                  style={{
+                    height: "100%",
+                    width: "auto",
+                  }}
+                />
+              </Box>
             </Box>
-          </Box>
-        </>
-      )}
-    </Toolbar>
-  </AppBar>
-);
-
-export default Header;
+          </>
+        )}
+      </Toolbar>
+    </AppBar>
+  );
+}
