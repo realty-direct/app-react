@@ -1,8 +1,10 @@
 import { Box, Button, Drawer, List, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { useLocation } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import SideBarOptions from "./SideBarOptions";
+import { default as DefaultSideBarOptions } from "./DefaultSideBarOptions";
+import PropertySideBarOptions from "./PropertySideBarOptions";
 
 export interface SidebarProps {
   isOpen: boolean;
@@ -15,9 +17,17 @@ export default function Sidebar({
 }: SidebarProps): JSX.Element {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const location = useLocation(); // Get current location
+
   const onLogout = () => {
     // Implement logout logic here
   };
+
+  // Extract the property ID from the current URL dynamically
+  const match = location.pathname.match(/\/property\/([^/]+)/);
+  const propertyId = match ? match[1] : null;
+
+  // Define route-specific sidebar items for Property
 
   return (
     <Drawer
@@ -34,6 +44,7 @@ export default function Sidebar({
         },
       }}
     >
+      {/* Logo Section */}
       <Box
         sx={{
           textAlign: "center",
@@ -49,16 +60,16 @@ export default function Sidebar({
           src={logo}
           alt="App Logo"
           style={{ height: "100%", width: "100%" }}
-
-          // Ensures full height utilization
         />
       </Box>
 
+      {/* Sidebar Options Section */}
       <Box sx={{ width: "100%", flexGrow: 1 }}>
         <List>
-          <SideBarOptions />
+          {propertyId ? <PropertySideBarOptions /> : <DefaultSideBarOptions />}
         </List>
       </Box>
+      {/* Logout Section */}
       <Box
         sx={{
           textAlign: "center",

@@ -46,7 +46,12 @@ export default function RootView(): JSX.Element {
               <Route path="/" element={<Home />} />
               <Route path="/signin" element={<Signin />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/property/:id" element={<Property />} />
+              <Route path="/property/:id" element={<Property />}>
+                {/* <Route path="orders" element={<OrderHistory />} /> */}
+                {/* <Route path="forms" element={<FormsDownloads />} /> */}
+                {/* <Route path="enquiries" element={<Enquiries />} /> */}
+                {/* <Route path="delete" element={<DeleteProperty />} /> */}
+              </Route>
             </Routes>
           </Box>
         </Box>
