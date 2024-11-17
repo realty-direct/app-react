@@ -33,7 +33,7 @@ export default function Signin(): JSX.Element {
             />
             <div className="text-sm">
               <a
-                href="#"
+                href="/signin"
                 className="font-semibold text-indigo-600 hover:text-indigo-500"
               >
                 Forgot password?
@@ -53,7 +53,7 @@ export default function Signin(): JSX.Element {
           <p className="mt-10 text-center text-sm text-gray-500">
             Not a member?{" "}
             <a
-              href="#"
+              href="/signup"
               className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
             >
               Sign up here

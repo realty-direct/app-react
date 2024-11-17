@@ -8,13 +8,6 @@ import Property from "./Property";
 import Signup from "./Signup";
 import Signin from "./Singin";
 
-export interface DrawerOptions {
-  text: string;
-  icon: JSX.Element;
-  href: string;
-  id: number;
-}
-
 export default function RootView(): JSX.Element {
   const [isSideBarOpen, setIsSideBarOpen] = useState(true);
   const theme = useTheme();
