@@ -1,15 +1,14 @@
 import { Delete } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardMedia,
-  TextField,
-  Typography,
-} from "@mui/material";
-import Grid from "@mui/material/Grid2"; // Import Grid2
+import Add from "@mui/icons-material/Add";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardActions from "@mui/material/CardActions";
+import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
+import Grid from "@mui/material/Grid2";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NoImageFound from "../assets/no_image_found.jpg";
@@ -73,6 +72,10 @@ export default function Home(): JSX.Element {
     navigate(`/edit-listing/${id}`);
   };
 
+  const handleAddProperty = () => {
+    navigate("/create");
+  };
+
   return (
     <Box
       component="main"
@@ -86,9 +89,36 @@ export default function Home(): JSX.Element {
         minWidth: "100%",
       }}
     >
-      <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
-        Properties
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+          mb: 2,
+        }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+          Properties
+        </Typography>
+
+        {/* Add Property Button */}
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "rgb(110,240,145)", // Light green shade
+            color: "#000",
+            "&:hover": {
+              backgroundColor: "rgb(100,240,145)", // Slightly darker green on hover
+            },
+            padding: 2,
+          }}
+          startIcon={<Add />}
+          onClick={() => handleAddProperty()} // Replace with your navigation or add property logic
+        >
+          Add Property
+        </Button>
+      </Box>
 
       <TextField
         label="Search..."
@@ -98,7 +128,13 @@ export default function Home(): JSX.Element {
         sx={{ mb: 4, minWidth: "100%" }}
       />
 
-      <Grid container spacing={3} justifyContent="center" component="div">
+      <Grid
+        container
+        width={"100%"}
+        spacing={3}
+        justifyContent="center"
+        component="div"
+      >
         {filteredProperties.map((property) => (
           <Card
             key={property.id}
