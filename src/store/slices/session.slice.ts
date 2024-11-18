@@ -1,14 +1,9 @@
 // userSessionSlice.ts
 import type { StateCreator } from "zustand";
-import { StoreState } from "../store";
-import type { User } from "../types";
+import type { StoreState } from "../store";
+import type { User, UserSessionState } from "../types";
 
-export interface UserSessionState {
-  user: User | null;
-  token: string | null;
-  setUserSession: (user: User, token: string) => void;
-  clearUserSession: () => void;
-}
+
 
 export const createUserSessionSlice: StateCreator<
   StoreState,

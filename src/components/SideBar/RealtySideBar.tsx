@@ -23,11 +23,11 @@ export default function Sidebar({
     // Implement logout logic here
   };
 
+  // TODO: Need to figure out how to close the sidebar when an option is selected.
+
   // Extract the property ID from the current URL dynamically
   const match = location.pathname.match(/\/property\/([^/]+)/);
   const propertyId = match ? match[1] : null;
-
-  // Define route-specific sidebar items for Property
 
   return (
     <Drawer

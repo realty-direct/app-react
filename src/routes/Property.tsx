@@ -10,11 +10,12 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import NoImageFound from "../assets/no_image_found.jpg";
 
 const Property = () => {
   // Sample property data
   const property = {
-    imageUrl: "https://via.placeholder.com/800x400", // Replace with actual image URL
+    imageUrl: null, // Replace with actual image URL
     address: "123 Main St, Brisbane, QLD",
     type: "Apartment",
     description:
@@ -61,7 +62,7 @@ const Property = () => {
   ];
 
   return (
-    <Box sx={{ padding: 3 }}>
+    <Box sx={{ padding: 3, maxWidth: "100%" }}>
       {/* Top Section: Property Details */}
       <Paper
         sx={{
@@ -77,11 +78,11 @@ const Property = () => {
         {/* Property Image */}
         <Box
           component="img"
-          src={property.imageUrl}
+          src={property.imageUrl || NoImageFound}
           alt={`Image of ${property.address}`}
           sx={{
-            maxWidth: "100%",
-            height: { xs: "200px", md: "300px" },
+            maxWidth: { sm: "100%", md: "50%" },
+            maxHeight: { xs: "200px", md: "300px" },
             objectFit: "cover",
             borderRadius: 2,
             flex: 1,

@@ -1,12 +1,9 @@
 // propertiesSlice.ts
 import type { StateCreator } from "zustand";
 import type { StoreState } from "../store";
-import type { Property } from "../types";
+import type { PropertiesState, Property } from "../types";
 
-export interface PropertiesState {
-  properties: Property[];
-  fetchProperties: () => Promise<void>;
-}
+
 
 export const createPropertiesSlice: StateCreator<
   StoreState,
