@@ -80,9 +80,6 @@ export default function Home(): JSX.Element {
     <Box
       component="main"
       sx={{
-        flexGrow: 1,
-        p: 3,
-        backgroundColor: "#f8fafc",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -106,11 +103,11 @@ export default function Home(): JSX.Element {
         <Button
           variant="contained"
           sx={{
-            backgroundColor: "rgb(110,240,145)", // Light green shade
-            color: "#000",
-            "&:hover": {
-              backgroundColor: "rgb(100,240,145)", // Slightly darker green on hover
-            },
+            // backgroundColor: "rgb(110,240,145)", // Light green shade
+            // color: "#000",
+            // "&:hover": {
+            //   backgroundColor: "rgb(100,240,145)", // Slightly darker green on hover
+            // },
             padding: 2,
           }}
           startIcon={<Add />}

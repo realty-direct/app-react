@@ -62,7 +62,7 @@ const Property = () => {
   ];
 
   return (
-    <Box sx={{ padding: 3, maxWidth: "100%" }}>
+    <Box sx={{ padding: 3 }}>
       {/* Top Section: Property Details */}
       <Paper
         sx={{
@@ -81,7 +81,7 @@ const Property = () => {
           src={property.imageUrl || NoImageFound}
           alt={`Image of ${property.address}`}
           sx={{
-            maxWidth: { sm: "100%", md: "50%" },
+            // maxWidth: { sm: "100%", md: "50%" },
             maxHeight: { xs: "200px", md: "300px" },
             objectFit: "cover",
             borderRadius: 2,
@@ -111,14 +111,13 @@ const Property = () => {
       </Paper>
 
       {/* Bottom Section: Recent Orders */}
-      <Paper sx={{ boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)" }}>
+      <Paper sx={{ boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)", width: "100%" }}>
         <Typography
           variant="h6"
           sx={{
             padding: 2,
             fontWeight: "bold",
-            backgroundColor: "#f5f5f5",
-            borderBottom: "1px solid #ddd",
+            borderBottom: "1px solid",
           }}
         >
           Recent Orders
