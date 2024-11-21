@@ -4,16 +4,47 @@ import {
   Description,
   Edit,
   Gavel,
+  KeyboardReturn,
   Lightbulb,
   Mail,
 } from "@mui/icons-material";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { Box, IconButton } from "@mui/material";
 import type { Navigation } from "@toolpad/core/AppProvider";
 import { AppProvider } from "@toolpad/core/react-router-dom";
 import type React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useStore from "./store/store";
+
+const HeaderWithBackButton = () => {
+  const navigate = useNavigate();
+
+  return (
+    <Box
+      display="flex"
+      alignItems="center"
+      justifyContent="flex-start"
+      sx={{ width: "100%" }}
+    >
+      {/* Back Button */}
+      <IconButton
+        onClick={() => navigate(-1)} // Navigate back
+        color="primary"
+        sx={{ marginRight: 2 }}
+        aria-label="go back"
+      >
+        <KeyboardReturn />
+      </IconButton>
+
+      <img
+        src="https://mui.com/static/logo.png"
+        alt="MUI"
+        style={{ width: 36, height: 36, marginRight: 8 }}
+      />
+    </Box>
+  );
+};
 
 export default function ConditionalNavigationProvider({
   children,
@@ -89,18 +120,23 @@ export default function ConditionalNavigationProvider({
   if (matchesPath(noNavigationPaths, location.pathname)) {
     filteredNavigation = []; // No navigation for login/signup pages
   } else if (matchesPath(minimalNavigationPaths, location.pathname)) {
-    filteredNavigation = [
-      {
-        segment: "",
-        title: "Back to Dashboard",
-        icon: <KeyboardReturnIcon />,
-      },
-    ];
+    filteredNavigation = [];
   } else if (matchesPath(propertyNavigationPaths, location.pathname)) {
     filteredNavigation = PROPERTY_NAVIGATION; // Property-specific navigation
   } else {
     filteredNavigation = HOME_NAVIGATION; // Default navigation
   }
 
-  return <AppProvider navigation={filteredNavigation}>{children}</AppProvider>;
+  return (
+    <AppProvider
+      branding={{
+        logo: matchesPath(minimalNavigationPaths, location.pathname) ? (
+          <HeaderWithBackButton />
+        ) : undefined,
+      }}
+      navigation={filteredNavigation}
+    >
+      {children}
+    </AppProvider>
+  );
 }
