@@ -9,46 +9,57 @@ import CardMedia from "@mui/material/CardMedia";
 import Grid from "@mui/material/Grid2";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NoImageFound from "../assets/no_image_found.jpg";
+import useStore from "../store/store";
 
 export default function Home(): JSX.Element {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
 
+  const store = useStore();
+  const clearSelectedProperty = useStore(
+    (state) => state.clearSelectedProperty
+  );
+
+  // Everytime the Home screen mounts, clear the selected property.
+  useEffect(() => {
+    clearSelectedProperty();
+  }, [clearSelectedProperty]); // Only run once when the component mounts
+
   // TODO: Get this from the store
   const properties = [
     {
-      id: 1,
+      id: "1",
       name: "UNIT 100/100 BROADWAY, BONBEACH, VIC 3196",
       type: "Residential",
       location: "Bonbeach, VIC 3196",
       image: null, // Image not available
     },
     {
-      id: 2,
+      id: "2",
       name: "LEVEL 1, SUITE 1/1 HOBART PLACE, CITY, ACT 2601",
       type: "Residential",
       location: "City, ACT 2601",
       image: null, // Image not available
     },
     {
-      id: 3,
+      id: "3",
       name: "15 KATHLEEN AVENUE, SOUTHPORT, QLD 4215",
       type: "Residential",
       location: "Southport, QLD 4215",
       image: null, // Image not available
     },
     {
-      id: 4,
+      id: "4",
       name: "22 BAKER STREET, MELBOURNE, VIC 3000",
       type: "Commercial",
       location: "Melbourne, VIC 3000",
       image: null, // Image not available
     },
     {
-      id: 5,
+      id: "5",
       name: "10 DOWNING STREET, LONDON, SW1A 2AA",
       type: "Residential",
       location: "London, SW1A 2AA",
@@ -64,11 +75,12 @@ export default function Home(): JSX.Element {
     property.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleManageProperty = (id: number) => {
+  const handleManageProperty = (id: string) => {
+    store.setSelectedProperty(id);
     navigate(`/property/${id}`);
   };
 
-  const handleEditListing = (id: number) => {
+  const handleEditListing = (id: string) => {
     navigate(`/edit-listing/${id}`);
   };
 
@@ -103,11 +115,6 @@ export default function Home(): JSX.Element {
         <Button
           variant="contained"
           sx={{
-            // backgroundColor: "rgb(110,240,145)", // Light green shade
-            // color: "#000",
-            // "&:hover": {
-            //   backgroundColor: "rgb(100,240,145)", // Slightly darker green on hover
-            // },
             padding: 2,
           }}
           startIcon={<Add />}
@@ -116,7 +123,6 @@ export default function Home(): JSX.Element {
           Add Property
         </Button>
       </Box>
-
       <TextField
         label="Search..."
         variant="outlined"
