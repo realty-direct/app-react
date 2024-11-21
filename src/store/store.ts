@@ -1,14 +1,16 @@
 // store.ts
 import { create } from "zustand";
 import { createPropertiesSlice } from "./slices/properties.slice";
-import { createUserSessionSlice } from "./slices/session.slice";
-import type { PropertiesState, UserSessionState } from "./types";
+import { createSessionSlice } from "./slices/session.slice";
+import { createUserSlice } from "./slices/user.slice";
+import type { PropertiesState, SessionState, UserState } from "./types";
 
-export type StoreState = UserSessionState & PropertiesState;
+export type StoreState = UserState & PropertiesState & SessionState;
 
-const useStore = create<StoreState>((set, get, api) => ({
-  ...createUserSessionSlice(set, get, api),
-  ...createPropertiesSlice(set, get, api),
+const useStore = create<StoreState>((set) => ({
+  ...createUserSlice(set),
+  ...createPropertiesSlice(set),
+  ...createSessionSlice(set),
 }));
 
 export default useStore;

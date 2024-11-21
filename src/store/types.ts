@@ -1,25 +1,31 @@
+// Define the UserState interface
 export interface User {
-  id: string;
-  name: string;
-  email: string;
+  id: string | null;
+  name: string | null;
+  email: string | null;
+}
+
+export interface UserState extends User {
+  setUser: (user: User) => void;
+  clearUser: () => void;
+}
+
+export interface SessionState {
+  authToken: string | null;
+  isAuthenticated: boolean;
+  setSession: (token: string) => void;
+  clearSession: () => void;
 }
 
 export interface Property {
   id: string;
-  address: string;
-  description: string;
-  price: number;
-  // Add other relevant fields
+  name: string;
 }
 
 export interface PropertiesState {
   properties: Property[];
-  fetchProperties: () => Promise<void>;
-}
-
-export interface UserSessionState {
-  user: User | null;
-  token: string | null;
-  setUserSession: (user: User, token: string) => void;
-  clearUserSession: () => void;
+  selectedProperty: string | null;
+  setProperties: (properties: Property[]) => void;
+  setSelectedProperty: (id: string) => void;
+  clearSelectedProperty: () => void;
 }
