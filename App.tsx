@@ -70,7 +70,7 @@ export default function App(): JSX.Element {
 
       // slots={{ headerContent: BrandingWithBackButton }}
     >
-      <PageContainer>
+      <PageContainer breadcrumbs={[]} title="">
         <RootView />
       </PageContainer>
     </DashboardLayout>
