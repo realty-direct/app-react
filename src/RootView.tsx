@@ -1,5 +1,6 @@
-import { Box, useTheme } from "@mui/material";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Box } from "@mui/material";
+import type { JSX } from "react";
+import { Route, Routes } from "react-router-dom";
 import Create from "./routes/Create";
 import Home from "./routes/Home";
 import Property from "./routes/Property";
@@ -7,15 +8,6 @@ import Signup from "./routes/Signup";
 import Signin from "./routes/Singin";
 
 export default function RootView(): JSX.Element {
-  const theme = useTheme();
-
-  const hideSidebarPaths = ["/signin", "/signup", "/create"];
-  const location = useLocation();
-  const shouldHideSidebar = hideSidebarPaths.some((path) =>
-    location.pathname.includes(path)
-  );
-  const shouldHideHeader = ["/signin", "/signup"].includes(location.pathname);
-
   return (
     <Box>
       {/* Sidebar appears on larger screens or toggles on small screens */}

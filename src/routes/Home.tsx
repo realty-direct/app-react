@@ -9,6 +9,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Grid from "@mui/material/Grid2";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NoImageFound from "../assets/no_image_found.jpg";
@@ -19,6 +20,7 @@ export default function Home(): JSX.Element {
   const [searchQuery, setSearchQuery] = useState("");
 
   const store = useStore();
+
   const clearSelectedProperty = useStore(
     (state) => state.clearSelectedProperty
   );

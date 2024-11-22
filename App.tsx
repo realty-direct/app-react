@@ -1,6 +1,7 @@
 import { KeyboardReturn } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import { DashboardLayout, PageContainer } from "@toolpad/core";
+import type { JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MinimalLayout from "./src/MinimalLayout";
 import RootView from "./src/RootView";

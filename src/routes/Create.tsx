@@ -10,6 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import type { JSX } from "react";
 import { useState } from "react";
 
 const STATES_IN_AUSTRALIA = [
