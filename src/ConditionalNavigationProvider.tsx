@@ -77,38 +77,36 @@ export default function ConditionalNavigationProvider({
   ];
 
   // Property-specific navigation
-  const PROPERTY_NAVIGATION: Navigation = currentPropertyId
-    ? [
-        {
-          segment: "",
-          title: "Back to Dashboard",
-          icon: <KeyboardReturnIcon />,
-        },
-        { kind: "divider" },
-        {
-          segment: `property/${currentPropertyId}`,
-          title: "Overview",
-          icon: <Dashboard />,
-        },
-        {
-          segment: `orders/${currentPropertyId}`,
-          title: "Orders",
-          icon: <ShoppingCartIcon />,
-        },
-        { segment: "forms", title: "Forms & Downloads", icon: <Description /> },
-        {
-          segment: `enquiries/${currentPropertyId}`,
-          title: "Enquiries",
-          icon: <Mail />,
-        },
-        {
-          // TODO: Need to figure this out to run a WS call to delete the property.
-          segment: `delete/${currentPropertyId}`,
-          title: "Delete Property",
-          icon: <Delete />,
-        },
-      ]
-    : [];
+  const PROPERTY_NAVIGATION: Navigation = [
+    {
+      segment: "",
+      title: "Back to Dashboard",
+      icon: <KeyboardReturnIcon />,
+    },
+    { kind: "divider" },
+    {
+      segment: `property/${currentPropertyId}`,
+      title: "Overview",
+      icon: <Dashboard />,
+    },
+    {
+      segment: `orders/${currentPropertyId}`,
+      title: "Orders",
+      icon: <ShoppingCartIcon />,
+    },
+    { segment: "forms", title: "Forms & Downloads", icon: <Description /> },
+    {
+      segment: `enquiries/${currentPropertyId}`,
+      title: "Enquiries",
+      icon: <Mail />,
+    },
+    {
+      // TODO: Need to figure this out to run a WS call to delete the property.
+      segment: `delete/${currentPropertyId}`,
+      title: "Delete Property",
+      icon: <Delete />,
+    },
+  ];
 
   // Helper function to check if a route matches any of the specified paths
   const matchesPath = (paths: string[], currentPath: string) =>
