@@ -24,8 +24,5 @@ export interface Property {
 
 export interface PropertiesState {
   properties: Property[];
-  selectedProperty: string | null;
   setProperties: (properties: Property[]) => void;
-  setSelectedProperty: (id: string) => void;
-  clearSelectedProperty: () => void;
 }

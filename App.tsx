@@ -53,9 +53,13 @@ export default function App(): JSX.Element {
   // Define pages where header and sidebar should be hidden
   const minimalLayoutPaths = ["/signin", "/signup"];
 
-  const isCreateRoutePath = ["/create"].includes(location.pathname);
-
+  // Check if current route matches minimal layout paths
   const useMinimalLayout = minimalLayoutPaths.includes(location.pathname);
+
+  // Check if the current route matches "/create" or "/property/:id/edit"
+  const isCreateRoutePath =
+    location.pathname === "/create" ||
+    /^\/property\/[^/]+\/edit$/.test(location.pathname); // Regex to match "/property/${id}/edit"
 
   return useMinimalLayout ? (
     <MinimalLayout>
@@ -63,11 +67,10 @@ export default function App(): JSX.Element {
     </MinimalLayout>
   ) : (
     <DashboardLayout
-      hideNavigation={isCreateRoutePath}
+      hideNavigation={isCreateRoutePath} // Hide navigation for "/create" or "/property/:id/edit"
       slotProps={{
         toolbarActions: HeaderWithBackButton,
       }}
-
       // slots={{ headerContent: BrandingWithBackButton }}
     >
       <PageContainer breadcrumbs={[]} title="">
