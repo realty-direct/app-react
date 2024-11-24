@@ -10,25 +10,13 @@ import Grid from "@mui/material/Grid2";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { JSX } from "react";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import NoImageFound from "../assets/no_image_found.jpg";
-import useStore from "../store/store";
 
 export default function Home(): JSX.Element {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-
-  const store = useStore();
-
-  const clearSelectedProperty = useStore(
-    (state) => state.clearSelectedProperty
-  );
-
-  // Everytime the Home screen mounts, clear the selected property.
-  useEffect(() => {
-    clearSelectedProperty();
-  }, [clearSelectedProperty]); // Only run once when the component mounts
 
   // TODO: Get this from the store
   const properties = [
@@ -77,12 +65,7 @@ export default function Home(): JSX.Element {
     property.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleManageProperty = (id: string) => {
-    store.setSelectedProperty(id);
-    navigate(`/property/${id}`);
-  };
-
-  const handleEditListing = (id: string) => {
+  const handleDeleteListing = (id: string) => {
     navigate(`/edit-listing/${id}`);
   };
 
@@ -180,17 +163,15 @@ export default function Home(): JSX.Element {
                 </Typography>
               </CardContent>
               <CardActions className={"justify-between"}>
-                <Button
-                  size="small"
-                  color="primary"
-                  onClick={() => handleManageProperty(property.id)}
-                >
-                  Manage Property
-                </Button>
+                <Link to={`/property/${property.id}`}>
+                  <Button size="small" color="primary">
+                    Manage Property
+                  </Button>
+                </Link>
                 <Button
                   size="small"
                   color="error"
-                  onClick={() => handleEditListing(property.id)}
+                  onClick={() => handleDeleteListing(property.id)}
                 >
                   <Delete />
                 </Button>

@@ -14,11 +14,14 @@ import { Box, IconButton } from "@mui/material";
 import type { Navigation } from "@toolpad/core/AppProvider";
 import { AppProvider } from "@toolpad/core/react-router-dom";
 import type React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import useStore from "./store/store";
+import { useEffect } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const HeaderWithBackButton = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  const goBackToOverview = navigate(`/property/${id}`);
 
   return (
     <Box
@@ -29,7 +32,7 @@ const HeaderWithBackButton = () => {
     >
       {/* Back Button */}
       <IconButton
-        onClick={() => navigate(-1)} // Navigate back
+        onClick={() => goBackToOverview} // Navigate back
         color="primary"
         sx={{ marginRight: 2 }}
         aria-label="go back"
@@ -51,13 +54,21 @@ export default function ConditionalNavigationProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const store = useStore();
-  const currentPropertyId = store.selectedProperty;
+  const { id } = useParams();
+
+  const x = useParams();
+
+  useEffect(() => {
+    console.log(x);
+  }, [x]);
+
+  console.log(x, "PARAMS");
+
   const location = useLocation();
 
   // Define paths for conditional navigation
   const noNavigationPaths = ["/login", "/signup"];
-  const minimalNavigationPaths = ["/create"];
+  const minimalNavigationPaths = ["/create", "/property/.+/edit"]; // Include a regex pattern
   const propertyNavigationPaths = [
     "/property",
     "/orders",
@@ -85,24 +96,24 @@ export default function ConditionalNavigationProvider({
     },
     { kind: "divider" },
     {
-      segment: `property/${currentPropertyId}`,
+      segment: `property/${id}`,
       title: "Overview",
       icon: <Dashboard />,
     },
     {
-      segment: `orders/${currentPropertyId}`,
+      segment: `property/${id}/orders`,
       title: "Orders",
       icon: <ShoppingCartIcon />,
     },
     { segment: "forms", title: "Forms & Downloads", icon: <Description /> },
     {
-      segment: `enquiries/${currentPropertyId}`,
+      segment: `property/${id}/enquiries`,
       title: "Enquiries",
       icon: <Mail />,
     },
     {
       // TODO: Need to figure this out to run a WS call to delete the property.
-      segment: `delete/${currentPropertyId}`,
+      segment: `delete/${id}`,
       title: "Delete Property",
       icon: <Delete />,
     },
@@ -110,7 +121,14 @@ export default function ConditionalNavigationProvider({
 
   // Helper function to check if a route matches any of the specified paths
   const matchesPath = (paths: string[], currentPath: string) =>
-    paths.some((path) => currentPath.startsWith(path));
+    paths.some((path) => {
+      if (path.includes(".+")) {
+        // Handle regex pattern
+        const regex = new RegExp(`^${path}$`);
+        return regex.test(currentPath);
+      }
+      return currentPath.startsWith(path);
+    });
 
   // Determine the navigation based on the current path
   let filteredNavigation: Navigation = [];
@@ -118,7 +136,7 @@ export default function ConditionalNavigationProvider({
   if (matchesPath(noNavigationPaths, location.pathname)) {
     filteredNavigation = []; // No navigation for login/signup pages
   } else if (matchesPath(minimalNavigationPaths, location.pathname)) {
-    filteredNavigation = [];
+    filteredNavigation = []; // Minimal navigation for /create and /property/:id/edit
   } else if (matchesPath(propertyNavigationPaths, location.pathname)) {
     filteredNavigation = PROPERTY_NAVIGATION; // Property-specific navigation
   } else {

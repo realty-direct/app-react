@@ -10,9 +10,14 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { Outlet, useNavigate, useParams } from "react-router-dom";
 import NoImageFound from "../assets/no_image_found.jpg";
 
 const Property = () => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  console.log(id);
+
   // Sample property data
   const property = {
     imageUrl: null, // Replace with actual image URL
@@ -20,6 +25,7 @@ const Property = () => {
     type: "Apartment",
     description:
       "A modern two-bedroom apartment located in the heart of Brisbane.",
+    id: 1,
   };
 
   // Sample recent orders data
@@ -61,8 +67,14 @@ const Property = () => {
     },
   ];
 
+  const routeToEditProperty = () => {
+    // Route to the Edit Property page
+    navigate(`/property/${property.id}/edit`);
+  };
+
   return (
     <Box sx={{ padding: 3 }}>
+      <Outlet />
       {/* Top Section: Property Details */}
       <Paper
         sx={{
@@ -104,6 +116,7 @@ const Property = () => {
             variant="contained"
             color="primary"
             sx={{ textTransform: "none" }}
+            onClick={routeToEditProperty}
           >
             Edit Property Details
           </Button>
