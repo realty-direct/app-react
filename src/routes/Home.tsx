@@ -81,6 +81,7 @@ export default function Home(): JSX.Element {
         flexDirection: "column",
         alignItems: "center",
         minWidth: "100%",
+        padding: 4,
       }}
     >
       <Box

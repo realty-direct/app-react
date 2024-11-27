@@ -7,10 +7,10 @@ import type { PropertiesState, SessionState, UserState } from "./types";
 
 export type StoreState = UserState & PropertiesState & SessionState;
 
-const useStore = create<StoreState>((set) => ({
-  ...createUserSlice(set),
-  ...createPropertiesSlice(set),
-  ...createSessionSlice(set),
+const useStore = create<StoreState>((set, get, api) => ({
+  ...createUserSlice(set, get, api),
+  ...createPropertiesSlice(set, get, api),
+  ...createSessionSlice(set, get, api),
 }));
 
 export default useStore;

@@ -1,13 +1,29 @@
-import { KeyboardReturn } from "@mui/icons-material";
-import { Box, IconButton, Typography } from "@mui/material";
-import { DashboardLayout, PageContainer } from "@toolpad/core";
+import {
+  Dashboard,
+  Delete,
+  Description,
+  Edit,
+  Gavel,
+  KeyboardReturn,
+  Lightbulb,
+  Mail,
+  ShoppingCart,
+} from "@mui/icons-material";
+import { Box, IconButton } from "@mui/material";
+import type { NavigationItem } from "@toolpad/core";
+import { AppProvider } from "@toolpad/core";
 import type { JSX } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import MinimalLayout from "./src/MinimalLayout";
-import RootView from "./src/RootView";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 
 const HeaderWithBackButton = () => {
   const navigate = useNavigate();
+  // const location = useLocation();
+
+  const { id } = useParams();
+
+  const returnToPropertyOverview = () => {
+    navigate(`/property/${id}`); // Navigate to property overview
+  };
 
   return (
     <Box
@@ -16,66 +32,77 @@ const HeaderWithBackButton = () => {
       justifyContent="flex-start"
       sx={{ width: "100%" }}
     >
-      {/* Back Button */}
       <IconButton
-        onClick={() => navigate(-1)} // Navigate back
+        onClick={returnToPropertyOverview}
         color="primary"
         sx={{ marginRight: 2 }}
         aria-label="go back"
       >
         <KeyboardReturn />
       </IconButton>
-
-      {/* Logo */}
-      <Typography
-        variant="h6"
-        component="div"
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          whiteSpace: "nowrap",
-        }}
-      >
-        <img
-          src="https://toolpad.dev/static/branding/logo.svg"
-          alt="Toolpad Logo"
-          style={{ width: 24, height: 24, marginRight: 8 }}
-        />
-        Toolpad
-      </Typography>
     </Box>
   );
 };
 
 export default function App(): JSX.Element {
   const location = useLocation();
+  const { id } = useParams();
+  console.log(location);
 
-  // Define pages where header and sidebar should be hidden
-  const minimalLayoutPaths = ["/signin", "/signup"];
+  const HOME_NAVIGATION: NavigationItem[] = [
+    { segment: "guide", title: "Guide to Selling", icon: <Lightbulb /> },
+    { segment: "edit", title: "Edit Account", icon: <Edit /> },
+    {
+      segment: "conveyancer",
+      title: "Recommended Conveyancer",
+      icon: <Gavel />,
+    },
+  ];
 
-  // Check if current route matches minimal layout paths
-  const useMinimalLayout = minimalLayoutPaths.includes(location.pathname);
+  const PROPERTY_NAVIGATION: NavigationItem[] = [
+    {
+      segment: `/property/${id}`,
+      title: "Overview",
+      icon: <Dashboard />,
+    },
+    {
+      segment: `/property/${id}/orders`,
+      title: "Orders",
+      icon: <ShoppingCart />,
+    },
+    {
+      segment: `/property/${id}/forms`,
+      title: "Forms & Downloads",
+      icon: <Description />,
+    },
+    {
+      segment: `/property/${id}/enquiries`,
+      title: "Enquiries",
+      icon: <Mail />,
+    },
+    {
+      segment: `/property/${id}/delete`,
+      title: "Delete Property",
+      icon: <Delete />,
+    },
+  ];
 
-  // Check if the current route matches "/create" or "/property/:id/edit"
-  const isCreateRoutePath =
-    location.pathname === "/create" ||
-    /^\/property\/[^/]+\/edit$/.test(location.pathname); // Regex to match "/property/${id}/edit"
+  const isEditOrCreatePath =
+    location.pathname.includes("/create") ||
+    location.pathname.includes("/edit");
 
-  return useMinimalLayout ? (
-    <MinimalLayout>
-      <RootView />
-    </MinimalLayout>
-  ) : (
-    <DashboardLayout
-      hideNavigation={isCreateRoutePath} // Hide navigation for "/create" or "/property/:id/edit"
-      slotProps={{
-        toolbarActions: HeaderWithBackButton,
-      }}
-      // slots={{ headerContent: BrandingWithBackButton }}
+  const navigationToUse = location.pathname.startsWith("/property")
+    ? PROPERTY_NAVIGATION
+    : HOME_NAVIGATION;
+
+  return (
+    <AppProvider
+      navigation={isEditOrCreatePath ? undefined : navigationToUse}
+      branding={
+        isEditOrCreatePath ? { logo: <HeaderWithBackButton /> } : undefined
+      }
     >
-      <PageContainer breadcrumbs={[]} title="">
-        <RootView />
-      </PageContainer>
-    </DashboardLayout>
+      <Outlet />
+    </AppProvider>
   );
 }

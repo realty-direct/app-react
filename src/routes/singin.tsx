@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import RealtyFormInput from "../components/RealtyFormInput";
 
 export default function Signin(): JSX.Element {
