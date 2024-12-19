@@ -4,45 +4,15 @@ import {
   Description,
   Edit,
   Gavel,
-  KeyboardReturn,
   Lightbulb,
   Mail,
   ShoppingCart,
 } from "@mui/icons-material";
-import { Box, IconButton } from "@mui/material";
 import type { NavigationItem } from "@toolpad/core";
 import { AppProvider } from "@toolpad/core";
 import type { JSX } from "react";
-import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-
-const HeaderWithBackButton = () => {
-  const navigate = useNavigate();
-  // const location = useLocation();
-
-  const { id } = useParams();
-
-  const returnToPropertyOverview = () => {
-    navigate(`/property/${id}`); // Navigate to property overview
-  };
-
-  return (
-    <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="flex-start"
-      sx={{ width: "100%" }}
-    >
-      <IconButton
-        onClick={returnToPropertyOverview}
-        color="primary"
-        sx={{ marginRight: 2 }}
-        aria-label="go back"
-      >
-        <KeyboardReturn />
-      </IconButton>
-    </Box>
-  );
-};
+import { Outlet, useLocation, useParams } from "react-router-dom";
+import HeaderWithBackButton from "./src/components/EditPropertyHeader";
 
 export default function App(): JSX.Element {
   const location = useLocation();
