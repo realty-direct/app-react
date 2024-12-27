@@ -17,7 +17,6 @@ import HeaderWithBackButton from "./src/components/EditPropertyHeader";
 export default function App(): JSX.Element {
   const location = useLocation();
   const { id } = useParams();
-  console.log(location);
 
   const HOME_NAVIGATION: NavigationItem[] = [
     { segment: "guide", title: "Guide to Selling", icon: <Lightbulb /> },

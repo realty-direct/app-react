@@ -1,18 +1,14 @@
 import { KeyboardReturn } from "@mui/icons-material";
 import { Box, IconButton } from "@mui/material";
-import { NavLink, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const HeaderWithBackButton = () => {
-  const navigate = useNavigate();
   const { id } = useParams();
+  const navigate = useNavigate();
 
-  const returnToPropertyOverview = () => {
-    if (!id) {
-      console.error("Property ID is missing.");
-      return;
-    }
-    console.log("Navigating to: ", `/property/${id}`);
-    navigate(`/property/${id}`); // Use absolute path for navigation
+  const handleNavigate = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault(); // Prevent any default behavior
+    navigate(`/property/${id}`); // Navigate to the property page
   };
 
   return (
@@ -22,16 +18,14 @@ const HeaderWithBackButton = () => {
       justifyContent="flex-start"
       sx={{ width: "100%" }}
     >
-      <NavLink to={`/property/${id}`} style={{ textDecoration: "none" }}>
-        <IconButton
-          //   onClick={returnToPropertyOverview}
-          color="primary"
-          sx={{ marginRight: 2 }}
-          aria-label="go back"
-        >
-          <KeyboardReturn />
-        </IconButton>
-      </NavLink>
+      <IconButton
+        onClick={handleNavigate}
+        color="primary"
+        sx={{ marginRight: 2 }}
+        aria-label="go back"
+      >
+        <KeyboardReturn />
+      </IconButton>
     </Box>
   );
 };
