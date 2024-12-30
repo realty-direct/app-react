@@ -1,10 +1,6 @@
 import {
   Box,
   Button,
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  InputLabel,
   MenuItem,
   Radio,
   RadioGroup,
@@ -12,69 +8,145 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useState } from "react";
 
 export default function DetailsTab() {
+  const [landUnit, setLandUnit] = useState("m2");
+  const [houseUnit, setHouseUnit] = useState("m2");
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
+    <Box sx={{ p: { xs: 2, sm: 6 } }}>
+      {/* Header */}
+      <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
         Tell us more about your property
       </Typography>
 
-      {/* Property Category */}
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Property Category*</InputLabel>
-        <Select defaultValue="">
+      {/* Inputs Section */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, my: 4 }}>
+        {/* Property Category */}
+        <TextField select label="Property Category" variant="filled" fullWidth>
           <MenuItem value="residential">Residential</MenuItem>
           <MenuItem value="commercial">Commercial</MenuItem>
           <MenuItem value="industrial">Industrial</MenuItem>
           <MenuItem value="rural">Rural</MenuItem>
-        </Select>
-      </FormControl>
+        </TextField>
 
-      {/* Land Area */}
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Land Area (m²)"
-        type="number"
-        InputProps={{
-          inputProps: { min: 0 },
+        {/* Land Area and House Area */}
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap", // Wraps inputs on smaller screens
+            gap: 2,
+          }}
+        >
+          {/* Land Area */}
+          <Box sx={{ flex: 1, display: "flex", gap: 0 }}>
+            <TextField
+              label="Land Area"
+              type="number"
+              variant="filled"
+              fullWidth
+              sx={{ flex: 1 }}
+            />
+            <Select
+              value={landUnit}
+              onChange={(e) => setLandUnit(e.target.value)}
+              variant="filled"
+              sx={{
+                width: "auto", // Adapts to content
+                flexShrink: 0, // Prevents it from shrinking too much
+                borderLeft: 1,
+              }}
+              hiddenLabel
+            >
+              <MenuItem value="m2">m²</MenuItem>
+              <MenuItem value="acres">Acres</MenuItem>
+              <MenuItem value="hectares">Hectares</MenuItem>
+              <MenuItem value="squares">Squares</MenuItem>
+            </Select>
+          </Box>
+
+          {/* House Area */}
+          <Box sx={{ flex: 1, display: "flex", gap: 0 }}>
+            <TextField
+              label="House Area"
+              type="number"
+              variant="filled"
+              fullWidth
+              sx={{ flex: 1 }}
+            />
+            <Select
+              value={houseUnit}
+              onChange={(e) => setHouseUnit(e.target.value)}
+              variant="filled"
+              sx={{
+                width: "auto", // Adapts to content
+                flexShrink: 0, // Prevents it from shrinking too much
+                borderLeft: 1,
+              }}
+              hiddenLabel
+            >
+              <MenuItem value="m2">m²</MenuItem>
+              <MenuItem value="acres">Acres</MenuItem>
+              <MenuItem value="hectares">Hectares</MenuItem>
+              <MenuItem value="squares">Squares</MenuItem>
+            </Select>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Radio Group */}
+      <Typography sx={{ mb: 1 }}>Property Type</Typography>
+      <RadioGroup row sx={{ gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Radio value="new" />
+          <Typography>New</Typography>
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Radio value="established" />
+          <Typography>Established</Typography>
+        </Box>
+      </RadioGroup>
+
+      {/* Navigation Buttons */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          mt: 6,
+          flexWrap: "wrap", // Ensures buttons wrap on small screens
+          gap: 2,
         }}
-      />
+      >
+        <Button
+          variant="outlined"
+          sx={{
+            flex: "1 1 auto",
+            maxWidth: "150px",
+          }}
+        >
+          Back
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{
+            flex: "1 1 auto",
+            maxWidth: "150px",
+          }}
+        >
+          Continue
+        </Button>
+      </Box>
 
-      {/* House Area */}
-      <TextField
-        fullWidth
-        margin="normal"
-        label="House Area (m²)"
-        type="number"
-        InputProps={{
-          inputProps: { min: 0 },
-        }}
-      />
-
-      {/* Hide Street Address */}
-      <FormControlLabel
-        control={<Checkbox />}
-        label="Hide my street address and just display the suburb"
-      />
-
-      {/* Property Type: New or Established */}
-      <FormControl margin="normal">
-        <RadioGroup row>
-          <FormControlLabel value="new" control={<Radio />} label="New" />
-          <FormControlLabel
-            value="established"
-            control={<Radio />}
-            label="Established"
-          />
-        </RadioGroup>
-      </FormControl>
-
-      {/* Submit Button */}
-      <Button variant="contained" color="primary">
-        Save Details
-      </Button>
+      {/* Note */}
+      <Typography
+        variant="body2"
+        color="textSecondary"
+        sx={{ mt: 4, textAlign: "center" }}
+      >
+        Please note: You can skip between sections anytime
+      </Typography>
     </Box>
   );
 }

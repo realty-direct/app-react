@@ -1,8 +1,9 @@
-import { Box, Tab, Tabs } from "@mui/material";
-import { type JSX, useState } from "react";
+import { Box, Tabs } from "@mui/material";
+import Tab from "@mui/material/Tab";
+import { useState } from "react";
 import DetailsTab from "./Edit/Details";
 
-export default function Edit(): JSX.Element {
+export default function Edit() {
   const [tabValue, setTabValue] = useState(0);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -13,19 +14,14 @@ export default function Edit(): JSX.Element {
     <Box
       sx={{
         display: "flex",
-        flexGrow: 1,
-
-        minHeight: "100%",
       }}
     >
       {/* Vertical Tabs */}
       <Box
         sx={{
-          display: "flex",
           flexDirection: "column",
           borderRight: 1,
           borderColor: "divider",
-          minWidth: 200, // Ensures tabs have a consistent width
         }}
       >
         <Tabs
@@ -33,7 +29,7 @@ export default function Edit(): JSX.Element {
           value={tabValue}
           onChange={handleTabChange}
           aria-label="Vertical tabs example"
-          sx={{ flexGrow: 1 }}
+          sx={{ flex: 1, minHeight: "100%" }}
         >
           <Tab label="Details" />
           <Tab label="Features" />
@@ -49,7 +45,7 @@ export default function Edit(): JSX.Element {
       </Box>
 
       {/* Tab Content */}
-      <Box sx={{ flexGrow: 1, p: 3 }}>
+      <Box sx={{ p: 3, minHeight: "100%", flexGrow: 1 }}>
         {tabValue === 0 && <DetailsTab />}
         {tabValue === 1 && <Box>Features Content</Box>}
         {tabValue === 2 && <Box>Price Content</Box>}
