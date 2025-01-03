@@ -8,7 +8,7 @@ export default function PropertyEditLayout() {
       hideNavigation={true}
       //   slots={{ : HeaderWithBackButton }} // Add the header with a back button
     >
-      <Box sx={{ padding: 2 }}>
+      <Box>
         <Outlet /> {/* Renders the nested content for /property/:id/edit */}
       </Box>
     </DashboardLayout>

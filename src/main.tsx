@@ -37,7 +37,13 @@ const router = createBrowserRouter([
       },
       {
         path: "create",
-        Component: Create,
+        Component: PropertyEditLayout,
+        children: [
+          {
+            path: "",
+            Component: Create,
+          },
+        ],
       },
       {
         path: "property/:id", // Base path for property routes
