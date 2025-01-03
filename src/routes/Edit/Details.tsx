@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   MenuItem,
   Radio,
   RadioGroup,
@@ -107,46 +106,6 @@ export default function DetailsTab() {
           <Typography>Established</Typography>
         </Box>
       </RadioGroup>
-
-      {/* Navigation Buttons */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          mt: 6,
-          flexWrap: "wrap", // Ensures buttons wrap on small screens
-          gap: 2,
-        }}
-      >
-        <Button
-          variant="outlined"
-          sx={{
-            flex: "1 1 auto",
-            maxWidth: "150px",
-          }}
-        >
-          Back
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{
-            flex: "1 1 auto",
-            maxWidth: "150px",
-          }}
-        >
-          Continue
-        </Button>
-      </Box>
-
-      {/* Note */}
-      <Typography
-        variant="body2"
-        color="textSecondary"
-        sx={{ mt: 4, textAlign: "center" }}
-      >
-        Please note: You can skip between sections anytime
-      </Typography>
     </Box>
   );
 }

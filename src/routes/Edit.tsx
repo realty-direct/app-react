@@ -1,7 +1,8 @@
-import { Box, Tabs } from "@mui/material";
-import Tab from "@mui/material/Tab";
+import { Alert, Box, Button, Tab, Tabs } from "@mui/material";
+import type React from "react";
 import { useState } from "react";
-import DetailsTab from "./Edit/Details";
+import Details from "./Edit/Details";
+import Features from "./Edit/Features";
 
 export default function Edit() {
   const [tabValue, setTabValue] = useState(0);
@@ -14,40 +15,46 @@ export default function Edit() {
     <Box
       sx={{
         display: "flex",
+        flexDirection: "column",
+        width: "100vw", // Ensure the layout spans the entire width
+        padding: 1,
       }}
     >
-      {/* Vertical Tabs */}
-      <Box
+      {/* Horizontal Tabs */}
+      <Tabs
+        value={tabValue}
+        onChange={handleTabChange}
+        aria-label="Horizontal tabs example"
+        variant="scrollable"
+        scrollButtons
         sx={{
-          flexDirection: "column",
-          borderRight: 1,
+          borderBottom: 1,
           borderColor: "divider",
         }}
       >
-        <Tabs
-          orientation="vertical"
-          value={tabValue}
-          onChange={handleTabChange}
-          aria-label="Vertical tabs example"
-          sx={{ flex: 1, minHeight: "100%" }}
-        >
-          <Tab label="Details" />
-          <Tab label="Features" />
-          <Tab label="Price" />
-          <Tab label="Photos and Media" />
-          <Tab label="Ownership" />
-          <Tab label="Description" />
-          <Tab label="Contact" />
-          <Tab label="Inspections" />
-          <Tab label="Listing Enhancements" />
-          <Tab label="Checkout" />
-        </Tabs>
-      </Box>
+        <Tab label="Details" />
+        <Tab label="Features" />
+        <Tab label="Price" />
+        <Tab label="Photos and Media" />
+        <Tab label="Ownership" />
+        <Tab label="Description" />
+        <Tab label="Contact" />
+        <Tab label="Inspections" />
+        <Tab label="Listing Enhancements" />
+        <Tab label="Checkout" />
+      </Tabs>
 
       {/* Tab Content */}
-      <Box sx={{ p: 3, minHeight: "100%", flexGrow: 1 }}>
-        {tabValue === 0 && <DetailsTab />}
-        {tabValue === 1 && <Box>Features Content</Box>}
+      <Box
+        sx={{
+          flexGrow: 1, // Tab content grows to fill remaining height
+          // overflowY: "auto", // Enables scrolling for content
+          p: 3, // Adds padding
+          width: "100%", // Content takes full width
+        }}
+      >
+        {tabValue === 0 && <Details />}
+        {tabValue === 1 && <Features />}
         {tabValue === 2 && <Box>Price Content</Box>}
         {tabValue === 3 && <Box>Photos and Media Content</Box>}
         {tabValue === 4 && <Box>Ownership Content</Box>}
@@ -56,6 +63,39 @@ export default function Edit() {
         {tabValue === 7 && <Box>Inspections Content</Box>}
         {tabValue === 8 && <Box>Listing Enhancements Content</Box>}
         {tabValue === 9 && <Box>Checkout Content</Box>}
+      </Box>
+      {/* Navigation Buttons */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          mt: 6,
+          flexWrap: "wrap", // Ensures buttons wrap on small screens
+          gap: 2,
+        }}
+      >
+        <Button
+          variant="outlined"
+          sx={{
+            flex: "1 1 auto",
+            maxWidth: "150px",
+          }}
+        >
+          Back
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{
+            flex: "1 1 auto",
+            maxWidth: "150px",
+          }}
+        >
+          Continue
+        </Button>
+        <Alert severity="info" role="alert">
+          Please note: You can skip this section at anytime
+        </Alert>
       </Box>
     </Box>
   );
