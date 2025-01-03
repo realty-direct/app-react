@@ -1,14 +1,19 @@
 import { KeyboardReturn } from "@mui/icons-material";
 import { Box, IconButton } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const HeaderWithBackButton = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleNavigate = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault(); // Prevent any default behavior
-    navigate(`/property/${id}`); // Navigate to the property page
+    if (location.pathname.includes("create")) {
+      navigate("/");
+    } else {
+      navigate(`/property/${id}`); // Navigate to the property page
+    }
   };
 
   return (
