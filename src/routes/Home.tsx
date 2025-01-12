@@ -83,6 +83,7 @@ export default function Home(): JSX.Element {
         minWidth: "100%",
         padding: 4,
       }}
+      className="main"
     >
       <Box
         sx={{

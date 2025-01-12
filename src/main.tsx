@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "../App";
+
 import "./index.css";
 import HomeLayout from "./layouts/HomeLayout";
 import PropertyEditLayout from "./layouts/PropertyEditLayout";
@@ -9,6 +10,7 @@ import PropertyLayout from "./layouts/PropertyLayout";
 import Create from "./routes/Create";
 import Edit from "./routes/Edit";
 import Home from "./routes/Home";
+import Orders from "./routes/Orders";
 import Property from "./routes/Property";
 import Signup from "./routes/Signup";
 import Signin from "./routes/Singin";
@@ -53,10 +55,10 @@ const router = createBrowserRouter([
             path: "", // Default route for /property/:id
             Component: Property,
           },
-          // {
-          //   path: "enquiries",
-          //   Component: Enquiries, // Enquiries page
-          // },
+          {
+            path: "orders",
+            Component: Orders, // Enquiries page
+          },
         ],
       },
       {

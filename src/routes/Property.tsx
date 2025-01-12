@@ -84,7 +84,7 @@ const Property = () => {
           padding: 3,
           mb: 4,
           gap: 3,
-          boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
+          // boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
         }}
       >
         {/* Property Image */}
@@ -124,7 +124,7 @@ const Property = () => {
       </Paper>
 
       {/* Bottom Section: Recent Orders */}
-      <Paper sx={{ boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)", width: "100%" }}>
+      <Paper sx={{ width: "100%" }}>
         <Typography
           variant="h6"
           sx={{

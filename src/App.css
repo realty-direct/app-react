@@ -1,8 +1,9 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* This file is used for app-specific styles, particularly for the root-level component or shared layout styles. */
+
+.main {
+  background-color: #fbfbfb;
+
+  /* padding: 5cm; */
 }
 
 .logo {

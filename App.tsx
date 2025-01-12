@@ -1,4 +1,5 @@
 import {
+  ArrowBack,
   Dashboard,
   Delete,
   Description,
@@ -8,10 +9,11 @@ import {
   Mail,
   ShoppingCart,
 } from "@mui/icons-material";
-import type { NavigationItem } from "@toolpad/core";
+import type { Navigation, NavigationItem } from "@toolpad/core";
 import { AppProvider } from "@toolpad/core";
 import type { JSX } from "react";
 import { Outlet, useLocation, useParams } from "react-router-dom";
+import "./src/App.css";
 import HeaderWithBackButton from "./src/components/EditPropertyHeader";
 
 export default function App(): JSX.Element {
@@ -28,29 +30,36 @@ export default function App(): JSX.Element {
     },
   ];
 
-  const PROPERTY_NAVIGATION: NavigationItem[] = [
+  const PROPERTY_NAVIGATION: Navigation = [
     {
-      segment: `/property/${id}`,
+      segment: "/",
+      title: "Return to dashboard",
+      icon: <ArrowBack />,
+    },
+    { kind: "divider" },
+
+    {
+      segment: `property/${id}`,
       title: "Overview",
       icon: <Dashboard />,
     },
     {
-      segment: `/property/${id}/orders`,
+      segment: `property/${id}/orders`,
       title: "Orders",
       icon: <ShoppingCart />,
     },
     {
-      segment: `/property/${id}/forms`,
+      segment: `property/${id}/forms`,
       title: "Forms & Downloads",
       icon: <Description />,
     },
     {
-      segment: `/property/${id}/enquiries`,
+      segment: `property/${id}/enquiries`,
       title: "Enquiries",
       icon: <Mail />,
     },
     {
-      segment: `/property/${id}/delete`,
+      segment: `property/${id}/delete`,
       title: "Delete Property",
       icon: <Delete />,
     },
@@ -71,7 +80,9 @@ export default function App(): JSX.Element {
         isEditOrCreatePath ? { logo: <HeaderWithBackButton /> } : undefined
       }
     >
-      <Outlet />
+      <div className="main">
+        <Outlet />
+      </div>
     </AppProvider>
   );
 }
