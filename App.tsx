@@ -10,7 +10,7 @@ import {
   ShoppingCart,
 } from "@mui/icons-material";
 import type { Navigation, NavigationItem } from "@toolpad/core";
-import { AppProvider } from "@toolpad/core";
+import { ReactRouterAppProvider } from "@toolpad/core/react-router";
 import type { JSX } from "react";
 import { Outlet, useLocation, useParams } from "react-router-dom";
 import "./src/App.css";
@@ -21,6 +21,7 @@ export default function App(): JSX.Element {
   const { id } = useParams();
 
   const HOME_NAVIGATION: NavigationItem[] = [
+    { segment: "", title: "Your Properties", icon: <Lightbulb /> },
     { segment: "guide", title: "Guide to Selling", icon: <Lightbulb /> },
     { segment: "edit", title: "Edit Account", icon: <Edit /> },
     {
@@ -32,7 +33,7 @@ export default function App(): JSX.Element {
 
   const PROPERTY_NAVIGATION: Navigation = [
     {
-      segment: "/",
+      segment: ".",
       title: "Return to dashboard",
       icon: <ArrowBack />,
     },
@@ -74,7 +75,7 @@ export default function App(): JSX.Element {
     : HOME_NAVIGATION;
 
   return (
-    <AppProvider
+    <ReactRouterAppProvider
       navigation={isEditOrCreatePath ? undefined : navigationToUse}
       branding={
         isEditOrCreatePath ? { logo: <HeaderWithBackButton /> } : undefined
@@ -83,6 +84,6 @@ export default function App(): JSX.Element {
       <div className="main">
         <Outlet />
       </div>
-    </AppProvider>
+    </ReactRouterAppProvider>
   );
 }
