@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { RouterProvider, createBrowserRouter } from "react-router";
+
 import App from "../App";
 
 import "./index.css";
@@ -9,6 +10,7 @@ import PropertyEditLayout from "./layouts/PropertyEditLayout";
 import PropertyLayout from "./layouts/PropertyLayout";
 import Create from "./routes/Create";
 import Edit from "./routes/Edit";
+import Guide from "./routes/Guide";
 import Home from "./routes/Home";
 import Orders from "./routes/Orders";
 import Property from "./routes/Property";
@@ -21,11 +23,16 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/", // Home and other top-level routes
+
         Component: HomeLayout,
         children: [
           {
             path: "",
             Component: Home,
+          },
+          {
+            path: "guide",
+            Component: Guide,
           },
         ],
       },
@@ -52,7 +59,7 @@ const router = createBrowserRouter([
         Component: PropertyLayout, // Layout for /property/:id and related views
         children: [
           {
-            path: "", // Default route for /property/:id
+            path: "",
             Component: Property,
           },
           {
