@@ -5,10 +5,12 @@ import {
   Description,
   Edit,
   Gavel,
+  House,
   Lightbulb,
   Mail,
   ShoppingCart,
 } from "@mui/icons-material";
+import { createTheme } from "@mui/material";
 import type { Navigation, NavigationItem } from "@toolpad/core";
 import { ReactRouterAppProvider } from "@toolpad/core/react-router";
 import type { JSX } from "react";
@@ -16,12 +18,51 @@ import { Outlet, useLocation, useParams } from "react-router-dom";
 import "./src/App.css";
 import HeaderWithBackButton from "./src/components/EditPropertyHeader";
 
+const theme = createTheme({
+  cssVariables: {
+    colorSchemeSelector: "data-toolpad-color-scheme",
+  },
+  colorSchemes: {
+    light: {
+      palette: {
+        background: {
+          // default: "#F9F9FE",
+          // paper: "#EEEEF9",
+        },
+        success: {
+          "500": "#2E7D32",
+          "100": "#C8E6C9",
+          "300": "#A5D6A7",
+          "400": "#00c073",
+        },
+      },
+    },
+    dark: {
+      palette: {
+        background: {
+          // default: "#2A4364",
+          // paper: "#112E4D",
+        },
+      },
+    },
+  },
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 600,
+      lg: 1200,
+      xl: 1536,
+    },
+  },
+});
+
 export default function App(): JSX.Element {
   const location = useLocation();
   const { id } = useParams();
 
   const HOME_NAVIGATION: NavigationItem[] = [
-    { segment: "", title: "Your Properties", icon: <Lightbulb /> },
+    { segment: "", title: "Your Properties", icon: <House /> },
     { segment: "guide", title: "Guide to Selling", icon: <Lightbulb /> },
     { segment: "edit", title: "Edit Account", icon: <Edit /> },
     {
@@ -80,8 +121,10 @@ export default function App(): JSX.Element {
       branding={
         isEditOrCreatePath ? { logo: <HeaderWithBackButton /> } : undefined
       }
+      theme={theme}
+      //  theme={} // https://mui.com/toolpad/core/react-app-provider/#theming
     >
-      <div className="main">
+      <div className="main-outlet">
         <Outlet />
       </div>
     </ReactRouterAppProvider>

@@ -1,10 +1,27 @@
 /* This file is used for app-specific styles, particularly for the root-level component or shared layout styles. */
 
-.main {
-  background-color: #fbfbfb;
 
-  /* padding: 5cm; */
+:root {
+  --main-outlet-bg: #fbfbfb;
+  /* Default background color */
 }
+
+/* Dark Mode */
+[data-toolpad-color-scheme="dark"] {
+  --main-outlet-bg: #101010;
+  /* Red in dark mode */
+}
+
+/* Apply it to the div */
+.main-outlet {
+  background-color: var(--main-outlet-bg);
+  min-height: 100vh;
+
+  /* transition: background-color 0.3s ease-in-out; */
+
+  /* Smooth transition */
+}
+
 
 .logo {
   height: 6em;
@@ -12,9 +29,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -23,6 +42,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
