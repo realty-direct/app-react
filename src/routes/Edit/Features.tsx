@@ -1,10 +1,9 @@
 import {
   Box,
-  Button,
   Checkbox,
   Divider,
   FormControlLabel,
-  Grid,
+  Grid2,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
@@ -74,20 +73,14 @@ export default function Features() {
 
   return (
     <Box p={3}>
-      {/* Top Navigation Bar Note */}
-      <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-        Please note: You can skip between sections anytime by using the top
-        Navigation bar
-      </Typography>
-
       <Typography variant="h5" mb={2}>
         What features does your property have?
       </Typography>
 
       {/* Features Checklist */}
-      <Grid container spacing={3}>
+      <Grid2 container spacing={3}>
         {Object.entries(features).map(([category, items]) => (
-          <Grid item xs={12} md={6} key={category}>
+          <Grid2 key={category}>
             <Typography variant="h6" gutterBottom>
               {category}
             </Typography>
@@ -104,27 +97,9 @@ export default function Features() {
                 label={item}
               />
             ))}
-          </Grid>
+          </Grid2>
         ))}
-      </Grid>
-
-      {/* Action Buttons */}
-      <Box mt={4} display="flex" justifyContent="space-between">
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => console.log("Back clicked")}
-        >
-          Back
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => console.log("Continue clicked")}
-        >
-          Continue
-        </Button>
-      </Box>
+      </Grid2>
     </Box>
   );
 }

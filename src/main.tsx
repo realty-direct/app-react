@@ -9,7 +9,7 @@ import HomeLayout from "./layouts/HomeLayout";
 import PropertyEditLayout from "./layouts/PropertyEditLayout";
 import PropertyLayout from "./layouts/PropertyLayout";
 import Create from "./routes/Create/Create";
-import Edit from "./routes/Edit";
+import Edit from "./routes/Edit/Edit";
 import Guide from "./routes/Guide";
 import Home from "./routes/Home";
 import Orders from "./routes/Orders";

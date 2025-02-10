@@ -2,12 +2,14 @@ import { Box, Button, Tab, Tabs } from "@mui/material";
 
 import type { JSX } from "react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AdditionalInfo from "./AdditionalInfo";
 import PropertyDetails from "./PropertyDetails";
 
 export default function Create(): JSX.Element {
   const [tabIndex, setTabIndex] = useState(0);
   const [propertyDetails, setPropertyDetails] = useState({ address: "" });
+  const navigate = useNavigate();
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabIndex(newValue);
@@ -30,6 +32,9 @@ export default function Create(): JSX.Element {
   };
 
   const handleBack = () => {
+    if (tabIndex === 0) {
+      navigate("/");
+    }
     setTabIndex(0);
   };
 
@@ -47,6 +52,9 @@ export default function Create(): JSX.Element {
             handlePropertyDetailsChange={handlePropertyDetailsChange}
             propertyDetails={propertyDetails}
           />
+          <Button color={"inherit"} variant={"contained"} onClick={handleBack}>
+            Back
+          </Button>
           <Button variant={"contained"} onClick={handleContinue}>
             Next
           </Button>
