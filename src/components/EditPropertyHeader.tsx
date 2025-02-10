@@ -12,9 +12,13 @@ const HeaderWithBackButton = () => {
     if (location.pathname.includes("create")) {
       navigate("/");
     } else {
+      // TODO: Fix this it does not work. Could be because it is initialised before the router?
+      // navigate(-1) will work but I dont think it is best practise.
       navigate(`/property/${id}`); // Navigate to the property page
     }
   };
+
+  // TODO: Should make this a save and exit button maybe?
 
   return (
     <Box
@@ -30,6 +34,9 @@ const HeaderWithBackButton = () => {
         aria-label="go back"
       >
         <KeyboardReturn />
+        {
+          // TODO: Make this a save and exit button
+        }
       </IconButton>
     </Box>
   );

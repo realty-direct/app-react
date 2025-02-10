@@ -72,7 +72,7 @@ export default function Description() {
       />
 
       {/* Important Notice */}
-      <Paper sx={{ p: 2, backgroundColor: "#f9f9f9", mb: 3 }}>
+      <Paper sx={{ p: 2, mb: 3 }}>
         <Typography variant="body2">
           <b>Important:</b> Don't put your contact details here as this is
           against realestate.com.au's acceptable use policy.

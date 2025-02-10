@@ -26,9 +26,7 @@ export default function Summary() {
         Your package includes a <b>customizable 600x900 sign.</b>
       </Typography>
 
-      <Paper
-        sx={{ p: 3, textAlign: "center", backgroundColor: "#f9f9f9", mb: 3 }}
-      >
+      <Paper sx={{ p: 3, textAlign: "center", mb: 3 }}>
         <Typography variant="subtitle1">
           On the sign, we'll print: <b>0406371630</b>
         </Typography>
