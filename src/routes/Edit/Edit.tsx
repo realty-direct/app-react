@@ -1,9 +1,16 @@
 import { Alert, Box, Button, Grid2, Tab, Tabs } from "@mui/material";
 import type React from "react";
 import { useState } from "react";
+import Contact from "./Contact";
+import Description from "./Description";
 import Details from "./Details";
 import Features from "./Features";
+import Inspections from "./Inspections";
+import ListingEnhancements from "./ListingEnhancements";
+import Media from "./Media";
+import Ownership from "./Ownership";
 import Price from "./Price";
+import Summary from "./Summary";
 
 export default function Edit() {
   const [tabValue, setTabValue] = useState(0);
@@ -58,7 +65,7 @@ export default function Edit() {
           <Tab label="Contact" />
           <Tab label="Inspections" />
           <Tab label="Listing Enhancements" />
-          <Tab label="Checkout" />
+          <Tab label="Summary" />
         </Tabs>
       </Grid2>
 
@@ -67,13 +74,13 @@ export default function Edit() {
         {tabValue === 0 && <Details />}
         {tabValue === 1 && <Features />}
         {tabValue === 2 && <Price />}
-        {tabValue === 3 && <Box>Photos and Media Content</Box>}
-        {tabValue === 4 && <Box>Ownership Content</Box>}
-        {tabValue === 5 && <Box>Description Content</Box>}
-        {tabValue === 6 && <Box>Contact Content</Box>}
-        {tabValue === 7 && <Box>Inspections Content</Box>}
-        {tabValue === 8 && <Box>Listing Enhancements Content</Box>}
-        {tabValue === 9 && <Box>Checkout Content</Box>}
+        {tabValue === 3 && <Media />}
+        {tabValue === 4 && <Ownership />}
+        {tabValue === 5 && <Description />}
+        {tabValue === 6 && <Contact />}
+        {tabValue === 7 && <Inspections />}
+        {tabValue === 8 && <ListingEnhancements />}
+        {tabValue === 9 && <Summary />}
         <Alert severity="info" role="alert" icon={undefined}>
           Please note: You can skip this section at anytime
         </Alert>
