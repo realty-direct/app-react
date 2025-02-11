@@ -13,10 +13,11 @@ import {
 import { createTheme } from "@mui/material";
 import type { Navigation, NavigationItem } from "@toolpad/core";
 import { ReactRouterAppProvider } from "@toolpad/core/react-router";
-import type { JSX } from "react";
-import { Outlet, useLocation, useParams } from "react-router-dom";
+import { type JSX, useEffect } from "react";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import "./src/App.css";
 import HeaderWithBackButton from "./src/components/EditPropertyHeader";
+import { useRealtyStore } from "./src/store/store";
 
 const theme = createTheme({
   cssVariables: {
@@ -60,6 +61,18 @@ const theme = createTheme({
 export default function App(): JSX.Element {
   const location = useLocation();
   const { id } = useParams();
+  const navigate = useNavigate();
+
+  const { isAuthenticated } = useRealtyStore();
+
+  useEffect(() => {
+    const publicRoutes = ["/signin", "/signup"];
+
+    // ✅ Allow users to access "/signin" and "/signup" without redirecting
+    if (!isAuthenticated && !publicRoutes.includes(location.pathname)) {
+      navigate("/signin", { replace: true });
+    }
+  }, [isAuthenticated, navigate, location.pathname]);
 
   const HOME_NAVIGATION: NavigationItem[] = [
     { segment: "", title: "Your Properties", icon: <House /> },

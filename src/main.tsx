@@ -14,8 +14,8 @@ import Guide from "./routes/Guide";
 import Home from "./routes/Home";
 import Orders from "./routes/Orders";
 import Property from "./routes/Property";
+import Signin from "./routes/Signin";
 import Signup from "./routes/Signup";
-import Signin from "./routes/Singin";
 
 const router = createBrowserRouter([
   {

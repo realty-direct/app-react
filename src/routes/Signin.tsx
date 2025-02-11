@@ -1,13 +1,11 @@
-import { type JSX, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signUp } from "../lib/supabase";
-import useRealtyStore from "../store/store";
+import { signIn } from "../lib/supabase";
+import { useRealtyStore } from "../store/store";
 
-export default function Signup(): JSX.Element {
+export default function Signin() {
   const navigate = useNavigate();
-  const { setSession } = useRealtyStore(); // ✅ Zustand session state
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const { setSession } = useRealtyStore(); // Zustand session state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -18,13 +16,13 @@ export default function Signup(): JSX.Element {
     setError(null);
     setLoading(true);
 
-    const { user, error } = await signUp(email, password);
+    const { user, error } = await signIn(email, password);
     if (error) {
       setError(error.message);
       setLoading(false);
     } else {
       setSession(user?.id || ""); // ✅ Store session in Zustand
-      navigate("/dashboard"); // ✅ Redirect after signup
+      navigate("/dashboard"); // ✅ Redirect after login
     }
   };
 
@@ -38,7 +36,7 @@ export default function Signup(): JSX.Element {
             className="mx-auto h-10 w-auto"
           />
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-            Sign up for an account
+            Sign in to your account
           </h2>
         </div>
 
@@ -50,46 +48,10 @@ export default function Signup(): JSX.Element {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
-                htmlFor="fname"
-                className="block text-sm font-medium text-gray-700"
-              >
-                First Name
-              </label>
-              <input
-                id="fname"
-                type="text"
-                required
-                autoComplete="given-name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="family-name"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Last Name
-              </label>
-              <input
-                id="family-name"
-                type="text"
-                required
-                autoComplete="family-name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
-            </div>
-
-            <div>
-              <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email Address
+                Email address
               </label>
               <input
                 id="email"
@@ -113,11 +75,20 @@ export default function Signup(): JSX.Element {
                 id="password"
                 type="password"
                 required
-                autoComplete="new-password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
+            </div>
+
+            <div className="text-sm">
+              <a
+                href="/forgot-password"
+                className="font-semibold text-indigo-600 hover:text-indigo-500"
+              >
+                Forgot password?
+              </a>
             </div>
 
             <div>
@@ -128,10 +99,20 @@ export default function Signup(): JSX.Element {
                 hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 
                 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                {loading ? "Signing up..." : "Sign up"}
+                {loading ? "Signing in..." : "Sign in"}
               </button>
             </div>
           </form>
+
+          <p className="mt-10 text-center text-sm text-gray-500">
+            Not a member?{" "}
+            <a
+              href="/signup"
+              className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+            >
+              Sign up here
+            </a>
+          </p>
         </div>
       </div>
     </div>

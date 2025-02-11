@@ -16,3 +16,21 @@ export interface Property {
 }
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ✅ Authentication Functions
+export const signUp = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  return { user: data?.user, error };
+};
+
+export const signIn = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  return { user: data?.user, error };
+};
+
+export const signOut = async () => {
+  await supabase.auth.signOut();
+};
