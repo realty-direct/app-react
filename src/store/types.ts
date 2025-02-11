@@ -19,7 +19,11 @@ export interface SessionState {
 
 export interface Property {
   id: string;
-  name: string;
+  name: string; // ✅ Ensure this matches Supabase
+  title: string;
+  price: number;
+  description: string;
+  created_at: string;
 }
 
 export interface PropertiesState {
