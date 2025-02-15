@@ -1,8 +1,9 @@
 // Define the UserState interface
 export interface User {
-  id: string | null;
-  name: string | null;
-  email: string | null;
+  id: string;
+  fname: string;
+  lname: string;
+  email: string;
 }
 
 export interface UserState extends User {
@@ -13,7 +14,8 @@ export interface UserState extends User {
 export interface SessionState {
   authToken: string | null;
   isAuthenticated: boolean;
-  setSession: (token: string) => void;
+  user: User | null;
+  setSession: (user: User) => void;
   clearSession: () => void;
 }
 

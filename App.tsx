@@ -7,6 +7,7 @@ import {
   Gavel,
   House,
   Lightbulb,
+  Logout,
   Mail,
   ShoppingCart,
 } from "@mui/icons-material";
@@ -83,6 +84,15 @@ export default function App(): JSX.Element {
       title: "Recommended Conveyancer",
       icon: <Gavel />,
     },
+    { kind: "divider" }, // ✅ Adds a visual separation before the logout button
+
+    // ✅ Log Out Button at the Bottom
+    {
+      segment: "",
+      title: "Log Out",
+      icon: <Logout />,
+      pattern: "logout", // ✅ Custom identifier for logout handling
+    },
   ];
 
   const PROPERTY_NAVIGATION: Navigation = [
@@ -143,3 +153,5 @@ export default function App(): JSX.Element {
     </ReactRouterAppProvider>
   );
 }
+
+// TODO: Before production: https://supabase.com/docs/guides/deployment/going-into-prod

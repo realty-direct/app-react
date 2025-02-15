@@ -1,31 +1,42 @@
+import { Box, Button, Modal, Typography } from "@mui/material"; // ✅ MUI Components
 import { type JSX, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signUp } from "../lib/supabase";
-import useRealtyStore from "../store/store";
+import { resendConfirmationEmail, signUp } from "../lib/supabase";
 
 export default function Signup(): JSX.Element {
   const navigate = useNavigate();
-  const { setSession } = useRealtyStore(); // ✅ Zustand session state
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false); // ✅ Controls the modal
+  const [resendLoading, setResendLoading] = useState(false); // ✅ Loading for resend button
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    const { user, error } = await signUp(email, password);
+    const { error } = await signUp(email, password, firstName, lastName);
+
     if (error) {
       setError(error.message);
       setLoading(false);
     } else {
-      setSession(user?.id || ""); // ✅ Store session in Zustand
-      navigate("/dashboard"); // ✅ Redirect after signup
+      setShowModal(true); // ✅ Open the modal
+      setLoading(false);
     }
+  };
+
+  const handleResendEmail = async () => {
+    setResendLoading(true);
+    const { error } = await resendConfirmationEmail(email);
+    if (error) {
+      setError(error.message);
+    }
+    setResendLoading(false);
   };
 
   return (
@@ -119,6 +130,18 @@ export default function Signup(): JSX.Element {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
             </div>
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-600">
+                Already signed up?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/signin")}
+                  className="text-indigo-600 hover:text-indigo-500 font-semibold"
+                >
+                  Sign in
+                </button>
+              </p>
+            </div>
 
             <div>
               <button
@@ -134,6 +157,38 @@ export default function Signup(): JSX.Element {
           </form>
         </div>
       </div>
+
+      {/* ✅ MUI Confirmation Modal */}
+      <Modal open={showModal} onClose={() => navigate("/signin")}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "white",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" component="h2">
+            Confirmation Email Sent!
+          </Typography>
+          <Typography sx={{ mt: 2 }}>
+            Please check your inbox to confirm your email. If you don't see it,
+            click the button below to resend.
+          </Typography>
+
+          <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
+            <Button onClick={() => navigate("/signin")}>Go To Sign In</Button>
+            <Button onClick={handleResendEmail} disabled={resendLoading}>
+              {resendLoading ? "Resending..." : "Don't see it? Resend"}
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </div>
   );
 }

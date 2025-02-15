@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signIn } from "../lib/supabase";
+import { signIn, supabase } from "../lib/supabase";
 import { useRealtyStore } from "../store/store";
 
 export default function Signin() {
@@ -17,12 +17,37 @@ export default function Signin() {
     setLoading(true);
 
     const { user, error } = await signIn(email, password);
+
     if (error) {
       setError(error.message);
       setLoading(false);
     } else {
-      setSession(user?.id || ""); // ✅ Store session in Zustand
-      navigate("/dashboard"); // ✅ Redirect after login
+      console.log(user);
+
+      if (user) {
+        // ✅ Fetch the user profile from the `profiles` table
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("first_name, last_name")
+          .eq("id", user.id)
+          .single(); // Ensure we get a single record
+
+        if (profileError) {
+          setError("Failed to load user profile");
+          setLoading(false);
+          return;
+        }
+
+        // ✅ Store the full user info in Zustand
+        setSession({
+          id: user.id,
+          fname: profile?.first_name || "", // ✅ Now fetched from `profiles` table
+          lname: profile?.last_name || "", // ✅ Now fetched from `profiles` table
+          email: user.email ?? "",
+        });
+
+        navigate("/"); // ✅ Redirect after login
+      }
     }
   };
 

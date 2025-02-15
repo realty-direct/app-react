@@ -1,6 +1,5 @@
 import type { StateCreator } from "zustand";
-import { supabase } from "../../lib/supabase";
-import type { SessionState } from "../types";
+import type { SessionState, User } from "../types";
 
 export const createSessionSlice: StateCreator<
   SessionState,
@@ -10,13 +9,21 @@ export const createSessionSlice: StateCreator<
 > = (set) => ({
   authToken: null,
   isAuthenticated: false,
+  user: null, // ✅ Store full user info
 
-  setSession: async (token) => {
-    set({ authToken: token, isAuthenticated: true });
+  setSession: (user: User) => {
+    set({
+      authToken: user.id,
+      isAuthenticated: true,
+      user, // ✅ Store user details
+    });
   },
 
-  clearSession: async () => {
-    await supabase.auth.signOut();
-    set({ authToken: null, isAuthenticated: false });
+  clearSession: () => {
+    set({
+      authToken: null,
+      isAuthenticated: false,
+      user: null, // ✅ Clear user info on logout
+    });
   },
 });
