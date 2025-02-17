@@ -11,7 +11,7 @@ import PropertyLayout from "./layouts/PropertyLayout";
 import AccountManagement from "./routes/AccountManagement";
 import Confirm from "./routes/Confirm";
 import Conveyancing from "./routes/Conveyancing";
-import Create from "./routes/Create/Create";
+import Create from "./routes/Create";
 import Edit from "./routes/Edit/Edit";
 import Guide from "./routes/Guide";
 import Home from "./routes/Home";
