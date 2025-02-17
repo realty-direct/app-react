@@ -3,11 +3,11 @@ import {
   Dashboard,
   Delete,
   Description,
-  Edit,
   Gavel,
   House,
   Lightbulb,
   Mail,
+  Person,
   ShoppingCart,
 } from "@mui/icons-material";
 import { createTheme } from "@mui/material";
@@ -77,11 +77,16 @@ export default function App(): JSX.Element {
   const HOME_NAVIGATION: NavigationItem[] = [
     { segment: "", title: "Your Properties", icon: <House /> },
     { segment: "guide", title: "Guide to Selling", icon: <Lightbulb /> },
-    { segment: "edit", title: "Edit Account", icon: <Edit /> },
     {
-      segment: "conveyancer",
+      segment: "conveyancing",
       title: "Recommended Conveyancer",
       icon: <Gavel />,
+    },
+    { kind: "divider" },
+    {
+      segment: "account",
+      title: "Account Management",
+      icon: <Person />,
     },
   ];
 

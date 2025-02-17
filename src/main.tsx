@@ -10,6 +10,7 @@ import PropertyEditLayout from "./layouts/PropertyEditLayout";
 import PropertyLayout from "./layouts/PropertyLayout";
 import AccountManagement from "./routes/AccountManagement";
 import Confirm from "./routes/Confirm";
+import Conveyancing from "./routes/Conveyancing";
 import Create from "./routes/Create/Create";
 import Edit from "./routes/Edit/Edit";
 import Guide from "./routes/Guide";
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
           {
             path: "account",
             Component: AccountManagement,
+          },
+          {
+            path: "conveyancing",
+            Component: Conveyancing,
           },
         ],
       },
