@@ -49,11 +49,11 @@ const theme = createTheme({
   },
   breakpoints: {
     values: {
-      xs: 0,
-      sm: 600,
-      md: 600,
-      lg: 1200,
-      xl: 1536,
+      xs: 0, // Extra small devices (phones)
+      sm: 600, // Small devices (tablets)
+      md: 960, // Medium devices (small laptops)
+      lg: 1280, // Large devices (desktops)
+      xl: 1920, // Extra large screens (4K displays)
     },
   },
 });
