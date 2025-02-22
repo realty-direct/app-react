@@ -21,14 +21,22 @@ export interface SessionState {
 
 export interface Property {
   id: string;
-  name: string; // ✅ Ensure this matches Supabase
-  title: string;
-  price: number;
-  description: string;
+  user_id: string;
+  address: string;
+  property_type: "residential" | "commercial" | "land" | "rural";
+  sale_type?: "standard_sale" | "auction";
+  price?: number;
+  price_display?: "same_as_price" | "hide" | "range" | "custom";
+  status: "draft" | "published" | "sold";
   created_at: string;
 }
 
 export interface PropertiesState {
   properties: Property[];
   setProperties: (properties: Property[]) => void;
+  fetchProperties: (userId: string) => Promise<void>;
+  addProperty: (
+    newProperty: Omit<Property, "id" | "created_at">
+  ) => Promise<string | null>;
+  deleteProperty: (id: string) => Promise<void>;
 }

@@ -1,68 +1,43 @@
-import { Delete } from "@mui/icons-material";
-import Add from "@mui/icons-material/Add";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import Grid from "@mui/material/Grid2";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import type { JSX } from "react";
-import { useState } from "react";
+import { Add, Delete } from "@mui/icons-material";
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardMedia,
+  Grid2,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { type JSX, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NoImageFound from "../assets/no_image_found.jpg";
+import useRealtyStore from "../store/store";
 
 export default function Home(): JSX.Element {
   const navigate = useNavigate();
+  const { properties, fetchProperties, user } = useRealtyStore(); // ✅ Zustand store
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // TODO: Get this from the store
-  const properties = [
-    {
-      id: "1",
-      name: "UNIT 100/100 BROADWAY, BONBEACH, VIC 3196",
-      type: "Residential",
-      location: "Bonbeach, VIC 3196",
-      image: null, // Image not available
-    },
-    {
-      id: "2",
-      name: "LEVEL 1, SUITE 1/1 HOBART PLACE, CITY, ACT 2601",
-      type: "Residential",
-      location: "City, ACT 2601",
-      image: null, // Image not available
-    },
-    {
-      id: "3",
-      name: "15 KATHLEEN AVENUE, SOUTHPORT, QLD 4215",
-      type: "Residential",
-      location: "Southport, QLD 4215",
-      image: null, // Image not available
-    },
-    {
-      id: "4",
-      name: "22 BAKER STREET, MELBOURNE, VIC 3000",
-      type: "Commercial",
-      location: "Melbourne, VIC 3000",
-      image: null, // Image not available
-    },
-    {
-      id: "5",
-      name: "10 DOWNING STREET, LONDON, SW1A 2AA",
-      type: "Residential",
-      location: "London, SW1A 2AA",
-      image: null, // Image not available
-    },
-  ];
+  // ✅ Fetch properties from Zustand store when component mounts
+  useEffect(() => {
+    // TODO: This should not fire every time Home is rendered. Should come from store. Store should be updated when user logs in and when changes to db are made.
+    const loadProperties = async () => {
+      if (user) await fetchProperties(user?.id); // Fetch from Supabase
+      setLoading(false);
+    };
+    loadProperties();
+  }, [fetchProperties, user]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
 
+  // ✅ Filter properties based on search
   const filteredProperties = properties.filter((property) =>
-    property.name.toLowerCase().includes(searchQuery.toLowerCase())
+    property.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleDeleteListing = (id: string) => {
@@ -83,8 +58,8 @@ export default function Home(): JSX.Element {
         minWidth: "100%",
         padding: 4,
       }}
-      className="main"
     >
+      {/* Header */}
       <Box
         sx={{
           display: "flex",
@@ -92,6 +67,7 @@ export default function Home(): JSX.Element {
           alignItems: "center",
           width: "100%",
           mb: 2,
+          flexDirection: { xs: "column", md: "row" },
         }}
       >
         <Typography variant="h4" sx={{ fontWeight: "bold" }}>
@@ -101,15 +77,15 @@ export default function Home(): JSX.Element {
         {/* Add Property Button */}
         <Button
           variant="contained"
-          sx={{
-            padding: 2,
-          }}
+          sx={{ marginTop: { xs: 2, lg: 0 }, marginBottom: { xs: 2, lg: 0 } }} // ✅ Responsive padding
           startIcon={<Add />}
-          onClick={() => handleAddProperty()} // Replace with your navigation or add property logic
+          onClick={handleAddProperty}
         >
           Add Property
         </Button>
       </Box>
+
+      {/* Search Bar */}
       <TextField
         label="Search..."
         variant="outlined"
@@ -118,70 +94,75 @@ export default function Home(): JSX.Element {
         sx={{ mb: 4, minWidth: "100%" }}
       />
 
-      <Grid
-        container
-        width={"100%"}
-        spacing={3}
-        justifyContent="center"
-        component="div"
-      >
-        {filteredProperties.map((property) => (
-          <Card
-            key={property.id}
-            sx={{
-              display: "flex",
-              mb: 2,
-              width: "100%",
-              flexDirection: { xs: "column", sm: "row" }, // Responsive for smaller screens
-            }}
-          >
-            {/* First Column: Property Image */}
-            <CardMedia
-              component="img"
+      {/* Loading State */}
+      {loading ? (
+        <Typography variant="body1">Loading properties...</Typography>
+      ) : filteredProperties.length === 0 ? (
+        <Typography variant="body1" color="text.secondary">
+          No properties found.
+        </Typography>
+      ) : (
+        <Grid2 container spacing={3} width="100%">
+          {filteredProperties.map((property) => (
+            <Card
+              key={property.id}
               sx={{
-                width: { xs: "100%", sm: 160 }, // Full width on small screens, fixed width otherwise
-                height: "100%",
-                objectFit: "cover",
-              }}
-              image={property.image || NoImageFound}
-              alt={property.name}
-            />
-
-            {/* Second Column: Content */}
-            <Box
-              sx={{
-                flex: 1,
                 display: "flex",
-                flexDirection: "column",
-                p: 2, // Padding around the content
+                flexDirection: { xs: "column", sm: "row" }, // ✅ Stacks on mobile, horizontal on desktop
+                width: "100%",
+                maxWidth: 800, // ✅ Keeps card from being too wide
+                mx: "auto",
+                mb: 2,
+                boxShadow: 3,
+                borderRadius: 2,
               }}
             >
-              <CardContent sx={{ flex: 1 }}>
-                <Typography variant="h6" gutterBottom>
-                  {property.name}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Property type: {property.type}
-                </Typography>
-              </CardContent>
-              <CardActions className={"justify-between"}>
-                <Link to={`/property/${property.id}`}>
-                  <Button size="small" color="primary">
-                    Manage Property
-                  </Button>
-                </Link>
-                <Button
-                  size="small"
-                  color="error"
-                  onClick={() => handleDeleteListing(property.id)}
+              {/* Property Image */}
+              <CardMedia
+                component="img"
+                sx={{
+                  width: { xs: "100%", sm: 250 }, // ✅ Full width on mobile, fixed size on desktop
+                  height: { xs: 160, sm: "auto" }, // ✅ Prevents images from growing too large
+                  objectFit: "contain",
+                }}
+                image={NoImageFound} // TODO: Add image support
+                alt={property.address}
+              />
+
+              {/* Property Details */}
+              <Box
+                sx={{ flex: 1, display: "flex", flexDirection: "column", p: 2 }}
+              >
+                <CardContent sx={{ flex: 1 }}>
+                  <Typography variant="h6" gutterBottom>
+                    {property.address}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {property.property_type.toUpperCase()}
+                  </Typography>
+                </CardContent>
+
+                <CardActions
+                  sx={{ display: "flex", justifyContent: "space-between" }}
                 >
-                  <Delete />
-                </Button>
-              </CardActions>
-            </Box>
-          </Card>
-        ))}
-      </Grid>
+                  <Link to={`/property/${property.id}`}>
+                    <Button size="small" color="primary">
+                      Manage Property
+                    </Button>
+                  </Link>
+                  <Button
+                    size="small"
+                    color="error"
+                    onClick={() => handleDeleteListing(property.id)}
+                  >
+                    <Delete />
+                  </Button>
+                </CardActions>
+              </Box>
+            </Card>
+          ))}
+        </Grid2>
+      )}
     </Box>
   );
 }

@@ -4,81 +4,103 @@ import {
   Button,
   FormControl,
   FormControlLabel,
-  Grid2,
   Radio,
   RadioGroup,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
 import type { JSX } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useRealtyStore from "../store/store";
 
 export default function Create(): JSX.Element {
-  const [propertyDetails, setPropertyDetails] = useState({
+  const navigate = useNavigate();
+  const { addProperty, user } = useRealtyStore(); // ✅ Zustand store
+  const [propertyDetails, setPropertyDetails] = useState<{
+    address: string;
+    propertyType: "residential" | "commercial" | "land" | "rural" | "";
+  }>({
     address: "",
     propertyType: "",
   });
-
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPropertyDetails({ ...propertyDetails, [e.target.name]: e.target.value });
   };
 
-  const handleContinue = () => {
-    // ✅ Insert form submission logic here
-    console.log("Property Details Submitted: ", propertyDetails);
-    navigate("/"); // Redirect to homepage after submission
+  const handleContinue = async () => {
+    if (!propertyDetails.address || !propertyDetails.propertyType) {
+      setError("Please provide both an address and property type.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    if (!user) return;
+    try {
+      const propertyId = await addProperty({
+        user_id: user.id,
+        address: propertyDetails.address,
+        property_type: propertyDetails.propertyType,
+        status: "draft",
+      });
+
+      if (!propertyId) {
+        setError("Failed to create property. Please try again.");
+      } else {
+        navigate(`/property/${propertyId}`); // ✅ Redirect to edit page
+      }
+    } catch (error) {
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Box sx={{ width: "100%", p: 3 }}>
-      <Typography
-        variant="h4"
-        fontWeight="bold"
-        textAlign="center"
-        gutterBottom
-      >
-        Property Details
-      </Typography>
+    <Box className="w-full">
+      {/* Sticky Tabs */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-300 shadow-md">
+        <Tabs value={0} aria-label="Property details tab">
+          <Tab label="Property Details" />
+        </Tabs>
+      </div>
 
-      <Grid2 container spacing={3} mt={3}>
-        <Grid2 size={9}>
+      {/* Content Layout */}
+      <div className="flex flex-col md:flex-row gap-6 mt-6 p-6">
+        {/* Main Content */}
+        <div className="w-full md:w-3/4">
           <Typography variant="h6" gutterBottom>
             Enter Property Details
           </Typography>
-          <Box component="form" noValidate sx={{ mt: 2 }}>
+          <Box component="form" noValidate className="mt-4">
             {/* Address Input */}
-            <TextField
-              fullWidth
-              label="Full Address"
-              name="address"
-              value={propertyDetails.address}
-              onChange={handleInputChange}
-              margin="normal"
-            />
-
-            {/* Map Placeholder */}
-            <Box
-              sx={{
-                mt: 3,
-                height: 300,
-                bgcolor: "#f0f0f0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 1,
-              }}
-            >
-              <Typography variant="body1">Map Placeholder</Typography>
+            <Box component="form" noValidate className="mt-4 relative">
+              <TextField
+                fullWidth
+                label="Full Address"
+                name="address"
+                value={propertyDetails.address}
+                onChange={handleInputChange}
+                variant="outlined" // ✅ Explicitly define variant
+              />
             </Box>
 
+            {/* Map Placeholder */}
+            <div className="mt-6 h-72 bg-gray-200 flex items-center justify-center rounded-md">
+              <Typography variant="body1">Map Placeholder</Typography>
+            </div>
+
             {/* Property Type Selection */}
-            <Typography variant="h6" sx={{ mt: 4 }}>
+            <Typography variant="h6" className="mt-6">
               What type of property are you looking to list?
             </Typography>
-            <FormControl component="fieldset" sx={{ mt: 1 }}>
+            <FormControl component="fieldset" className="mt-2">
               <RadioGroup
                 row
                 name="propertyType"
@@ -108,45 +130,53 @@ export default function Create(): JSX.Element {
               </RadioGroup>
             </FormControl>
           </Box>
-        </Grid2>
+        </div>
 
-        {/* Info Alerts */}
-        <Grid2 size={3} minHeight={"100%"}>
-          <Alert severity="info" sx={{ mb: 2 }}>
+        {/* Info Alerts (Responsive) */}
+        <div className="w-full md:w-1/4 flex flex-col gap-4">
+          <Alert severity="info">
             <strong>Please remember:</strong>
-            <br /> <br /> Realestate.com.au rules do not permit users to set the
-            location of properties to a more popular nearby suburb/town.
             <br />
+            Realestate.com.au rules do not permit users to set the location of
+            properties to a more popular nearby suburb/town.
             <br />
             Please use the legal address as shown on your council rates.
           </Alert>
 
-          <Alert severity="info" sx={{ mb: 2 }}>
+          <Alert severity="info">
             <strong>Address Visibility:</strong> Not sure whether to show or
             hide your address? We recommend displaying it in most cases.
           </Alert>
 
-          <Alert severity="info" sx={{ mb: 2 }}>
+          <Alert severity="info">
             <strong>Need help?</strong> Get in touch with our team!
             <br /> 📞 INSERT
             <br /> 📱 INSERT
           </Alert>
-        </Grid2>
-      </Grid2>
+        </div>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <Alert severity="error" className="mx-6">
+          {error}
+        </Alert>
+      )}
 
       {/* Navigation Buttons */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+      <div className="flex justify-between mt-6 p-6">
         <Button
           color="inherit"
           variant="contained"
           onClick={() => navigate("/")}
+          disabled={loading}
         >
           Back
         </Button>
-        <Button variant="contained" onClick={handleContinue}>
-          Continue
+        <Button variant="contained" onClick={handleContinue} disabled={loading}>
+          {loading ? "Creating..." : "Continue"}
         </Button>
-      </Box>
+      </div>
     </Box>
   );
 }
