@@ -23,6 +23,8 @@ export default function SidebarFooterAccountPopover() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // ✅ State for menu
   const open = Boolean(anchorEl);
 
+  const x;
+
   // ✅ Define user account details
   const account = {
     id: user?.id ?? "guest",
