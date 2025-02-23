@@ -15,6 +15,7 @@ export const useRealtyStore = create<StoreState>((set, get, api) => ({
 
 // ✅ Expose Zustand store to the window object for debugging
 if (import.meta.env.MODE === "development" && typeof window !== "undefined") {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   (window as any).store = {
     getState: useRealtyStore.getState,
     setState: useRealtyStore.setState,

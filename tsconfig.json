@@ -3,5 +3,15 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+
+  "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
+  }
 }

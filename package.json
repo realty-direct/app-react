@@ -8,13 +8,16 @@
     "build": "tsc -b && vite build",
     "lint": "bunx biome lint . && bunx biome format --check . && bunx biome check .",
     "preview": "vite preview",
-    "generate-supabase-types": "bunx supabase gen types typescript --project-id vrgjjmrqvvpmoozydmqp > src/database/database_types.ts"
+    "generate-supabase-types": "bunx supabase gen types typescript --project-id vrgjjmrqvvpmoozydmqp > src/database/database_types.ts",
+    "prepare": "husky"
   },
   "lint-staged": {
-    "**/*.{ts,tsx,js,jsx}": [
+    "**/*.{ts,tsx}": [
       "bunx biome format --write",
-      "bunx biome lint --apply",
-      "bunx biome check --no-errors-on-unmatched"
+      "bunx biome lint --apply"
+    ],
+    "**/*": [
+      "bash -c 'bunx tsc --noEmit --skipLibCheck --project tsconfig.json'"
     ]
   },
   "dependencies": {
@@ -40,7 +43,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.4.3",
     "postcss": "^8.4.47",
-    "typescript": "^5.5.3",
+    "typescript": "^5.7.3",
     "vite": "^5.4.8"
   },
   "overrides": {

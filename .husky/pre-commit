@@ -1,2 +1,4 @@
 #!/bin/sh
+set -e  # 🚨 Ensure the commit fails if any command fails
 bunx lint-staged
+
