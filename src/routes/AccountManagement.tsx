@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../database/supabase";
 import useRealtyStore from "../store/store";
 
 export default function AccountManagement() {

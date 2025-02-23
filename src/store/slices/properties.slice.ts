@@ -1,5 +1,5 @@
 import type { StateCreator } from "zustand";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../database/supabase";
 import type { PropertiesState, Property } from "../types"; // ✅ Import correct types
 
 export const createPropertiesSlice: StateCreator<
@@ -15,20 +15,29 @@ export const createPropertiesSlice: StateCreator<
     set(() => ({ properties }));
   },
 
-  // ✅ Fetch properties from Supabase
+  // ✅ Fetch properties from Supabase (fully self-contained)
   fetchProperties: async (userId: string) => {
-    const { data, error } = await supabase
-      .from("properties")
-      .select(
-        "id, user_id, address, property_type, sale_type, price, price_display, status, created_at"
-      )
-      .eq("user_id", userId) // Fetch only properties belonging to the logged-in user
-      .order("created_at", { ascending: false });
+    try {
+      const { data: properties, error } = await supabase
+        .from("properties")
+        .select(
+          "id, user_id, address, property_type, sale_type, price, price_display, status, created_at"
+        ) // ✅ Ensure only necessary fields are selected
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching properties:", error);
-    } else {
-      set(() => ({ properties: data as Property[] }));
+      if (error) {
+        console.error("Error fetching properties:", error);
+        throw new Error("Failed to load properties");
+      }
+
+      if (!properties || properties.length === 0) {
+        console.warn("No properties found");
+      }
+
+      set(() => ({ properties })); // ✅ Zustand update
+    } catch (error) {
+      console.error("fetchProperties error:", error);
     }
   },
 
@@ -44,16 +53,18 @@ export const createPropertiesSlice: StateCreator<
       console.error("Error adding property:", error);
       return null;
     }
+
     const newPropertyWithId: Property = {
       id: data.id,
-      created_at: data.created_at, // ✅ Ensure `created_at` exists
+      created_at: data.created_at,
       ...newProperty,
     };
 
     set((state) => ({
       properties: [...state.properties, newPropertyWithId],
     }));
-    return data.id; // ✅ Return property ID to navigate after creation
+
+    return data.id;
   },
 
   // ✅ Delete a property

@@ -1,7 +1,7 @@
 import { Box, Button, Modal, Typography } from "@mui/material"; // ✅ Import MUI components
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { checkUserSession } from "../lib/supabase";
+import { checkUserSession } from "../database/supabase";
 
 export default function Confirm() {
   const navigate = useNavigate();

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signIn, supabase } from "../lib/supabase";
+import { supabase } from "../database/supabase";
 import { useRealtyStore } from "../store/store";
 
 export default function Signin() {
   const navigate = useNavigate();
-  const { setSession } = useRealtyStore(); // Zustand session state
+  const { setSession, fetchProperties } = useRealtyStore(); // Zustand session state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -16,38 +16,49 @@ export default function Signin() {
     setError(null);
     setLoading(true);
 
-    const { user, error } = await signIn(email, password);
+    // ✅ Sign in the user
+    const { data: session, error: signInError } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
+    if (signInError || !session.user) {
+      setError(signInError?.message || "Login failed");
       setLoading(false);
-    } else {
-      console.log(user);
+      return;
+    }
 
-      if (user) {
-        // ✅ Fetch the user profile from the `profiles` table
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("first_name, last_name")
-          .eq("id", user.id)
-          .single(); // Ensure we get a single record
+    const user = session.user; // ✅ Get the authenticated user
 
-        if (profileError) {
-          setError("Failed to load user profile");
-          setLoading(false);
-          return;
-        }
+    try {
+      // ✅ Fetch the user profile from `profiles`
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("id", user.id)
+        .single();
 
-        // ✅ Store the full user info in Zustand
-        setSession({
-          id: user.id,
-          fname: profile?.first_name || "", // ✅ Now fetched from `profiles` table
-          lname: profile?.last_name || "", // ✅ Now fetched from `profiles` table
-          email: user.email ?? "",
-        });
+      if (profileError) throw new Error("Failed to load user profile");
 
-        navigate("/"); // ✅ Redirect after login
-      }
+      // ✅ Store the full user info in Zustand
+      setSession({
+        id: user.id,
+        fname: profile?.first_name || "",
+        lname: profile?.last_name || "",
+        email: user.email ?? "",
+      });
+
+      // ✅ Fetch properties
+      await fetchProperties(user.id);
+
+      // ✅ TypeScript **automatically infers** `properties` as `Property[]`
+
+      navigate("/"); // ✅ Redirect after successful login
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false); // ✅ Always reset loading state
     }
   };
 

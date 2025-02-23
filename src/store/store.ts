@@ -2,7 +2,7 @@
 // ! WARNING: Be careful of any type in this file, had to add this here because of Biome and ESLint.
 
 import { create } from "zustand";
-import { signIn, supabase } from "../lib/supabase"; // ✅ Import Supabase client
+import { signIn, supabase } from "../database/supabase"; // ✅ Import Supabase client
 import { createPropertiesSlice } from "./slices/properties.slice";
 import { createSessionSlice } from "./slices/session.slice";
 import { createUserSlice } from "./slices/user.slice";

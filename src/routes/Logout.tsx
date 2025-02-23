@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { signOut } from "../lib/supabase";
+import { signOut } from "../database/supabase";
 import useRealtyStore from "../store/store";
 
 export default function Logout() {

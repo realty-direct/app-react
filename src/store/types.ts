@@ -1,3 +1,5 @@
+import type { Database } from "../database/database_types";
+
 // Define the UserState interface
 export interface User {
   id: string;
@@ -19,22 +21,12 @@ export interface SessionState {
   clearSession: () => void;
 }
 
-export interface Property {
-  id: string;
-  user_id: string;
-  address: string;
-  property_type: "residential" | "commercial" | "land" | "rural";
-  sale_type?: "standard_sale" | "auction";
-  price?: number;
-  price_display?: "same_as_price" | "hide" | "range" | "custom";
-  status: "draft" | "published" | "sold";
-  created_at: string;
-}
+export type Property = Database["public"]["Tables"]["properties"]["Row"];
 
 export interface PropertiesState {
   properties: Property[];
   setProperties: (properties: Property[]) => void;
-  fetchProperties: (userId: string) => Promise<void>;
+  fetchUserProperties: (userId: string) => Promise<void>;
   addProperty: (
     newProperty: Omit<Property, "id" | "created_at">
   ) => Promise<string | null>;

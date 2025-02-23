@@ -1,7 +1,7 @@
 import { Box, Button, Modal, Typography } from "@mui/material"; // ✅ MUI Components
 import { type JSX, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { resendConfirmationEmail, signUp } from "../lib/supabase";
+import { resendConfirmationEmail, signUp } from "../database/supabase";
 
 export default function Signup(): JSX.Element {
   const navigate = useNavigate();
