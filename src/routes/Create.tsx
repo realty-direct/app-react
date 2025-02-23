@@ -48,6 +48,9 @@ export default function Create(): JSX.Element {
         address: propertyDetails.address,
         property_type: propertyDetails.propertyType,
         status: "draft",
+        price: 0,
+        price_display: null,
+        sale_type: null,
       });
 
       if (!propertyId) {

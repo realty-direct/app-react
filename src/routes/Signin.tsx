@@ -44,8 +44,8 @@ export default function Signin() {
       // ✅ Store the full user info in Zustand
       setSession({
         id: user.id,
-        fname: profile?.first_name || "",
-        lname: profile?.last_name || "",
+        first_name: profile?.first_name || "",
+        last_name: profile?.last_name || "",
         email: user.email ?? "",
       });
 
@@ -61,6 +61,8 @@ export default function Signin() {
       setLoading(false); // ✅ Always reset loading state
     }
   };
+
+  // Need to make this page always in light mode
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white w-full">
@@ -96,7 +98,7 @@ export default function Signin() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full px-3 bg-white py-2 border border-gray-300 text-black rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
             </div>
 
@@ -114,7 +116,7 @@ export default function Signin() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border bg-white text-black border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
             </div>
 

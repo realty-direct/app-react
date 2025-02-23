@@ -61,13 +61,13 @@ export default function Signup(): JSX.Element {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
-                htmlFor="fname"
+                htmlFor="first_name"
                 className="block text-sm font-medium text-gray-700"
               >
                 First Name
               </label>
               <input
-                id="fname"
+                id="first_name"
                 type="text"
                 required
                 autoComplete="given-name"

@@ -1,12 +1,9 @@
 import type { Database } from "../database/database_types";
 
 // Define the UserState interface
-export interface User {
-  id: string;
-  fname: string;
-  lname: string;
-  email: string;
-}
+
+// ✅ Use Supabase-generated types
+export type User = Database["public"]["Tables"]["profiles"]["Row"];
 
 export interface UserState extends User {
   setUser: (user: User) => void;
@@ -26,7 +23,7 @@ export type Property = Database["public"]["Tables"]["properties"]["Row"];
 export interface PropertiesState {
   properties: Property[];
   setProperties: (properties: Property[]) => void;
-  fetchUserProperties: (userId: string) => Promise<void>;
+  fetchProperties: (userId: string) => Promise<void>;
   addProperty: (
     newProperty: Omit<Property, "id" | "created_at">
   ) => Promise<string | null>;

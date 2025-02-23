@@ -18,16 +18,16 @@ import { useNavigate } from "react-router-dom";
 import useRealtyStore from "../store/store";
 
 export default function SidebarFooterAccountPopover() {
-  const { user } = useRealtyStore(); // ✅ Extract user from Zustand store
+  const { id, first_name, last_name, email } = useRealtyStore();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // ✅ State for menu
   const open = Boolean(anchorEl);
 
   // ✅ Define user account details
   const account = {
-    id: user?.id ?? "guest",
-    name: user ? `${user.fname} ${user.lname}`.trim() : "Guest",
-    email: user?.email ?? "No email available",
+    id: id,
+    name: `${first_name} ${last_name}`.trim(),
+    email: email,
     color: "#3f51b5", // ✅ Default avatar color
     image: null, // ✅ If profile images are supported in the future
   };
