@@ -13,7 +13,8 @@
   "lint-staged": {
     "**/*.{ts,tsx,js,jsx}": [
       "bunx biome format --write",
-      "bunx biome lint --apply"
+      "bunx biome lint --apply",
+      "bunx biome check --no-errors-on-unmatched"
     ]
   },
   "dependencies": {

@@ -25,6 +25,8 @@ export default function SidebarFooterAccountPopover() {
 
   const x;
 
+  //
+
   // ✅ Define user account details
   const account = {
     id: user?.id ?? "guest",
