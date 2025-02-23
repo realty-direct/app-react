@@ -37,7 +37,7 @@ export type Database = {
           id: string
           price: number
           price_display: string | null
-          property_type: string
+          property_type: string | null
           sale_type: string | null
           status: string | null
           user_id: string | null
@@ -48,7 +48,7 @@ export type Database = {
           id?: string
           price?: number
           price_display?: string | null
-          property_type: string
+          property_type?: string | null
           sale_type?: string | null
           status?: string | null
           user_id?: string | null
@@ -59,7 +59,7 @@ export type Database = {
           id?: string
           price?: number
           price_display?: string | null
-          property_type?: string
+          property_type?: string | null
           sale_type?: string | null
           status?: string | null
           user_id?: string | null

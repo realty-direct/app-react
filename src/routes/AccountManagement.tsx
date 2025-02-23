@@ -17,8 +17,8 @@ export default function AccountManagement() {
   const { user, setSession, clearSession } = useRealtyStore();
   const navigate = useNavigate();
 
-  const [firstName, setFirstName] = useState(user?.first_name || "");
-  const [lastName, setLastName] = useState(user?.last_name || "");
+  const [fname, setFname] = useState(user?.fname || "");
+  const [lname, setLname] = useState(user?.lname || "");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<AlertColor>("info");
@@ -30,7 +30,7 @@ export default function AccountManagement() {
 
     const { error } = await supabase
       .from("profiles")
-      .update({ first_name: firstName, last_name: lastName })
+      .update({ first_name: fname, last_name: lname })
       .eq("id", user?.id);
 
     if (error) {
@@ -39,8 +39,8 @@ export default function AccountManagement() {
     } else {
       setSession({
         id: user?.id ?? "",
-        first_name: firstName,
-        last_name: lastName,
+        fname,
+        lname,
         email: user?.email ?? "",
       });
       setMessage("Profile updated successfully.");
@@ -128,14 +128,14 @@ export default function AccountManagement() {
       <Stack spacing={2}>
         <TextField
           label="First Name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
+          value={fname}
+          onChange={(e) => setFname(e.target.value)}
           fullWidth
         />
         <TextField
           label="Last Name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
+          value={lname}
+          onChange={(e) => setLname(e.target.value)}
           fullWidth
         />
         <TextField label="Email" value={user?.email} disabled fullWidth />
