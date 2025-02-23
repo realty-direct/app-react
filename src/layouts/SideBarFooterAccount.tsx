@@ -26,8 +26,8 @@ export default function SidebarFooterAccountPopover() {
   // ✅ Define user account details
   const account = {
     id: user?.id ?? "guest",
-    name: user ? `${user.fname} ${user.lname}`.trim() : "Guest",
-    email: user?.email ?? "No email available",
+    name: `${user.first_name} ${user.last_name}`.trim(),
+    email: user.email,
     color: "#3f51b5", // ✅ Default avatar color
     image: null, // ✅ If profile images are supported in the future
   };

@@ -17,7 +17,7 @@ import useRealtyStore from "../store/store";
 
 export default function Home(): JSX.Element {
   const navigate = useNavigate();
-  const { properties, fetchProperties, user } = useRealtyStore(); // ✅ Zustand store
+  const { properties, fetchUserProperties, user } = useRealtyStore(); // ✅ Zustand store
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -25,11 +25,11 @@ export default function Home(): JSX.Element {
   useEffect(() => {
     // TODO: This should not fire every time Home is rendered. Should come from store. Store should be updated when user logs in and when changes to db are made.
     const loadProperties = async () => {
-      if (user) await fetchProperties(user?.id); // Fetch from Supabase
+      if (user) await fetchUserProperties(user?.id); // Fetch from Supabase
       setLoading(false);
     };
     loadProperties();
-  }, [fetchProperties, user]);
+  }, [fetchUserProperties, user]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);

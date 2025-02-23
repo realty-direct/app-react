@@ -16,7 +16,7 @@ export const createPropertiesSlice: StateCreator<
   },
 
   // ✅ Fetch properties from Supabase (fully self-contained)
-  fetchProperties: async (userId: string) => {
+  fetchUserProperties: async (userId: string) => {
     try {
       const { data: properties, error } = await supabase
         .from("properties")

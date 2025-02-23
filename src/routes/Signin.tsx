@@ -5,7 +5,7 @@ import { useRealtyStore } from "../store/store";
 
 export default function Signin() {
   const navigate = useNavigate();
-  const { setSession, fetchProperties } = useRealtyStore(); // Zustand session state
+  const { setSession, fetchUserProperties } = useRealtyStore(); // Zustand session state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -44,13 +44,13 @@ export default function Signin() {
       // ✅ Store the full user info in Zustand
       setSession({
         id: user.id,
-        fname: profile?.first_name || "",
-        lname: profile?.last_name || "",
+        first_name: profile?.first_name || "",
+        last_name: profile?.last_name || "",
         email: user.email ?? "",
       });
 
       // ✅ Fetch properties
-      await fetchProperties(user.id);
+      await fetchUserProperties(user.id);
 
       // ✅ TypeScript **automatically infers** `properties` as `Property[]`
 

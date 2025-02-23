@@ -1,12 +1,8 @@
 import type { Database } from "../database/database_types";
 
 // Define the UserState interface
-export interface User {
-  id: string;
-  fname: string;
-  lname: string;
-  email: string;
-}
+
+export type User = Database["public"]["Tables"]["profiles"]["Row"];
 
 export interface UserState extends User {
   setUser: (user: User) => void;
@@ -16,7 +12,7 @@ export interface UserState extends User {
 export interface SessionState {
   authToken: string | null;
   isAuthenticated: boolean;
-  user: User | null;
+  user: User;
   setSession: (user: User) => void;
   clearSession: () => void;
 }
