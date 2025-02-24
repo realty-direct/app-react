@@ -10,9 +10,7 @@ export interface UserState extends User {
 }
 
 export interface SessionState {
-  authToken: string | null;
-  isAuthenticated: boolean;
-  user: User;
+  user: User | null;
   setSession: (user: User) => void;
   clearSession: () => void;
 }
