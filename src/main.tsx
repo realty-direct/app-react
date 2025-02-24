@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { RouterProvider, createBrowserRouter } from "react-router";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
 import App from "../App";
 
@@ -8,6 +8,8 @@ import "./index.css";
 import HomeLayout from "./layouts/HomeLayout";
 import PropertyEditLayout from "./layouts/PropertyEditLayout";
 import PropertyLayout from "./layouts/PropertyLayout";
+import ProtectedRoute from "./layouts/ProtectedRoute";
+import PublicRoute from "./layouts/PublicRoute";
 import AccountManagement from "./routes/AccountManagement";
 import Confirm from "./routes/Confirm";
 import Conveyancing from "./routes/Conveyancing";
@@ -23,81 +25,74 @@ import Signup from "./routes/Signup";
 
 const router = createBrowserRouter([
   {
-    Component: App, // Root component wrapping everything
+    Component: App,
     children: [
-      {
-        path: "/", // Home and other top-level routes
-
-        Component: HomeLayout,
-        children: [
-          {
-            path: "",
-            Component: Home,
-          },
-          {
-            path: "guide",
-            Component: Guide,
-          },
-          {
-            path: "account",
-            Component: AccountManagement,
-          },
-          {
-            path: "conveyancing",
-            Component: Conveyancing,
-          },
-        ],
-      },
+      // 🌐 Public Routes (Only for unauthenticated users)
       {
         path: "signin",
-        Component: Signin,
+        element: (
+          <PublicRoute>
+            <Signin />
+          </PublicRoute>
+        ),
       },
       {
         path: "signup",
-        Component: Signup,
-      },
-      {
-        path: "confirm",
-        Component: Confirm,
-      },
-      {
-        path: "logout",
-        Component: Logout,
+        element: (
+          <PublicRoute>
+            <Signup />
+          </PublicRoute>
+        ),
       },
 
+      // ✅ Always accessible routes (e.g., email confirmation, logout)
+      { path: "confirm", Component: Confirm },
+      { path: "logout", Component: Logout },
+
+      // 🔒 Protected Routes (For authenticated users only)
       {
-        path: "create",
-        Component: PropertyEditLayout,
+        path: "/",
+        element: (
+          <ProtectedRoute>
+            <HomeLayout />
+          </ProtectedRoute>
+        ),
         children: [
-          {
-            path: "",
-            Component: Create,
-          },
+          { path: "", Component: Home },
+          { path: "guide", Component: Guide },
+          { path: "account", Component: AccountManagement },
+          { path: "conveyancing", Component: Conveyancing },
         ],
       },
       {
-        path: "property/:id", // Base path for property routes
-        Component: PropertyLayout, // Layout for /property/:id and related views
+        path: "create",
+        element: (
+          <ProtectedRoute>
+            <PropertyEditLayout />
+          </ProtectedRoute>
+        ),
+        children: [{ path: "", Component: Create }],
+      },
+      {
+        path: "property/:id",
+        element: (
+          <ProtectedRoute>
+            <PropertyLayout />
+          </ProtectedRoute>
+        ),
         children: [
-          {
-            path: "",
-            Component: Property,
-          },
-          {
-            path: "orders",
-            Component: Orders, // Enquiries page
-          },
+          { path: "", Component: Property },
+          { path: "orders", Component: Orders },
         ],
       },
       {
         path: "property/:id/edit",
-        Component: PropertyEditLayout, // Separate layout for editing
-        children: [
-          {
-            path: "",
-            Component: Edit, // Edit property view
-          },
-        ],
+        element: (
+          <ProtectedRoute>
+            <PropertyEditLayout />
+          </ProtectedRoute>
+        ),
+        children: [{ path: "", Component: Edit }],
       },
     ],
   },

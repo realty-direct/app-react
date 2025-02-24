@@ -133,6 +133,15 @@ export default function App(): JSX.Element {
     ? PROPERTY_NAVIGATION
     : HOME_NAVIGATION;
 
+  // ✅ Prevent rendering Outlet if user is not authenticated
+  if (
+    !isAuthenticated &&
+    location.pathname !== "/signin" &&
+    location.pathname !== "/signup"
+  ) {
+    return <></>; // Avoid rendering anything until navigation happens
+  }
+
   return (
     <ReactRouterAppProvider
       navigation={isEditOrCreatePath ? undefined : navigationToUse}
