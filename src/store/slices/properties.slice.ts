@@ -15,6 +15,10 @@ export const createPropertiesSlice: StateCreator<
     set(() => ({ properties }));
   },
 
+  clearProperties: () => {
+    set(() => ({ properties: [] }));
+  },
+
   // ✅ Fetch properties from Supabase (fully self-contained)
   fetchUserProperties: async (userId: string) => {
     try {
