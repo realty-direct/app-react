@@ -1,17 +1,17 @@
+import type { Session } from "@supabase/supabase-js";
 import type { Database } from "../database/database_types";
 
-// Define the UserState interface
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
-export type User = Database["public"]["Tables"]["profiles"]["Row"];
-
-export interface UserState extends User {
-  setUser: (user: User) => void;
-  clearUser: () => void;
+export interface ProfileState {
+  profile: Profile | null; // ✅ Store the entire user object
+  setProfile: (profile: Profile) => void;
+  clearProfile: () => void;
 }
 
 export interface SessionState {
-  user: User | null;
-  setSession: (user: User) => void;
+  session: Session | null;
+  setSession: (session: Session | null) => void;
   clearSession: () => void;
 }
 
@@ -25,4 +25,5 @@ export interface PropertiesState {
     newProperty: Omit<Property, "id" | "created_at">
   ) => Promise<string | null>;
   deleteProperty: (id: string) => Promise<void>;
+  clearProperties: () => void;
 }

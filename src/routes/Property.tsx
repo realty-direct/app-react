@@ -16,7 +16,6 @@ import NoImageFound from "../assets/no_image_found.jpg";
 const Property = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  console.log(id);
 
   // Sample property data
   const property = {

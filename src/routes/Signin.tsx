@@ -5,7 +5,7 @@ import { useRealtyStore } from "../store/store";
 
 export default function Signin() {
   const navigate = useNavigate();
-  const { setSession, fetchUserProperties } = useRealtyStore(); // Zustand session state
+  const { fetchUserProperties, setProfile } = useRealtyStore(); // Zustand session state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -42,11 +42,12 @@ export default function Signin() {
       if (profileError) throw new Error("Failed to load user profile");
 
       // ✅ Store the full user info in Zustand
-      setSession({
+
+      setProfile({
         id: user.id,
-        first_name: profile?.first_name || "",
-        last_name: profile?.last_name || "",
         email: user.email ?? "",
+        first_name: profile.first_name,
+        last_name: profile.last_name,
       });
 
       // ✅ Fetch properties

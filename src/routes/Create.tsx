@@ -18,7 +18,7 @@ import useRealtyStore from "../store/store";
 
 export default function Create(): JSX.Element {
   const navigate = useNavigate();
-  const { addProperty, user } = useRealtyStore(); // ✅ Zustand store
+  const { addProperty, profile } = useRealtyStore(); // ✅ Zustand store
   const [propertyDetails, setPropertyDetails] = useState<{
     address: string;
     propertyType: "residential" | "commercial" | "land" | "rural" | "";
@@ -41,13 +41,16 @@ export default function Create(): JSX.Element {
 
     setLoading(true);
     setError(null);
-    if (!user) return;
+    if (!profile) return;
     try {
       const propertyId = await addProperty({
-        user_id: user.id,
+        user_id: profile.id,
         address: propertyDetails.address,
         property_type: propertyDetails.propertyType,
         status: "draft",
+        price: 0,
+        price_display: null,
+        sale_type: null,
       });
 
       if (!propertyId) {

@@ -15,24 +15,23 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../database/supabase"; // ✅ Import Supabase client
 import useRealtyStore from "../store/store";
 
 export default function SidebarFooterAccountPopover() {
-  const { user } = useRealtyStore(); // ✅ Extract user from Zustand store
+  const { profile: user, clearSession } = useRealtyStore(); // ✅ Extract user & clearSession
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // ✅ State for menu
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  // ✅ Define user account details
   const account = {
     id: user?.id ?? "guest",
-    name: `${user.first_name} ${user.last_name}`.trim(),
-    email: user.email,
-    color: "#3f51b5", // ✅ Default avatar color
-    image: null, // ✅ If profile images are supported in the future
+    name: `${user?.first_name} ${user?.last_name}`.trim(),
+    email: user?.email,
+    color: "#3f51b5",
+    image: null,
   };
 
-  // ✅ Handle menu open/close
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -45,13 +44,23 @@ export default function SidebarFooterAccountPopover() {
     setAnchorEl(null);
   };
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut(); // ✅ Logs user out from Supabase
+      clearSession(); // ✅ Clears user session from Zustand
+      navigate("/signin"); // ✅ Redirects to login page
+    } catch (error) {
+      console.error("❌ Logout failed:");
+    }
+  };
+
   return (
     <Stack direction="column">
       <Divider />
       <MenuList>
         <MenuItem
           sx={{
-            justifyContent: "space-between", // ✅ Ensures spacing between avatar and three dots
+            justifyContent: "space-between",
             width: "100%",
             columnGap: 2,
           }}
@@ -67,9 +76,8 @@ export default function SidebarFooterAccountPopover() {
                   bgcolor: account.color,
                 }}
                 src={account.name}
-                // alt={account.name}
               >
-                {account.name[0]} {/* ✅ Display first letter of the name */}
+                {account.name[0]}
               </Avatar>
             </ListItemIcon>
             <ListItemText
@@ -85,14 +93,12 @@ export default function SidebarFooterAccountPopover() {
               secondaryTypographyProps={{ variant: "caption" }}
             />
           </Stack>
-
-          {/* ✅ Three Dots Button */}
           <IconButton onClick={handleMenuOpen}>
             <MoreVert />
           </IconButton>
         </MenuItem>
       </MenuList>
-      {/* ✅ Dropdown Menu for Three Dots Button */}
+
       <Menu
         anchorEl={anchorEl}
         open={open}
@@ -103,18 +109,10 @@ export default function SidebarFooterAccountPopover() {
         <MenuItem onClick={handleNavigateToManageAccount}>
           Manage Account
         </MenuItem>
-        <MenuItem onClick={() => navigate("logout")}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center", // ✅ Aligns items vertically
-              //   justifyContent: "center", // ✅ Centers the text while keeping icon on left
-              width: "100%", // ✅ Ensures full width
-            }}
-          >
+        <MenuItem onClick={handleLogout}>
+          <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
             <LogoutIcon sx={{ mr: 1 }} />
-            {/* ✅ Adds spacing to the right of the icon */}
-            <Typography>Log out</Typography> {/* ✅ Centered text */}
+            <Typography>Log out</Typography>
           </Box>
         </MenuItem>
       </Menu>

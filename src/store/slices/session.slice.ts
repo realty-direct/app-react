@@ -1,29 +1,15 @@
+import type { Session } from "@supabase/supabase-js";
 import type { StateCreator } from "zustand";
-import type { SessionState, User } from "../types";
+import type { SessionState } from "../types";
 
-export const createSessionSlice: StateCreator<
-  SessionState,
-  [],
-  [],
-  SessionState
-> = (set) => ({
-  authToken: null,
-  isAuthenticated: false,
-  user: null, // ✅ Store full user info
+export const createSessionSlice: StateCreator<SessionState> = (set) => ({
+  session: null, // ✅ Zustand only tracks the session
 
-  setSession: (user: User) => {
-    set({
-      authToken: user.id,
-      isAuthenticated: true,
-      user, // ✅ Store user details
-    });
+  setSession: (session: Session | null) => {
+    set({ session });
   },
 
   clearSession: () => {
-    set({
-      authToken: null,
-      isAuthenticated: false,
-      user: null, // ✅ Clear user info on logout
-    });
+    set({ session: null }); // ✅ Set user to `null` when logged out
   },
 });

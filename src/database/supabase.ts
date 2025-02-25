@@ -1,24 +1,18 @@
 import { createClient } from "@supabase/supabase-js";
 
-// TODO: If I ever open source this project, move these to .env
-
+// ✅ Move these to .env in production
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Define types for the database schema
-export interface Property {
-  id: string;
-  name: string; // ✅ Ensure consistency with `store/types.ts`
-  title: string;
-  price: number;
-  description: string;
-  created_at: string;
-}
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true, // ✅ Ensure session persistence
+    autoRefreshToken: true, // ✅ Automatically refresh tokens when needed
+    detectSessionInUrl: false, // ✅ Prevent URL-based session handling
+  },
+});
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// ✅ Authentication Functions
-// TODO: Add phone number auth
+// ✅ Sign Up User
 export const signUp = async (
   email: string,
   password: string,
@@ -29,17 +23,17 @@ export const signUp = async (
     email,
     password,
     options: {
-      emailRedirectTo: `${window.location.origin}/confirm`, // ✅ Redirect to confirmation page
+      emailRedirectTo: `${window.location.origin}/confirm`,
     },
   });
 
   if (error) return { user: null, error };
 
-  // ✅ Save user profile data in the "profiles" table (if confirmation is required, this happens after email verification)
+  // ✅ If user exists, insert profile into `profiles` table
   if (data?.user) {
     const { error: profileError } = await supabase.from("profiles").insert([
       {
-        id: data.user.id, // ✅ Link profile to Supabase Auth user ID
+        id: data.user.id,
         first_name: firstName,
         last_name: lastName,
         email: email,
@@ -52,31 +46,43 @@ export const signUp = async (
   return { user: data?.user, error: null };
 };
 
+// ✅ Sign In User
 export const signIn = async (email: string, password: string) => {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
-  if (error?.message.includes("Email not confirmed")) {
-    return {
-      user: null,
-      error: { message: "Please confirm your email before signing in." },
-    };
+  if (error) {
+    if (error.message.includes("Email not confirmed")) {
+      return {
+        user: null,
+        error: { message: "Please confirm your email before signing in." },
+      };
+    }
+    return { user: null, error };
   }
 
-  return { user: data?.user, error };
+  return { user: data?.user, error: null };
 };
 
+// ✅ Sign Out User
 export const signOut = async () => {
-  await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+  if (error) console.error("❌ Logout error:", error.message);
 };
 
+// ✅ Check User Session (Returns `user` object or `null`)
 export const checkUserSession = async () => {
-  const { data } = await supabase.auth.getSession();
-  return data?.session?.user || null;
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    console.error("❌ Error fetching user session:", error.message);
+    return null;
+  }
+  return data.user || null;
 };
 
+// ✅ Resend Confirmation Email
 export const resendConfirmationEmail = async (email: string) => {
   const { error } = await supabase.auth.resend({
     type: "signup",

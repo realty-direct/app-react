@@ -14,7 +14,7 @@ import { supabase } from "../database/supabase";
 import useRealtyStore from "../store/store";
 
 export default function AccountManagement() {
-  const { user, setSession, clearSession } = useRealtyStore();
+  const { profile: user, setSession, clearSession } = useRealtyStore();
   const navigate = useNavigate();
 
   const [fname, setFname] = useState(user?.fname || "");
