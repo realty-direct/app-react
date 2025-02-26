@@ -5,10 +5,12 @@ import { resendConfirmationEmail, signUp } from "../database/supabase";
 
 export default function Signup(): JSX.Element {
   const navigate = useNavigate();
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false); // ✅ Controls the modal
@@ -40,7 +42,7 @@ export default function Signup(): JSX.Element {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white w-full">
+    <div className="min-h-screen flex items-center justify-center  w-full">
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <img
@@ -48,7 +50,7 @@ export default function Signup(): JSX.Element {
             src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
             className="mx-auto h-10 w-auto"
           />
-          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight ">
             Sign up for an account
           </h2>
         </div>
@@ -60,14 +62,11 @@ export default function Signup(): JSX.Element {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label
-                htmlFor="fname"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="firstName" className="block text-sm font-medium ">
                 First Name
               </label>
               <input
-                id="fname"
+                id="firstName"
                 type="text"
                 required
                 autoComplete="given-name"
@@ -80,7 +79,7 @@ export default function Signup(): JSX.Element {
             <div>
               <label
                 htmlFor="family-name"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium "
               >
                 Last Name
               </label>
@@ -96,10 +95,7 @@ export default function Signup(): JSX.Element {
             </div>
 
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="email" className="block text-sm font-medium ">
                 Email Address
               </label>
               <input
@@ -114,10 +110,7 @@ export default function Signup(): JSX.Element {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="password" className="block text-sm font-medium ">
                 Password
               </label>
               <input
@@ -131,7 +124,7 @@ export default function Signup(): JSX.Element {
               />
             </div>
             <div className="mt-4 text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm ">
                 Already signed up?{" "}
                 <button
                   type="button"

@@ -4,9 +4,10 @@ import type { Database } from "../database/database_types";
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export interface ProfileState {
-  profile: Profile | null; // ✅ Store the entire user object
+  profile: Profile | null;
   setProfile: (profile: Profile) => void;
   clearProfile: () => void;
+  fetchUserProfile: (userId: string) => Promise<void>; // ✅ Moved to ProfileState
 }
 
 export interface SessionState {

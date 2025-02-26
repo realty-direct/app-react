@@ -1,5 +1,4 @@
 import { Alert, Box, Button, Grid2, Tab, Tabs } from "@mui/material";
-import type React from "react";
 import { useState } from "react";
 import Contact from "./Contact";
 import Description from "./Description";
@@ -15,7 +14,7 @@ import Summary from "./Summary";
 export default function Edit() {
   const [tabValue, setTabValue] = useState(0);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 

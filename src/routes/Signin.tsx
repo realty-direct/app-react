@@ -41,8 +41,6 @@ export default function Signin() {
 
       if (profileError) throw new Error("Failed to load user profile");
 
-      // ✅ Store the full user info in Zustand
-
       setProfile({
         id: user.id,
         email: user.email ?? "",
@@ -64,7 +62,7 @@ export default function Signin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white w-full">
+    <div className="min-h-screen flex items-center justify-center  w-full">
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <img
@@ -72,7 +70,7 @@ export default function Signin() {
             src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
             className="mx-auto h-10 w-auto"
           />
-          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight">
             Sign in to your account
           </h2>
         </div>
@@ -84,10 +82,7 @@ export default function Signin() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="email" className="block text-sm font-medium ">
                 Email address
               </label>
               <input
@@ -102,10 +97,7 @@ export default function Signin() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="password" className="block text-sm font-medium ">
                 Password
               </label>
               <input
@@ -141,7 +133,7 @@ export default function Signin() {
             </div>
           </form>
 
-          <p className="mt-10 text-center text-sm text-gray-500">
+          <p className="mt-10 text-center text-sm ">
             Not a member?{" "}
             <a
               href="/signup"

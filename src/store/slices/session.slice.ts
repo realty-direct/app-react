@@ -1,15 +1,14 @@
-import type { Session } from "@supabase/supabase-js";
 import type { StateCreator } from "zustand";
 import type { SessionState } from "../types";
 
 export const createSessionSlice: StateCreator<SessionState> = (set) => ({
-  session: null, // ✅ Zustand only tracks the session
+  session: null,
 
-  setSession: (session: Session | null) => {
-    set({ session });
+  setSession: (session) => {
+    set({ session }); // ✅ Only update session state (don't fetch profile or properties)
   },
 
   clearSession: () => {
-    set({ session: null }); // ✅ Set user to `null` when logged out
+    set({ session: null });
   },
 });

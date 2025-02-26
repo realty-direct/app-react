@@ -14,11 +14,11 @@ import { supabase } from "../database/supabase";
 import useRealtyStore from "../store/store";
 
 export default function AccountManagement() {
-  const { profile: user, setSession, clearSession } = useRealtyStore();
+  const { profile, setProfile, clearSession } = useRealtyStore();
   const navigate = useNavigate();
 
-  const [fname, setFname] = useState(user?.fname || "");
-  const [lname, setLname] = useState(user?.lname || "");
+  const [firstName, setFirstName] = useState(profile?.first_name || "");
+  const [lastName, setLastName] = useState(profile?.last_name || "");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<AlertColor>("info");
@@ -30,18 +30,18 @@ export default function AccountManagement() {
 
     const { error } = await supabase
       .from("profiles")
-      .update({ first_name: fname, last_name: lname })
-      .eq("id", user?.id);
+      .update({ first_name: firstName, last_name: lastName })
+      .eq("id", profile?.id);
 
     if (error) {
       setMessage(`Error updating profile: ${error.message}`);
       setAlertType("error");
     } else {
-      setSession({
-        id: user?.id ?? "",
-        fname,
-        lname,
-        email: user?.email ?? "",
+      setProfile({
+        id: profile?.id ?? "",
+        first_name: firstName,
+        last_name: lastName,
+        email: profile?.email ?? "",
       });
       setMessage("Profile updated successfully.");
       setAlertType("success");
@@ -52,7 +52,7 @@ export default function AccountManagement() {
 
   // ✅ Delete Account
   const handleDeleteAccount = async () => {
-    if (!user?.id) {
+    if (!profile?.id) {
       setMessage("Error: No user found.");
       setAlertType("error");
       return;
@@ -66,7 +66,7 @@ export default function AccountManagement() {
       const { error: profileError } = await supabase
         .from("profiles")
         .delete()
-        .eq("id", user.id);
+        .eq("id", profile.id);
 
       if (profileError) {
         throw new Error(`Failed to delete profile: ${profileError.message}`);
@@ -74,7 +74,7 @@ export default function AccountManagement() {
 
       // ✅ Step 2: Delete the user from Supabase authentication (Requires Admin Role)
       const { error: userError } = await supabase.auth.admin.deleteUser(
-        user.id
+        profile.id
       );
 
       if (userError) {
@@ -128,17 +128,17 @@ export default function AccountManagement() {
       <Stack spacing={2}>
         <TextField
           label="First Name"
-          value={fname}
-          onChange={(e) => setFname(e.target.value)}
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
           fullWidth
         />
         <TextField
           label="Last Name"
-          value={lname}
-          onChange={(e) => setLname(e.target.value)}
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
           fullWidth
         />
-        <TextField label="Email" value={user?.email} disabled fullWidth />
+        <TextField label="Email" value={profile?.email} disabled fullWidth />
 
         <Button
           variant="contained"

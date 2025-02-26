@@ -10,7 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { type JSX, useEffect, useState } from "react";
+import { type JSX, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NoImageFound from "../assets/no_image_found.jpg";
 import useRealtyStore from "../store/store";
@@ -19,21 +19,12 @@ export default function Home(): JSX.Element {
   const navigate = useNavigate();
   const { properties, fetchUserProperties, profile } = useRealtyStore(); // ✅ Zustand store
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  // ✅ Fetch properties from Zustand store when component mounts
-  useEffect(() => {
-    // TODO: This should not fire every time Home is rendered. Should come from store. Store should be updated when user logs in and when changes to db are made.
-    const loadProperties = async () => {
-      if (profile) await fetchUserProperties(profile?.id); // Fetch from Supabase
-      setLoading(false);
-    };
-    loadProperties();
-  }, [fetchUserProperties, profile]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
+
+  console.log(properties);
 
   // ✅ Filter properties based on search
   const filteredProperties = properties.filter((property) =>
@@ -94,10 +85,7 @@ export default function Home(): JSX.Element {
         sx={{ mb: 4, minWidth: "100%" }}
       />
 
-      {/* Loading State */}
-      {loading ? (
-        <Typography variant="body1">Loading properties...</Typography>
-      ) : filteredProperties.length === 0 ? (
+      {filteredProperties.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
           No properties found.
         </Typography>
