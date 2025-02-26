@@ -35,10 +35,7 @@ export type Database = {
           address: string
           created_at: string | null
           id: string
-          price: number
-          price_display: string | null
           property_type: string
-          sale_type: string | null
           status: string | null
           user_id: string | null
         }
@@ -46,10 +43,7 @@ export type Database = {
           address: string
           created_at?: string | null
           id?: string
-          price?: number
-          price_display?: string | null
           property_type: string
-          sale_type?: string | null
           status?: string | null
           user_id?: string | null
         }
@@ -57,14 +51,134 @@ export type Database = {
           address?: string
           created_at?: string | null
           id?: string
-          price?: number
-          price_display?: string | null
           property_type?: string
-          sale_type?: string | null
           status?: string | null
           user_id?: string | null
         }
         Relationships: []
+      }
+      property_details: {
+        Row: {
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          description: string | null
+          house_area: number | null
+          id: string
+          land_area: number | null
+          listing_title: string | null
+          ownership_verification_file: string | null
+          price: number | null
+          price_display: string | null
+          property_id: string
+          sale_type: string | null
+          youtube_video_url: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          description?: string | null
+          house_area?: number | null
+          id?: string
+          land_area?: number | null
+          listing_title?: string | null
+          ownership_verification_file?: string | null
+          price?: number | null
+          price_display?: string | null
+          property_id: string
+          sale_type?: string | null
+          youtube_video_url?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          description?: string | null
+          house_area?: number | null
+          id?: string
+          land_area?: number | null
+          listing_title?: string | null
+          ownership_verification_file?: string | null
+          price?: number | null
+          price_display?: string | null
+          property_id?: string
+          sale_type?: string | null
+          youtube_video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_details_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_features: {
+        Row: {
+          feature_name: string
+          feature_type: string
+          id: string
+          property_id: string
+        }
+        Insert: {
+          feature_name: string
+          feature_type: string
+          id?: string
+          property_id: string
+        }
+        Update: {
+          feature_name?: string
+          feature_type?: string
+          id?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_features_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_inspections: {
+        Row: {
+          end_time: string
+          id: string
+          inspection_date: string
+          inspection_type: string
+          property_id: string
+          start_time: string
+        }
+        Insert: {
+          end_time: string
+          id?: string
+          inspection_date: string
+          inspection_type: string
+          property_id: string
+          start_time: string
+        }
+        Update: {
+          end_time?: string
+          id?: string
+          inspection_date?: string
+          inspection_type?: string
+          property_id?: string
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_inspections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
