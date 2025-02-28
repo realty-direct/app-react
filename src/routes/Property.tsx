@@ -5,10 +5,12 @@ import useRealtyStore from "../store/store";
 const Property = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>(); // ✅ Get the property ID from the route
-  const { properties } = useRealtyStore();
+  const { properties, propertyDetails } = useRealtyStore();
 
   // ✅ Try to find the property in Zustand store first
   const property = properties.find((p) => p.id === id);
+
+  const details = propertyDetails.find((p) => p.property_id === id);
 
   // ✅ If the property isn't found, show an error message instead of fetching again
   if (!property) {
@@ -55,10 +57,10 @@ const Property = () => {
             {property.address}
           </Typography>
           <Typography variant="body1" sx={{ color: "text.secondary", mb: 2 }}>
-            {property.property_type}
+            {details?.property_type}
           </Typography>
           <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
-            {/* {property.description} */}
+            {details?.description}
           </Typography>
           <Button
             variant="contained"

@@ -1,18 +1,29 @@
+import type { Session } from "@supabase/supabase-js";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { supabase } from "../database/supabase";
 import { createPropertiesSlice } from "./slices/properties.slice";
+import { createPropertyDetailsSlice } from "./slices/property_details.slice";
 import { createSessionSlice } from "./slices/session.slice";
 import { createProfileSlice } from "./slices/user.slice";
-import type { ProfileState, PropertiesState, SessionState } from "./types";
+import type {
+  ProfileState,
+  PropertiesState,
+  PropertyDetailsState,
+  SessionState,
+} from "./types";
 
-export type StoreState = ProfileState & PropertiesState & SessionState;
+export type StoreState = ProfileState &
+  PropertiesState &
+  PropertyDetailsState &
+  SessionState;
 
 export const useRealtyStore = create<StoreState>()(
   persist(
     (set, get, api) => ({
       ...createProfileSlice(set, get, api),
       ...createPropertiesSlice(set, get, api),
+      ...createPropertyDetailsSlice(set, get, api),
       ...createSessionSlice(set, get, api),
     }),
     {
@@ -22,31 +33,47 @@ export const useRealtyStore = create<StoreState>()(
         session: state.session,
         profile: state.profile,
         properties: state.properties,
+        propertyDetails: state.propertyDetails,
       }),
     }
   )
 );
 
-// ✅ Restore session when app loads & fetch profile + properties
-supabase.auth.getSession().then(({ data }) => {
-  if (data.session) {
-    useRealtyStore.getState().setSession(data.session);
+// ✅ Function to restore session & fetch profile, properties, and details
+const restoreSessionAndData = async (session: Session | null) => {
+  const store = useRealtyStore.getState(); // 🔥 Optimized: Avoids repeated `.getState()` calls
 
-    // ✅ Fetch user profile & properties here (NOT in session slice)
-    useRealtyStore.getState().fetchUserProfile(data.session.user.id);
-    useRealtyStore.getState().fetchUserProperties(data.session.user.id);
+  if (!session?.user) {
+    store.clearSession(); // ✅ Ensure state is reset on logout
+    return;
   }
+
+  try {
+    store.setSession(session);
+
+    // ✅ Fetch user profile
+    await store.fetchUserProfile(session.user.id);
+
+    // ✅ Fetch user properties
+    await store.fetchUserProperties(session.user.id);
+
+    // ✅ Fetch property details **only if properties exist**
+    const propertyIds = store.properties.map((p) => p.id);
+
+    await store.fetchUserPropertyDetails(propertyIds);
+  } catch (error) {
+    console.error("❌ Error restoring session and fetching data:", error);
+  }
+};
+
+// ✅ Restore session when app loads
+supabase.auth.getSession().then(({ data }) => {
+  restoreSessionAndData(data.session);
 });
 
 // ✅ Listen for authentication state changes
 supabase.auth.onAuthStateChange((_event, session) => {
-  useRealtyStore.getState().setSession(session);
-
-  if (session?.user) {
-    // ✅ Fetch user profile & properties here (NOT in session slice)
-    useRealtyStore.getState().fetchUserProfile(session.user.id);
-    useRealtyStore.getState().fetchUserProperties(session.user.id);
-  }
+  restoreSessionAndData(session);
 });
 
 // ✅ Expose Zustand store to the window object for debugging

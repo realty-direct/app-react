@@ -35,7 +35,6 @@ export type Database = {
           address: string
           created_at: string | null
           id: string
-          property_type: string
           status: string | null
           user_id: string | null
         }
@@ -43,7 +42,6 @@ export type Database = {
           address: string
           created_at?: string | null
           id?: string
-          property_type: string
           status?: string | null
           user_id?: string | null
         }
@@ -51,7 +49,6 @@ export type Database = {
           address?: string
           created_at?: string | null
           id?: string
-          property_type?: string
           status?: string | null
           user_id?: string | null
         }
@@ -60,49 +57,52 @@ export type Database = {
       property_details: {
         Row: {
           contact_email: string | null
+          contact_name: string | null
           contact_phone: string | null
           created_at: string | null
           description: string | null
-          house_area: number | null
+          house_area: string | null
           id: string
-          land_area: number | null
+          land_area: string | null
           listing_title: string | null
-          ownership_verification_file: string | null
           price: number | null
           price_display: string | null
           property_id: string
+          property_type: string | null
           sale_type: string | null
           youtube_video_url: string | null
         }
         Insert: {
           contact_email?: string | null
+          contact_name?: string | null
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
-          house_area?: number | null
+          house_area?: string | null
           id?: string
-          land_area?: number | null
+          land_area?: string | null
           listing_title?: string | null
-          ownership_verification_file?: string | null
           price?: number | null
           price_display?: string | null
           property_id: string
+          property_type?: string | null
           sale_type?: string | null
           youtube_video_url?: string | null
         }
         Update: {
           contact_email?: string | null
+          contact_name?: string | null
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
-          house_area?: number | null
+          house_area?: string | null
           id?: string
-          land_area?: number | null
+          land_area?: string | null
           listing_title?: string | null
-          ownership_verification_file?: string | null
           price?: number | null
           price_display?: string | null
           property_id?: string
+          property_type?: string | null
           sale_type?: string | null
           youtube_video_url?: string | null
         }

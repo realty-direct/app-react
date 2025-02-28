@@ -18,7 +18,7 @@ import useRealtyStore from "../store/store";
 
 export default function Create(): JSX.Element {
   const navigate = useNavigate();
-  const { addProperty, profile } = useRealtyStore(); // ✅ Zustand store
+  const { addProperty, profile, updatePropertyDetail } = useRealtyStore(); // ✅ Zustand store
   const [propertyDetails, setPropertyDetails] = useState<{
     address: string;
     propertyType: "residential" | "commercial" | "land" | "rural" | "";
@@ -42,21 +42,29 @@ export default function Create(): JSX.Element {
     setLoading(true);
     setError(null);
     if (!profile) return;
+
     try {
+      // ✅ Step 1: Create the property
       const propertyId = await addProperty({
         user_id: profile.id,
         address: propertyDetails.address,
-        property_type: propertyDetails.propertyType,
         status: "draft",
       });
 
       if (!propertyId) {
         setError("Failed to create property. Please try again.");
-      } else {
-        navigate(`/property/${propertyId}`); // ✅ Redirect to edit page
+        return;
       }
+
+      // ✅ Step 2: Update property_details (only for this property)
+      await updatePropertyDetail(propertyId, {
+        property_type: propertyDetails.propertyType,
+      });
+
+      // ✅ Step 3: Redirect to property edit page
+      navigate(`/property/${propertyId}`);
     } catch (error) {
-      setError("An unexpected error occurred");
+      setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
     }

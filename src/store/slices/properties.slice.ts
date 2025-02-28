@@ -2,10 +2,13 @@ import type { StateCreator } from "zustand";
 import { supabase } from "../../database/supabase";
 import type { PropertiesState, Property } from "../types";
 
-export const createPropertiesSlice: StateCreator<PropertiesState> = (set) => ({
+export const createPropertiesSlice: StateCreator<PropertiesState> = (
+  set,
+  get
+) => ({
   properties: [],
 
-  setProperties: (properties) => set({ properties }),
+  setProperties: (properties: Property[]) => set({ properties }),
 
   clearProperties: () => set({ properties: [] }),
 
@@ -17,17 +20,19 @@ export const createPropertiesSlice: StateCreator<PropertiesState> = (set) => ({
         .eq("user_id", userId);
 
       if (error) {
-        console.error("Error fetching properties:", error);
+        console.error("❌ Error fetching properties:", error);
         return;
       }
 
       set({ properties });
     } catch (error) {
-      console.error("fetchUserProperties error:", error);
+      console.error("❌ fetchUserProperties error:", error);
     }
   },
 
-  addProperty: async (newProperty: Omit<Property, "id" | "created_at">) => {
+  addProperty: async (
+    newProperty: Omit<Property, "id" | "created_at">
+  ): Promise<string | null> => {
     try {
       const { data, error } = await supabase
         .from("properties")
@@ -35,37 +40,35 @@ export const createPropertiesSlice: StateCreator<PropertiesState> = (set) => ({
         .select("id, created_at")
         .single();
 
-      if (error) {
-        console.error("Error adding property:", error);
+      if (error || !data) {
+        console.error("❌ Error adding property:", error);
         return null;
       }
 
-      const newPropertyWithId: Property = {
+      // ✅ Explicitly handling `created_at`, ensuring it's always stored correctly
+      const createdProperty: Property = {
         id: data.id,
-        created_at: data.created_at,
+        created_at: data.created_at ?? null, // Ensuring correct typing
         ...newProperty,
       };
 
       set((state) => ({
-        properties: [...state.properties, newPropertyWithId],
+        properties: [...state.properties, createdProperty],
       }));
 
       return data.id;
     } catch (error) {
-      console.error("addProperty error:", error);
+      console.error("❌ addProperty error:", error);
       return null;
     }
   },
 
-  deleteProperty: async (id: string) => {
+  deleteProperty: async (id: string): Promise<void> => {
     try {
-      const { error } = await supabase
-        .from("properties")
-        .delete()
-        .match({ id });
+      const { error } = await supabase.from("properties").delete().eq("id", id);
 
       if (error) {
-        console.error("Error deleting property:", error);
+        console.error("❌ Error deleting property:", error);
         return;
       }
 
@@ -73,7 +76,7 @@ export const createPropertiesSlice: StateCreator<PropertiesState> = (set) => ({
         properties: state.properties.filter((property) => property.id !== id),
       }));
     } catch (error) {
-      console.error("deleteProperty error:", error);
+      console.error("❌ deleteProperty error:", error);
     }
   },
 });

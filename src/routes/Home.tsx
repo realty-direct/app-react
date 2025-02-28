@@ -12,19 +12,16 @@ import {
 } from "@mui/material";
 import { type JSX, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import NoImageFound from "../assets/no_image_found.jpg";
 import useRealtyStore from "../store/store";
 
 export default function Home(): JSX.Element {
   const navigate = useNavigate();
-  const { properties, fetchUserProperties, profile } = useRealtyStore(); // ✅ Zustand store
+  const { properties, propertyDetails } = useRealtyStore(); // ✅ Zustand store
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
-
-  console.log(properties);
 
   // ✅ Filter properties based on search
   const filteredProperties = properties.filter((property) =>
@@ -96,9 +93,9 @@ export default function Home(): JSX.Element {
               key={property.id}
               sx={{
                 display: "flex",
-                flexDirection: { xs: "column", sm: "row" }, // ✅ Stacks on mobile, horizontal on desktop
+                flexDirection: { xs: "column", sm: "row" },
                 width: "100%",
-                maxWidth: 800, // ✅ Keeps card from being too wide
+                maxWidth: 800,
                 mx: "auto",
                 mb: 2,
                 boxShadow: 3,
@@ -109,11 +106,11 @@ export default function Home(): JSX.Element {
               <CardMedia
                 component="img"
                 sx={{
-                  width: { xs: "100%", sm: 250 }, // ✅ Full width on mobile, fixed size on desktop
-                  height: { xs: 160, sm: "auto" }, // ✅ Prevents images from growing too large
+                  width: { xs: "100%", sm: 250 },
+                  height: { xs: 160, sm: "auto" },
                   objectFit: "contain",
                 }}
-                image={NoImageFound} // TODO: Add image support
+                // image={NoImageFound}
                 alt={property.address}
               />
 
@@ -126,7 +123,9 @@ export default function Home(): JSX.Element {
                     {property.address}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {property.property_type.toUpperCase()}
+                    {propertyDetails
+                      .find((detail) => detail.property_id === property.id)
+                      ?.property_type?.toUpperCase() || "UNKNOWN TYPE"}
                   </Typography>
                 </CardContent>
 
