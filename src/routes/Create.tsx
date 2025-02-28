@@ -86,9 +86,11 @@ export default function Create(): JSX.Element {
           <Typography variant="h6" gutterBottom>
             Enter Property Details
           </Typography>
-          <Box component="form" noValidate className="mt-4">
+
+          {/* ✅ Removed the nested `<form>` */}
+          <Box className="mt-4">
             {/* Address Input */}
-            <Box component="form" noValidate className="mt-4 relative">
+            <Box className="mt-4 relative">
               <TextField
                 fullWidth
                 label="Full Address"

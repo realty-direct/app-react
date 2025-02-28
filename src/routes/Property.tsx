@@ -57,7 +57,7 @@ const Property = () => {
             {property.address}
           </Typography>
           <Typography variant="body1" sx={{ color: "text.secondary", mb: 2 }}>
-            {details?.property_type}
+            {details?.property_type?.toUpperCase()}
           </Typography>
           <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
             {details?.description}
