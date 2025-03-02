@@ -10,11 +10,11 @@ import {
 import { useState } from "react";
 import { useParams } from "react-router"; // ✅ Import useParams
 import useRealtyStore from "../../store/store"; // ✅ Import Zustand store
+import type { PropertyDetail } from "../../store/types";
 
 export default function DetailsTab() {
   const { id: propertyId } = useParams<{ id: string }>();
-
-  const { propertyDetails, updatePropertyDetail } = useRealtyStore();
+  const { propertyDetails, updatePropertyDetailInStore } = useRealtyStore(); // ✅ Changed function name to avoid confusion
 
   const [landUnit, setLandUnit] = useState("m²"); // ✅ Default to m²
   const [houseUnit, setHouseUnit] = useState("m²"); // ✅ Default to m²
@@ -26,6 +26,14 @@ export default function DetailsTab() {
 
   if (!propertyDetail)
     return <Typography>No details found for this property.</Typography>;
+
+  const handleChange = (key: keyof PropertyDetail, value: string) => {
+    if (!propertyId) return;
+    updatePropertyDetailInStore(propertyId, { [key]: value }); // ✅ Only updates Zustand, no network request
+  };
+
+  const formatNumberInput = (value: string) =>
+    value.replace(/[^\d.]/g, "").replace(/^(\d*\.\d*)\./g, "$1"); // ✅ Allows only one decimal
 
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
@@ -42,14 +50,8 @@ export default function DetailsTab() {
           label="Property Category"
           variant="filled"
           fullWidth
-          value={propertyDetail.property_type || ""}
-          onChange={(e) =>
-            updatePropertyDetail(
-              propertyDetail.id,
-              "property_type",
-              e.target.value
-            )
-          }
+          value={propertyDetail.property_category || ""}
+          onChange={(e) => handleChange("property_category", e.target.value)}
         >
           <MenuItem value="residential">Residential</MenuItem>
           <MenuItem value="commercial">Commercial</MenuItem>
@@ -63,22 +65,21 @@ export default function DetailsTab() {
           <Box sx={{ flex: 1, display: "flex", gap: 0 }}>
             <TextField
               label="Land Area"
-              type="number"
+              type="text"
               variant="filled"
               fullWidth
-              value={propertyDetail.land_area?.replace(/\D/g, "") || ""}
+              value={propertyDetail.land_area?.split(" ")[0] || ""} // ✅ Show only the number
               onChange={(e) =>
-                updatePropertyDetail(
-                  propertyDetail.id,
-                  "land_area",
-                  `${e.target.value} ${landUnit}`
-                )
+                handleChange("land_area", formatNumberInput(e.target.value))
               }
               sx={{ flex: 1 }}
             />
             <Select
-              value={landUnit}
-              onChange={(e) => setLandUnit(e.target.value)}
+              value={propertyDetail.land_unit || landUnit}
+              onChange={(e) => {
+                setLandUnit(e.target.value);
+                handleChange("land_unit", e.target.value);
+              }}
               variant="filled"
               sx={{
                 width: "auto",
@@ -98,22 +99,21 @@ export default function DetailsTab() {
           <Box sx={{ flex: 1, display: "flex", gap: 0 }}>
             <TextField
               label="House Area"
-              type="number"
+              type="text"
               variant="filled"
               fullWidth
-              value={propertyDetail.house_area?.replace(/\D/g, "") || ""}
+              value={propertyDetail.house_area?.split(" ")[0] || ""} // ✅ Show only the number
               onChange={(e) =>
-                updatePropertyDetail(
-                  propertyDetail.id,
-                  "house_area",
-                  `${e.target.value} ${houseUnit}`
-                )
+                handleChange("house_area", formatNumberInput(e.target.value))
               }
               sx={{ flex: 1 }}
             />
             <Select
-              value={houseUnit}
-              onChange={(e) => setHouseUnit(e.target.value)}
+              value={propertyDetail.house_unit || houseUnit}
+              onChange={(e) => {
+                setHouseUnit(e.target.value);
+                handleChange("house_unit", e.target.value);
+              }}
               variant="filled"
               sx={{
                 width: "auto",
@@ -137,13 +137,7 @@ export default function DetailsTab() {
         row
         sx={{ gap: 2 }}
         value={propertyDetail.property_type || ""}
-        onChange={(e) =>
-          updatePropertyDetail(
-            propertyDetail.id,
-            "property_type",
-            e.target.value
-          )
-        }
+        onChange={(e) => handleChange("property_type", e.target.value)}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Radio value="new" />

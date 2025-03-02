@@ -62,11 +62,14 @@ export type Database = {
           created_at: string | null
           description: string | null
           house_area: string | null
+          house_unit: string | null
           id: string
           land_area: string | null
+          land_unit: string | null
           listing_title: string | null
           price: number | null
           price_display: string | null
+          property_category: string | null
           property_id: string
           property_type: string | null
           sale_type: string | null
@@ -79,11 +82,14 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           house_area?: string | null
+          house_unit?: string | null
           id?: string
           land_area?: string | null
+          land_unit?: string | null
           listing_title?: string | null
           price?: number | null
           price_display?: string | null
+          property_category?: string | null
           property_id: string
           property_type?: string | null
           sale_type?: string | null
@@ -96,11 +102,14 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           house_area?: string | null
+          house_unit?: string | null
           id?: string
           land_area?: string | null
+          land_unit?: string | null
           listing_title?: string | null
           price?: number | null
           price_display?: string | null
+          property_category?: string | null
           property_id?: string
           property_type?: string | null
           sale_type?: string | null

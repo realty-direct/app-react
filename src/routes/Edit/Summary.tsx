@@ -76,7 +76,7 @@ export default function Summary() {
 
       {/* Submit Button */}
       <Button variant="contained" color="primary" fullWidth>
-        Finalize Listing
+        Finalise Listing
       </Button>
     </Box>
   );

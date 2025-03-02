@@ -1,5 +1,6 @@
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { Outlet, useNavigate, useParams } from "react-router";
+
 import useRealtyStore from "../store/store";
 
 const Property = () => {
@@ -39,9 +40,11 @@ const Property = () => {
         }}
       >
         {/* ✅ Property Image */}
+        {
+          // TODO: If there is not property image add <BrokenImageOutlinedIcon sx={{ fontSize: 60, color: "grey.600" }} />
+        }
         <Box
           component="img"
-          // src={property.imageUrl || NoImageFound}
           alt={`Image of ${property.address}`}
           sx={{
             maxHeight: { xs: "200px", md: "300px" },

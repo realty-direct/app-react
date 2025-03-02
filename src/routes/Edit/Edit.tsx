@@ -1,5 +1,7 @@
 import { Alert, Box, Button, Grid2, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
+import { useParams } from "react-router"; // ✅ Added useParams
+import useRealtyStore from "../../store/store"; // ✅ Import Zustand store
 import Contact from "./Contact";
 import Description from "./Description";
 import Details from "./Details";
@@ -12,13 +14,19 @@ import Price from "./Price";
 import Summary from "./Summary";
 
 export default function Edit() {
+  const { id: propertyId } = useParams(); // ✅ Get the property ID
+  const { savePropertyDetails } = useRealtyStore(); // ✅ Zustand function
   const [tabValue, setTabValue] = useState(0);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    if (!propertyId) return;
+
+    await savePropertyDetails(propertyId); // ✅ Save to Supabase on Continue
+
     setTabValue((prev) => prev + 1);
   };
 
@@ -33,14 +41,12 @@ export default function Edit() {
         size={12}
         sx={{
           position: "sticky",
-          top: 0, // Stick to top when scrolling
-          zIndex: 1200, // Ensure tabs stay above content
-          backgroundColor: "background.paper", // Use theme background color
+          top: 0,
+          zIndex: 1200,
+          backgroundColor: "background.paper",
           borderBottom: 1,
           borderColor: "divider",
-          // Add subtle shadow when sticky
           boxShadow: (theme) => `0 2px 4px ${theme.palette.divider}`,
-          // Smooth transition for shadow
           transition: "box-shadow 0.3s ease",
         }}
       >
@@ -81,21 +87,20 @@ export default function Edit() {
         {tabValue === 8 && <ListingEnhancements />}
         {tabValue === 9 && <Summary />}
         <Alert severity="info" role="alert" icon={undefined}>
-          Please note: You can skip this section at anytime
+          Please note: You can skip this section at any time
         </Alert>
         <Box
           sx={{
             display: "flex",
             justifyContent: "flex-end",
-            gap: 2, // Adds spacing between buttons
-            mt: 2, // Adds margin top
+            gap: 2,
+            mt: 2,
           }}
         >
           <Button
             variant="outlined"
             sx={{ maxWidth: "150px" }}
             onClick={handleBack}
-            // size="large"
             size="large"
           >
             Back
@@ -111,8 +116,8 @@ export default function Edit() {
           </Button>
         </Box>
       </Grid2>
-      {/* Navigation Buttons */}
 
+      {/* Navigation Buttons */}
       <Grid2 size={3} p={3}>
         Insert side info here
         {

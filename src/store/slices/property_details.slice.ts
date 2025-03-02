@@ -33,6 +33,16 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
     }
   },
 
+  updatePropertyDetailInStore: (propertyId, updates) => {
+    set((state) => ({
+      propertyDetails: state.propertyDetails.map((property) =>
+        property.property_id === propertyId
+          ? { ...property, ...updates }
+          : property
+      ),
+    }));
+  },
+
   fetchUserPropertyDetail: async (propertyId: string): Promise<void> => {
     try {
       const { data, error } = await supabase
@@ -49,19 +59,11 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
         return;
       }
 
-      set((state) => {
-        const existingIndex = state.propertyDetails.findIndex(
-          (detail) => detail.property_id === propertyId
-        );
-
-        if (existingIndex !== -1) {
-          const updatedDetails = [...state.propertyDetails];
-          updatedDetails[existingIndex] = data;
-          return { propertyDetails: updatedDetails };
-        }
-
-        return { propertyDetails: [...state.propertyDetails, data] };
-      });
+      set((state) => ({
+        propertyDetails: state.propertyDetails.map((detail) =>
+          detail.property_id === propertyId ? { ...detail, ...data } : detail
+        ),
+      }));
     } catch (error) {
       console.error("❌ fetchUserPropertyDetail error:", error);
     }
@@ -95,7 +97,7 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
 
       const { error } = await supabase
         .from("property_details")
-        .update(detailsToUpdate)
+        .update(detailsToUpdate) // ✅ Sends the full object, including `undefined` values
         .eq("property_id", propertyId);
 
       if (error) {

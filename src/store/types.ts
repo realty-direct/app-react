@@ -40,6 +40,10 @@ export interface PropertyDetailsState {
     propertyId: string,
     updates: Partial<PropertyDetail>
   ) => Promise<void>;
+  updatePropertyDetailInStore: (
+    propertyId: string,
+    updates: Partial<PropertyDetail>
+  ) => void;
   fetchUserPropertyDetails: (propertyIds: string[]) => Promise<void>;
   fetchUserPropertyDetail: (propertyId: string) => Promise<void>;
   savePropertyDetails: (propertyId: string) => Promise<void>;

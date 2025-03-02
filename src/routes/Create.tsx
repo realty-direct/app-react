@@ -18,13 +18,18 @@ import useRealtyStore from "../store/store";
 
 export default function Create(): JSX.Element {
   const navigate = useNavigate();
-  const { addProperty, profile, updatePropertyDetail } = useRealtyStore(); // ✅ Zustand store
+  const {
+    addProperty,
+    profile,
+    updatePropertyDetail,
+    fetchUserPropertyDetail,
+  } = useRealtyStore(); // ✅ Zustand store
   const [propertyDetails, setPropertyDetails] = useState<{
     address: string;
-    propertyType: "residential" | "commercial" | "land" | "rural" | "";
+    propertyCategory: "residential" | "commercial" | "land" | "rural" | "";
   }>({
     address: "",
-    propertyType: "",
+    propertyCategory: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,8 +39,8 @@ export default function Create(): JSX.Element {
   };
 
   const handleContinue = async () => {
-    if (!propertyDetails.address || !propertyDetails.propertyType) {
-      setError("Please provide both an address and property type.");
+    if (!propertyDetails.address || !propertyDetails.propertyCategory) {
+      setError("Please provide both an address and property category.");
       return;
     }
 
@@ -58,8 +63,10 @@ export default function Create(): JSX.Element {
 
       // ✅ Step 2: Update property_details (only for this property)
       await updatePropertyDetail(propertyId, {
-        property_type: propertyDetails.propertyType,
+        property_category: propertyDetails.propertyCategory,
       });
+
+      await fetchUserPropertyDetail(propertyId);
 
       // ✅ Step 3: Redirect to property edit page
       navigate(`/property/${propertyId}`);
@@ -106,15 +113,15 @@ export default function Create(): JSX.Element {
               <Typography variant="body1">Map Placeholder</Typography>
             </div>
 
-            {/* Property Type Selection */}
+            {/* Property Category Selection */}
             <Typography variant="h6" className="mt-6">
-              What type of property are you looking to list?
+              What category of property are you looking to list?
             </Typography>
             <FormControl component="fieldset" className="mt-2">
               <RadioGroup
                 row
-                name="propertyType"
-                value={propertyDetails.propertyType}
+                name="propertyCategory"
+                value={propertyDetails.propertyCategory}
                 onChange={handleInputChange}
               >
                 <FormControlLabel
