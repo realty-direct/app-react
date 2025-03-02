@@ -22,58 +22,48 @@ import Signup from "./routes/Signup";
 
 const router = createBrowserRouter([
   {
-    Component: App,
+    element: <App />, // ✅ Use element instead of Component
     children: [
-      {
-        path: "/signin",
-        Component: Signin,
-      },
-      {
-        path: "/signup",
-        Component: Signup,
-      },
-      {
-        path: "/confirm",
-        Component: Confirm,
-      },
-
-      // 🔒 Protected routes
+      { path: "/signin", element: <Signin /> },
+      { path: "/signup", element: <Signup /> },
+      { path: "/confirm", element: <Confirm /> },
       {
         element: <ProtectedRoute />, // ✅ Protect these routes
         children: [
           {
             path: "/",
-            Component: HomeLayout,
+            element: <HomeLayout />,
             children: [
-              { path: "", Component: Home },
-              { path: "guide", Component: Guide },
-              { path: "account", Component: AccountManagement },
-              { path: "conveyancing", Component: Conveyancing },
+              { path: "", element: <Home /> },
+              { path: "guide", element: <Guide /> },
+              { path: "account", element: <AccountManagement /> },
+              { path: "conveyancing", element: <Conveyancing /> },
             ],
           },
           {
-            path: "create",
-            Component: PropertyEditLayout,
-            children: [{ path: "", Component: Create }],
+            path: "/create",
+            element: <PropertyEditLayout />,
+            children: [{ path: "", element: <Create /> }],
           },
           {
-            path: "property/:id",
-            Component: PropertyLayout,
+            path: "/property/:id",
+            element: <PropertyLayout />,
             children: [
-              { path: "", Component: Property },
-              { path: "orders", Component: Orders },
+              { path: "", element: <Property /> },
+              { path: "orders", element: <Orders /> },
             ],
           },
           {
-            path: "property/:id/edit",
-            Component: PropertyEditLayout,
-            children: [{ path: "", Component: Edit }],
+            path: "/property/:id/edit",
+            element: <PropertyEditLayout />,
+            children: [{ path: "", element: <Edit /> }],
           },
         ],
       },
     ],
   },
 ]);
+
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
