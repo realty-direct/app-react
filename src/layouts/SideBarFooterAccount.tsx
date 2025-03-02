@@ -14,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { supabase } from "../database/supabase"; // ✅ Import Supabase client
 import useRealtyStore from "../store/store";
 

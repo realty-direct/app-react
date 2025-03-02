@@ -1,6 +1,6 @@
 import { createTheme } from "@mui/material";
 import { ReactRouterAppProvider } from "@toolpad/core/react-router";
-import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router";
 import "./src/App.css";
 import HeaderWithBackButton from "./src/components/EditPropertyHeader";
 import { useNavigationConfig } from "./src/lib/navigation";

@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
-import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router";
 import SidebarFooterAccountPopover from "./SideBarFooterAccount";
 
 export default function HomeLayout() {

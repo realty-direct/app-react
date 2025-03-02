@@ -11,7 +11,7 @@ import {
   ShoppingCart,
 } from "@mui/icons-material";
 import type { Navigation, NavigationItem } from "@toolpad/core";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router";
 
 export const HOME_NAVIGATION: NavigationItem[] = [
   { segment: "", title: "Your Properties", icon: <House /> },

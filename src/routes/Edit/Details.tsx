@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { useParams } from "react-router-dom"; // ✅ Import useParams
+import { useParams } from "react-router"; // ✅ Import useParams
 import useRealtyStore from "../../store/store"; // ✅ Import Zustand store
 
 export default function DetailsTab() {

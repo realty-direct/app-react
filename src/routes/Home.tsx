@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { type JSX, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import useRealtyStore from "../store/store";
 
 export default function Home(): JSX.Element {

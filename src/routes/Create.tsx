@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import type { JSX } from "react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import useRealtyStore from "../store/store";
 
 export default function Create(): JSX.Element {

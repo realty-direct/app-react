@@ -1,21 +1,13 @@
 import { KeyboardReturn } from "@mui/icons-material";
 import { Box, IconButton } from "@mui/material";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 const HeaderWithBackButton = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleNavigate = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault(); // Prevent any default behavior
-    if (location.pathname.includes("create")) {
-      navigate("/");
-    } else {
-      // TODO: Fix this it does not work. Could be because it is initialised before the router?
-      // navigate(-1) will work but I dont think it is best practise.
-      navigate(`/property/${id}`); // Navigate to the property page
-    }
+    event.preventDefault(); // Prevent default link behavior
+    navigate(-1); // Go
   };
 
   // TODO: Should make this a save and exit button maybe?

@@ -1,5 +1,5 @@
 import { Box, Button, Paper, Typography } from "@mui/material";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import { Outlet, useNavigate, useParams } from "react-router";
 import useRealtyStore from "../store/store";
 
 const Property = () => {
