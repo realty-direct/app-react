@@ -61,14 +61,12 @@ export default function Create(): JSX.Element {
         return;
       }
 
-      // ✅ Step 2: Update property_details (only for this property)
       await updatePropertyDetail(propertyId, {
         property_category: propertyDetails.propertyCategory,
       });
 
       await fetchUserPropertyDetail(propertyId);
 
-      // ✅ Step 3: Redirect to property edit page
       navigate(`/property/${propertyId}`);
     } catch (error) {
       setError("An unexpected error occurred.");

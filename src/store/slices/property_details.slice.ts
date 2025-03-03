@@ -14,7 +14,7 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
   updatePropertyDetail: async (
     propertyId: string,
     updates: Partial<PropertyDetail>
-  ): Promise<void> => {
+  ) => {
     try {
       const { error } = await supabase
         .from("property_details")
@@ -43,7 +43,7 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
     }));
   },
 
-  fetchUserPropertyDetail: async (propertyId: string): Promise<void> => {
+  fetchUserPropertyDetail: async (propertyId: string) => {
     try {
       const { data, error } = await supabase
         .from("property_details")
@@ -60,9 +60,10 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
       }
 
       set((state) => ({
-        propertyDetails: state.propertyDetails.map((detail) =>
-          detail.property_id === propertyId ? { ...detail, ...data } : detail
-        ),
+        propertyDetails: [
+          ...state.propertyDetails.filter((p) => p.property_id !== propertyId),
+          data,
+        ], // ✅ Keep it an array
       }));
     } catch (error) {
       console.error("❌ fetchUserPropertyDetail error:", error);
