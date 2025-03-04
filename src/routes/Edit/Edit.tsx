@@ -15,10 +15,13 @@ import Summary from "./Summary";
 
 export default function Edit() {
   const { id: propertyId } = useParams(); // ✅ Get the property ID
-  const { savePropertyDetails } = useRealtyStore(); // ✅ Zustand function
+  const { savePropertyDetails, savePropertyFeatures } = useRealtyStore(); // ✅ Zustand function
   const [tabValue, setTabValue] = useState(0);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    if (tabValue === 1 && propertyId) {
+      savePropertyFeatures(propertyId);
+    }
     setTabValue(newValue);
   };
 
@@ -26,6 +29,7 @@ export default function Edit() {
     if (!propertyId) return;
 
     await savePropertyDetails(propertyId); // ✅ Save to Supabase on Continue
+    await savePropertyFeatures(propertyId); // ✅ Save features
 
     setTabValue((prev) => prev + 1);
   };

@@ -4,19 +4,22 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { supabase } from "../database/supabase";
 import { createPropertiesSlice } from "./slices/properties.slice";
 import { createPropertyDetailsSlice } from "./slices/property_details.slice";
+import { createPropertyFeaturesSlice } from "./slices/property_features.slice";
 import { createSessionSlice } from "./slices/session.slice";
 import { createProfileSlice } from "./slices/user.slice";
 import type {
   ProfileState,
   PropertiesState,
   PropertyDetailsState,
+  PropertyFeaturesState,
   SessionState,
 } from "./types";
 
 export type StoreState = ProfileState &
   PropertiesState &
   PropertyDetailsState &
-  SessionState;
+  SessionState &
+  PropertyFeaturesState;
 
 export const useRealtyStore = create<StoreState>()(
   persist(
@@ -25,6 +28,7 @@ export const useRealtyStore = create<StoreState>()(
       ...createPropertiesSlice(set, get, api),
       ...createPropertyDetailsSlice(set, get, api),
       ...createSessionSlice(set, get, api),
+      ...createPropertyFeaturesSlice(set, get, api),
     }),
     {
       name: "realty-store",
@@ -34,6 +38,7 @@ export const useRealtyStore = create<StoreState>()(
         profile: state.profile,
         properties: state.properties,
         propertyDetails: state.propertyDetails,
+        propertyFeatures: state.propertyFeatures, // ✅ Persist property features
       }),
     }
   )
@@ -61,6 +66,10 @@ const restoreSessionAndData = async (session: Session | null) => {
     const propertyIds = store.properties.map((p) => p.id);
 
     await store.fetchUserPropertyDetails(propertyIds);
+
+    if (propertyIds.length > 0) {
+      await store.fetchAllPropertyFeatures(propertyIds);
+    }
   } catch (error) {
     console.error("❌ Error restoring session and fetching data:", error);
   }

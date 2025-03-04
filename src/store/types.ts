@@ -59,4 +59,5 @@ export interface PropertyFeaturesState {
     feature: PropertyFeature
   ) => void; // 🔥 Modified to work per property
   savePropertyFeatures: (propertyId: string) => Promise<void>;
+  fetchAllPropertyFeatures: (propertyIds: string[]) => Promise<void>;
 }
