@@ -8,18 +8,42 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useParams } from "react-router";
+import useRealtyStore from "../../store/store";
+import type { PropertyDetail } from "../../store/types";
 
 export default function Price() {
-  const [price, setPrice] = useState("");
-  const [priceDisplay, setPriceDisplay] = useState("same");
-  const [saleType, setSaleType] = useState("standard");
+  const { id: propertyId } = useParams<{ id: string }>();
+  const { propertyDetails, updatePropertyDetailInStore } = useRealtyStore();
 
-  // Function to format input as currency
-  const formatCurrency = (value: string) => {
-    if (!value) return ""; // Keep input blank when empty
-    const num = Number(value.replace(/\D/g, "")); // Remove non-numeric characters
-    return num ? `$${num.toLocaleString()}` : ""; // Convert to $ formatted string
+  console.log(propertyDetails);
+
+  // Get the correct property details
+  const propertyDetail = propertyDetails.find(
+    (p) => p.property_id === propertyId
+  );
+
+  if (!propertyDetail)
+    return <Typography>No details found for this property.</Typography>;
+
+  // Function to format a number as currency (UI display only)
+  const formatCurrency = (value: number | string) => {
+    const num = Number(value);
+    return num ? `$${num.toLocaleString()}` : "";
+  };
+
+  // Function to update Zustand & remove formatting for storage
+  const handleUpdate = (key: keyof PropertyDetail, value: string) => {
+    if (!propertyId) return;
+
+    let formattedValue: string | number = value;
+
+    // Convert price to a number for storage
+    if (key === "price") {
+      formattedValue = Number(value.replace(/\D/g, "")) || 0;
+    }
+
+    updatePropertyDetailInStore(propertyId, { [key]: formattedValue });
   };
 
   return (
@@ -40,11 +64,8 @@ export default function Price() {
           label="Enter a price"
           variant="filled"
           fullWidth
-          value={price}
-          onChange={(e) => {
-            const formattedPrice = formatCurrency(e.target.value);
-            setPrice(formattedPrice);
-          }}
+          value={formatCurrency(propertyDetail.price || "")} // Convert raw number to "$123,000"
+          onChange={(e) => handleUpdate("price", e.target.value)}
           sx={{ mb: 3 }}
         />
       </Paper>
@@ -55,8 +76,8 @@ export default function Price() {
           How would you like to display the price?
         </Typography>
         <RadioGroup
-          value={priceDisplay}
-          onChange={(e) => setPriceDisplay(e.target.value)}
+          value={propertyDetail.price_display || "same"}
+          onChange={(e) => handleUpdate("price_display", e.target.value)}
           sx={{ gap: 1 }}
         >
           <FormControlLabel
@@ -86,8 +107,8 @@ export default function Price() {
       <Paper elevation={2} sx={{ p: 2 }}>
         <Typography sx={{ mt: 3, mb: 1 }}>Sale Type</Typography>
         <RadioGroup
-          value={saleType}
-          onChange={(e) => setSaleType(e.target.value)}
+          value={propertyDetail.sale_type || "standard"}
+          onChange={(e) => handleUpdate("sale_type", e.target.value)}
           sx={{ gap: 1 }}
         >
           <FormControlLabel
