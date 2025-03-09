@@ -1,5 +1,5 @@
 import type { StateCreator } from "zustand";
-import { supabase } from "../../database/supabase";
+import { deletePropertyImage, supabase } from "../../database/supabase";
 import type { PropertyDetail, PropertyDetailsState } from "../types";
 
 export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
@@ -110,5 +110,91 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
     } catch (error) {
       console.error("❌ savePropertyDetails error:", error);
     }
+  },
+  updateImageOrder: (propertyId: string, images: { url: string }[]) => {
+    set((state) => ({
+      propertyDetails: state.propertyDetails.map((property) =>
+        property.property_id === propertyId ? { ...property, images } : property
+      ),
+    }));
+
+    // ✅ Save new order to Supabase
+    get().updatePropertyDetail(propertyId, { images });
+  },
+
+  setMainImage: (propertyId: string, mainImageUrl: string) => {
+    set((state) => ({
+      propertyDetails: state.propertyDetails.map((property) =>
+        property.property_id === propertyId
+          ? { ...property, main_image: mainImageUrl }
+          : property
+      ),
+    }));
+
+    // ✅ Save main image to Supabase
+    get().updatePropertyDetail(propertyId, { main_image: mainImageUrl });
+  },
+  fetchPropertyImages: async (propertyIds: string[]) => {
+    try {
+      const { data, error } = await supabase
+        .from("property_details")
+        .select("property_id, images")
+        .in("property_id", propertyIds);
+
+      if (error) {
+        console.error("❌ Error fetching images:", error);
+        return;
+      }
+
+      // ✅ Update Zustand store correctly using `set()`
+      set((state) => ({
+        propertyDetails: state.propertyDetails.map((property) => {
+          const propertyData = data.find(
+            (img) => img.property_id === property.property_id
+          );
+          return propertyData
+            ? { ...property, images: propertyData.images || [] }
+            : property;
+        }),
+      }));
+    } catch (error) {
+      console.error("❌ fetchPropertyImages error:", error);
+    }
+  },
+  deletePropertyImage: async (
+    propertyId: string,
+    imageUrl: string
+  ): Promise<boolean> => {
+    const success = await deletePropertyImage(imageUrl);
+    if (!success) return false; // ✅ Ensure it returns a boolean
+
+    set((state) => ({
+      propertyDetails: state.propertyDetails.map((property) => {
+        if (property.property_id !== propertyId) return property;
+
+        const currentImages = Array.isArray(property.images)
+          ? property.images.filter(
+              (img): img is { url: string } =>
+                img !== null &&
+                typeof img === "object" &&
+                "url" in img &&
+                typeof img.url === "string" &&
+                img.url !== imageUrl
+            )
+          : [];
+
+        return {
+          ...property,
+          images: currentImages,
+        };
+      }),
+    }));
+
+    const updatedImages =
+      get().propertyDetails.find((p) => p.property_id === propertyId)?.images ??
+      [];
+    await get().updatePropertyDetail(propertyId, { images: updatedImages });
+
+    return true; // ✅ Return `true` to match expected return type
   },
 });

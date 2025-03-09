@@ -70,7 +70,7 @@ export default function FeaturesTab() {
   if (!propertyId) return <Typography>No property selected.</Typography>;
 
   const handleFeatureToggle = (feature: Omit<PropertyFeature, "id">) => {
-    toggleFeatureSelection(propertyId, feature);
+    toggleFeatureSelection(propertyId, feature); // ✅ No need to add `id`
   };
 
   return (

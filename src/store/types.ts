@@ -47,6 +47,17 @@ export interface PropertyDetailsState {
   fetchUserPropertyDetails: (propertyIds: string[]) => Promise<void>;
   fetchUserPropertyDetail: (propertyId: string) => Promise<void>;
   savePropertyDetails: (propertyId: string) => Promise<void>;
+  updateImageOrder: (
+    propertyId: string,
+    images: {
+      url: string;
+    }[]
+  ) => void;
+  setMainImage: (propertyId: string, mainImageUrl: string) => void;
+  deletePropertyImage: (
+    propertyId: string,
+    imageUrl: string
+  ) => Promise<boolean>; // ✅ Ensure correct return type
 }
 
 // ✅ Define Zustand State for Property Features

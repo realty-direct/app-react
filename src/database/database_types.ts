@@ -61,19 +61,23 @@ export type Database = {
           contact_phone: string | null
           created_at: string | null
           description: string | null
+          floor_plans: Json | null
           house_area: string | null
           house_unit: string | null
           id: string
+          images: Json | null
           land_area: string | null
           land_unit: string | null
           listing_title: string | null
+          main_image: string | null
           price: number | null
           price_display: string | null
           property_category: string | null
           property_id: string
           property_type: string | null
           sale_type: string | null
-          youtube_video_url: string | null
+          user_id: string | null
+          video_url: string | null
         }
         Insert: {
           contact_email?: string | null
@@ -81,19 +85,23 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
+          floor_plans?: Json | null
           house_area?: string | null
           house_unit?: string | null
           id?: string
+          images?: Json | null
           land_area?: string | null
           land_unit?: string | null
           listing_title?: string | null
+          main_image?: string | null
           price?: number | null
           price_display?: string | null
           property_category?: string | null
           property_id: string
           property_type?: string | null
           sale_type?: string | null
-          youtube_video_url?: string | null
+          user_id?: string | null
+          video_url?: string | null
         }
         Update: {
           contact_email?: string | null
@@ -101,19 +109,23 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
+          floor_plans?: Json | null
           house_area?: string | null
           house_unit?: string | null
           id?: string
+          images?: Json | null
           land_area?: string | null
           land_unit?: string | null
           listing_title?: string | null
+          main_image?: string | null
           price?: number | null
           price_display?: string | null
           property_category?: string | null
           property_id?: string
           property_type?: string | null
           sale_type?: string | null
-          youtube_video_url?: string | null
+          user_id?: string | null
+          video_url?: string | null
         }
         Relationships: [
           {

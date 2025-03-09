@@ -75,6 +75,7 @@ export const signOut = async () => {
 // ✅ Check User Session (Returns `user` object or `null`)
 export const checkUserSession = async () => {
   const { data, error } = await supabase.auth.getUser();
+  console.log("User session data:", data);
   if (error) {
     console.error("❌ Error fetching user session:", error.message);
     return null;
@@ -93,4 +94,49 @@ export const resendConfirmationEmail = async (email: string) => {
   });
 
   return { error };
+};
+
+export const uploadPropertyImage = async (propertyId: string, file: File) => {
+  const filePath = `${propertyId}/${Date.now()}-${file.name.replace(/\s+/g, "-").toLowerCase()}`;
+
+  // ✅ Use the exact bucket name
+  const { data, error } = await supabase.storage
+    .from("property_photographs") // 🔥 Ensure this matches exactly
+    .upload(filePath, file, { cacheControl: "3600", upsert: false });
+
+  if (error) {
+    console.error("❌ Image upload failed:", error);
+    return null;
+  }
+
+  return supabase.storage.from("property_photographs").getPublicUrl(filePath)
+    .data.publicUrl;
+};
+
+export const deletePropertyImage = async (
+  imageUrl: string
+): Promise<boolean> => {
+  try {
+    const filePath = imageUrl.split(
+      "/storage/v1/object/public/property_photographs/"
+    )[1];
+    if (!filePath) {
+      console.error("❌ Invalid file path:", imageUrl);
+      return false;
+    }
+
+    const { error } = await supabase.storage
+      .from("property_photographs")
+      .remove([filePath]);
+    if (error) {
+      console.error("❌ Error deleting image from storage:", error);
+      return false;
+    }
+
+    console.log("✅ Image deleted successfully:", imageUrl);
+    return true;
+  } catch (error) {
+    console.error("❌ deletePropertyImage error:", error);
+    return false;
+  }
 };

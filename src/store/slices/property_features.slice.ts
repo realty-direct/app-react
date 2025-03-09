@@ -35,10 +35,11 @@ export const createPropertyFeaturesSlice: StateCreator<
                   f.feature_name === feature.feature_name
                 )
             )
-          : [...state.propertyFeatures, { ...feature, id: feature.id || "" }],
+          : [...state.propertyFeatures, feature], // ✅ No `id`, let Supabase handle it
       };
     });
   },
+
   fetchAllPropertyFeatures: async (propertyIds: string[]) => {
     if (propertyIds.length === 0) return; // ✅ Avoid unnecessary query
 

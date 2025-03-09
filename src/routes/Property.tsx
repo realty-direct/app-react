@@ -1,6 +1,7 @@
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { Outlet, useNavigate, useParams } from "react-router";
 
+import { BrokenImageOutlined } from "@mui/icons-material";
 import useRealtyStore from "../store/store";
 
 const Property = () => {
@@ -43,16 +44,21 @@ const Property = () => {
         {
           // TODO: If there is not property image add <BrokenImageOutlinedIcon sx={{ fontSize: 60, color: "grey.600" }} />
         }
-        <Box
-          component="img"
-          alt={`Image of ${property.address}`}
-          sx={{
-            maxHeight: { xs: "200px", md: "300px" },
-            objectFit: "cover",
-            borderRadius: 2,
-            flex: 1,
-          }}
-        />
+        {details?.main_image ? (
+          <Box
+            component="img"
+            src={details.main_image}
+            alt={`Image of ${property.address}`}
+            sx={{
+              maxHeight: { xs: "200px", md: "300px" },
+              objectFit: "cover",
+              borderRadius: 2,
+              flex: 1,
+            }}
+          />
+        ) : (
+          <BrokenImageOutlined sx={{ fontSize: 60, color: "grey.600" }} />
+        )}
 
         {/* ✅ Property Details */}
         <Box sx={{ flex: 2 }}>
