@@ -25,9 +25,7 @@ export interface PropertiesState {
   properties: Property[];
   setProperties: (properties: Property[]) => void;
   fetchUserProperties: (userId: string) => Promise<void>;
-  addProperty: (
-    newProperty: Omit<Property, "id" | "created_at">
-  ) => Promise<string | null>;
+  addProperty: (newProperty: Property) => void;
   deleteProperty: (id: string) => Promise<void>;
   clearProperties: () => void;
 }
@@ -37,10 +35,6 @@ export interface PropertyDetailsState {
   propertyDetails: PropertyDetail[];
   setPropertyDetails: (details: PropertyDetail[]) => void;
   updatePropertyDetail: (
-    propertyId: string,
-    updates: Partial<PropertyDetail>
-  ) => Promise<void>;
-  updatePropertyDetailInStore: (
     propertyId: string,
     updates: Partial<PropertyDetail>
   ) => void;

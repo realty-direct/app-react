@@ -11,36 +11,33 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
   setPropertyDetails: (details: PropertyDetail[]) =>
     set({ propertyDetails: details }),
 
-  updatePropertyDetail: async (
+  updatePropertyDetail: (
     propertyId: string,
     updates: Partial<PropertyDetail>
   ) => {
-    try {
-      const { error } = await supabase
-        .from("property_details")
-        .update(updates)
-        .eq("property_id", propertyId);
+    set((state) => {
+      const existingDetail = state.propertyDetails.find(
+        (detail) => detail.property_id === propertyId
+      );
 
-      if (error) {
-        console.error("❌ Error updating property details:", error);
-        return;
+      if (existingDetail) {
+        // ✅ If detail exists, update it
+        return {
+          propertyDetails: state.propertyDetails.map((detail) =>
+            detail.property_id === propertyId
+              ? { ...detail, ...updates }
+              : detail
+          ),
+        };
       }
-
-      // ✅ Fetch updated details and update Zustand store
-      await get().fetchUserPropertyDetail(propertyId);
-    } catch (error) {
-      console.error("❌ updatePropertyDetail error:", error);
-    }
-  },
-
-  updatePropertyDetailInStore: (propertyId, updates) => {
-    set((state) => ({
-      propertyDetails: state.propertyDetails.map((property) =>
-        property.property_id === propertyId
-          ? { ...property, ...updates }
-          : property
-      ),
-    }));
+      // ✅ If detail doesn't exist, create it
+      return {
+        propertyDetails: [
+          ...state.propertyDetails,
+          { property_id: propertyId, ...updates },
+        ],
+      };
+    });
   },
 
   fetchUserPropertyDetail: async (propertyId: string) => {

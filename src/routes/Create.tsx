@@ -14,16 +14,16 @@ import {
 import type { JSX } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import {
+  fetchPropertyDetailInDb,
+  updatePropertyDetailInDB,
+} from "../database/details";
+import { createPropertyInDB, fetchPropertyFromDB } from "../database/property";
 import useRealtyStore from "../store/store";
 
 export default function Create(): JSX.Element {
   const navigate = useNavigate();
-  const {
-    addProperty,
-    profile,
-    updatePropertyDetail,
-    fetchUserPropertyDetail,
-  } = useRealtyStore(); // ✅ Zustand store
+  const { addProperty, profile, updatePropertyDetail } = useRealtyStore(); // ✅ Zustand store
   const [propertyDetails, setPropertyDetails] = useState<{
     address: string;
     propertyCategory: "residential" | "commercial" | "land" | "rural" | "";
@@ -44,32 +44,50 @@ export default function Create(): JSX.Element {
       return;
     }
 
+    if (!profile) {
+      setError("User not found. Please log in again.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
-    if (!profile) return;
 
     try {
-      // ✅ Step 1: Create the property
-      const propertyId = await addProperty({
+      // ✅ Step 1: Create the property in the database
+      const newProperty = await createPropertyInDB({
         user_id: profile.id,
         address: propertyDetails.address,
         status: "draft",
       });
 
-      if (!propertyId) {
-        setError("Failed to create property. Please try again.");
-        return;
-      }
+      if (!newProperty) throw new Error("Failed to create property.");
 
-      await updatePropertyDetail(propertyId, {
+      // ✅ Step 2: Fetch the property from the database to ensure consistency
+      const fetchedProperty = await fetchPropertyFromDB(newProperty.id);
+
+      if (!fetchedProperty)
+        throw new Error("Failed to fetch property after creation.");
+
+      // ✅ Step 3: Update Zustand with the fetched property
+      addProperty(fetchedProperty);
+
+      // ✅ Step 4: Update property details in the database and get the updated row
+      await updatePropertyDetailInDB(fetchedProperty.id, {
         property_category: propertyDetails.propertyCategory,
       });
 
-      await fetchUserPropertyDetail(propertyId);
+      const fetchedDetails = await fetchPropertyDetailInDb(fetchedProperty.id);
 
-      navigate(`/property/${propertyId}`);
+      if (!fetchedDetails)
+        throw new Error("Failed to update property details.");
+
+      // ✅ Step 5: Update Zustand with new property details
+      await updatePropertyDetail(fetchedProperty.id, fetchedDetails);
+
+      // ✅ Step 6: Navigate to the new property page
+      navigate(`/property/${fetchedProperty.id}`);
     } catch (error) {
-      setError("An unexpected error occurred.");
+      // setError(error.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }

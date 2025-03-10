@@ -30,37 +30,10 @@ export const createPropertiesSlice: StateCreator<PropertiesState> = (
     }
   },
 
-  addProperty: async (
-    newProperty: Omit<Property, "id" | "created_at">
-  ): Promise<string | null> => {
-    try {
-      const { data, error } = await supabase
-        .from("properties")
-        .insert([newProperty])
-        .select("id, created_at")
-        .single();
-
-      if (error || !data) {
-        console.error("❌ Error adding property:", error);
-        return null;
-      }
-
-      // ✅ Explicitly handling `created_at`, ensuring it's always stored correctly
-      const createdProperty: Property = {
-        id: data.id,
-        created_at: data.created_at ?? null, // Ensuring correct typing
-        ...newProperty,
-      };
-
-      set((state) => ({
-        properties: [...state.properties, createdProperty],
-      }));
-
-      return data.id;
-    } catch (error) {
-      console.error("❌ addProperty error:", error);
-      return null;
-    }
+  addProperty: (newProperty: Property): void => {
+    set((state) => ({
+      properties: [...state.properties, newProperty],
+    }));
   },
 
   deleteProperty: async (id: string): Promise<void> => {

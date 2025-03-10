@@ -7,7 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useParams } from "react-router";
-import type { FeatureType } from "../../store/slices/property_features.slice";
+import type { FeatureType } from "../../store/slices/features.slice";
 import useRealtyStore from "../../store/store";
 import type { PropertyFeature } from "../../store/types";
 

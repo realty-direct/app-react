@@ -33,24 +33,24 @@ export type Database = {
       properties: {
         Row: {
           address: string
-          created_at: string | null
+          created_at: string
           id: string
-          status: string | null
-          user_id: string | null
+          status: string
+          user_id: string
         }
         Insert: {
           address: string
-          created_at?: string | null
+          created_at?: string
           id?: string
-          status?: string | null
-          user_id?: string | null
+          status?: string
+          user_id: string
         }
         Update: {
           address?: string
-          created_at?: string | null
+          created_at?: string
           id?: string
-          status?: string | null
-          user_id?: string | null
+          status?: string
+          user_id?: string
         }
         Relationships: []
       }

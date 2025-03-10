@@ -28,7 +28,7 @@ export default function Media() {
     propertyDetails,
     updateImageOrder,
     setMainImage,
-    updatePropertyDetailInStore,
+    updatePropertyDetail: updatePropertyDetailInStore,
     updatePropertyDetail,
     deletePropertyImage,
   } = useRealtyStore();

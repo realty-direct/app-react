@@ -14,7 +14,8 @@ import type { PropertyDetail } from "../../store/types";
 
 export default function Price() {
   const { id: propertyId } = useParams<{ id: string }>();
-  const { propertyDetails, updatePropertyDetailInStore } = useRealtyStore();
+  const { propertyDetails, updatePropertyDetail: updatePropertyDetailInStore } =
+    useRealtyStore();
 
   console.log(propertyDetails);
 

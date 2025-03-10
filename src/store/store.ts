@@ -2,9 +2,9 @@ import type { Session } from "@supabase/supabase-js";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { supabase } from "../database/supabase";
+import { createPropertyDetailsSlice } from "./slices/details.slice";
+import { createPropertyFeaturesSlice } from "./slices/features.slice";
 import { createPropertiesSlice } from "./slices/properties.slice";
-import { createPropertyDetailsSlice } from "./slices/property_details.slice";
-import { createPropertyFeaturesSlice } from "./slices/property_features.slice";
 import { createSessionSlice } from "./slices/session.slice";
 import { createProfileSlice } from "./slices/user.slice";
 import type {
@@ -69,6 +69,7 @@ const restoreSessionAndData = async (session: Session | null) => {
 
     if (propertyIds.length > 0) {
       await store.fetchAllPropertyFeatures(propertyIds);
+      await store.fetchPropertyImages(propertyIds);
     }
   } catch (error) {
     console.error("❌ Error restoring session and fetching data:", error);

@@ -14,7 +14,8 @@ import type { PropertyDetail } from "../../store/types";
 
 export default function DetailsTab() {
   const { id: propertyId } = useParams<{ id: string }>();
-  const { propertyDetails, updatePropertyDetailInStore } = useRealtyStore(); // ✅ Changed function name to avoid confusion
+  const { propertyDetails, updatePropertyDetail: updatePropertyDetailInStore } =
+    useRealtyStore(); // ✅ Changed function name to avoid confusion
 
   const [landUnit, setLandUnit] = useState("m²"); // ✅ Default to m²
   const [houseUnit, setHouseUnit] = useState("m²"); // ✅ Default to m²

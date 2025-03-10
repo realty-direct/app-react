@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { supabase } from "../database/supabase";
+import { fetchUserProfile, signIn } from "../database/auth";
 import { useRealtyStore } from "../store/store";
 
 export default function Signin() {
@@ -17,11 +17,7 @@ export default function Signin() {
     setLoading(true);
 
     // ✅ Sign in the user
-    const { data: session, error: signInError } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { data: session, error: signInError } = await signIn(email, password);
 
     if (signInError || !session.user) {
       setError(signInError?.message || "Login failed");
@@ -33,13 +29,10 @@ export default function Signin() {
 
     try {
       // ✅ Fetch the user profile from `profiles`
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("first_name, last_name")
-        .eq("id", user.id)
-        .single();
+      const { profile, profileError } = await fetchUserProfile(user.id);
 
-      if (profileError) throw new Error("Failed to load user profile");
+      if (profileError || !profile)
+        throw new Error("Failed to load user profile");
 
       setProfile({
         id: user.id,
