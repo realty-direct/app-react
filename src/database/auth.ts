@@ -73,18 +73,10 @@ export const resendConfirmationEmail = async (email: string) => {
   return { error };
 };
 
-// export const fetchUserProfile = async (userId: string) => {
-//     const { data: profile, error: profileError } = await supabase
-//     .from("profiles")
-//     .select("first_name, last_name")
-//     .eq("id", user.id)
-//     .single();
-// }
-
 export const fetchUserProfile = async (userId: string) => {
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("first_name, last_name")
+    .select("*")
     .eq("id", userId)
     .single();
 

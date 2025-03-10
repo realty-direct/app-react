@@ -1,6 +1,13 @@
 import type { Session } from "@supabase/supabase-js";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { fetchUserProfile } from "../database/auth";
+import {
+  fetchPropertyImagesFromDB,
+  fetchUserPropertyDetailsFromDB,
+} from "../database/details";
+import { fetchPropertyFeaturesFromDB } from "../database/features";
+import { fetchAllPropertiesFromDB } from "../database/property";
 import { supabase } from "../database/supabase";
 import { createPropertyDetailsSlice } from "./slices/details.slice";
 import { createPropertyFeaturesSlice } from "./slices/features.slice";
@@ -56,20 +63,39 @@ const restoreSessionAndData = async (session: Session | null) => {
   try {
     store.setSession(session);
 
-    // ✅ Fetch user profile
-    await store.fetchUserProfile(session.user.id);
+    //# Get profile info and add to store
+    const { profile, profileError } = await fetchUserProfile(session.user.id);
 
-    // ✅ Fetch user properties
-    await store.fetchUserProperties(session.user.id);
+    if (profileError) {
+      //TODO: Bigger error should be thrown
+      console.error("❌ Error fetching user profile:", profileError);
+      return;
+    }
 
-    // ✅ Fetch property details **only if properties exist**
-    const propertyIds = store.properties.map((p) => p.id);
+    store.setProfile(profile);
 
-    await store.fetchUserPropertyDetails(propertyIds);
+    //# Get properties and add to store
+
+    const properties = await fetchAllPropertiesFromDB(session.user.id);
+    store.setProperties(properties);
+
+    const propertyIds = properties.map((p) => p.id);
+
+    //# Get property details and add to store
+    const propertyDetails = await fetchUserPropertyDetailsFromDB(
+      session.user.id
+    );
+
+    store.setPropertyDetails(propertyDetails);
 
     if (propertyIds.length > 0) {
-      await store.fetchAllPropertyFeatures(propertyIds);
-      await store.fetchPropertyImages(propertyIds);
+      // ✅ Fetch property features & add to store
+      const propertyFeatures = await fetchPropertyFeaturesFromDB(propertyIds);
+      store.setPropertyFeatures(propertyFeatures);
+
+      // ✅ Fetch property images & update store
+      const propertyImages = await fetchPropertyImagesFromDB(propertyIds);
+      store.setPropertyImages(propertyImages);
     }
   } catch (error) {
     console.error("❌ Error restoring session and fetching data:", error);

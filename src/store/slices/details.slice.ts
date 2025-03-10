@@ -1,4 +1,5 @@
 import type { StateCreator } from "zustand";
+import { Json } from "../../database/database_types";
 import { deletePropertyImage, supabase } from "../../database/supabase";
 import type { PropertyDetail, PropertyDetailsState } from "../types";
 
@@ -11,33 +12,27 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
   setPropertyDetails: (details: PropertyDetail[]) =>
     set({ propertyDetails: details }),
 
+  createPropertyDetail: (propertyId: string, propertyCategory: string) => {
+    set((state) => ({
+      propertyDetails: [
+        ...state.propertyDetails,
+        {
+          property_id: propertyId,
+          property_category: propertyCategory,
+        } as PropertyDetail, // ✅ Type assertion to satisfy TypeScript
+      ],
+    }));
+  },
+
   updatePropertyDetail: (
     propertyId: string,
     updates: Partial<PropertyDetail>
   ) => {
-    set((state) => {
-      const existingDetail = state.propertyDetails.find(
-        (detail) => detail.property_id === propertyId
-      );
-
-      if (existingDetail) {
-        // ✅ If detail exists, update it
-        return {
-          propertyDetails: state.propertyDetails.map((detail) =>
-            detail.property_id === propertyId
-              ? { ...detail, ...updates }
-              : detail
-          ),
-        };
-      }
-      // ✅ If detail doesn't exist, create it
-      return {
-        propertyDetails: [
-          ...state.propertyDetails,
-          { property_id: propertyId, ...updates },
-        ],
-      };
-    });
+    set((state) => ({
+      propertyDetails: state.propertyDetails.map((detail) =>
+        detail.property_id === propertyId ? { ...detail, ...updates } : detail
+      ),
+    }));
   },
 
   fetchUserPropertyDetail: async (propertyId: string) => {
@@ -64,24 +59,6 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
       }));
     } catch (error) {
       console.error("❌ fetchUserPropertyDetail error:", error);
-    }
-  },
-
-  fetchUserPropertyDetails: async (propertyIds: string[]): Promise<void> => {
-    try {
-      const { data, error } = await supabase
-        .from("property_details")
-        .select("*")
-        .in("property_id", propertyIds);
-
-      if (error) {
-        console.error("❌ Error fetching property details:", error);
-        return;
-      }
-
-      set({ propertyDetails: data || [] });
-    } catch (error) {
-      console.error("❌ fetchUserPropertyDetails error:", error);
     }
   },
 
@@ -131,33 +108,19 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
     // ✅ Save main image to Supabase
     get().updatePropertyDetail(propertyId, { main_image: mainImageUrl });
   },
-  fetchPropertyImages: async (propertyIds: string[]) => {
-    try {
-      const { data, error } = await supabase
-        .from("property_details")
-        .select("property_id, images")
-        .in("property_id", propertyIds);
-
-      if (error) {
-        console.error("❌ Error fetching images:", error);
-        return;
-      }
-
-      // ✅ Update Zustand store correctly using `set()`
-      set((state) => ({
-        propertyDetails: state.propertyDetails.map((property) => {
-          const propertyData = data.find(
-            (img) => img.property_id === property.property_id
-          );
-          return propertyData
-            ? { ...property, images: propertyData.images || [] }
-            : property;
-        }),
-      }));
-    } catch (error) {
-      console.error("❌ fetchPropertyImages error:", error);
-    }
+  setPropertyImages: (data: { property_id: string; images: Json | null }[]) => {
+    set((state) => ({
+      propertyDetails: state.propertyDetails.map((property) => {
+        const propertyData = data.find(
+          (img) => img.property_id === property.property_id
+        );
+        return propertyData
+          ? { ...property, images: (propertyData.images as Json) || [] } // ✅ Ensure images type matches Json
+          : property;
+      }),
+    }));
   },
+
   deletePropertyImage: async (
     propertyId: string,
     imageUrl: string

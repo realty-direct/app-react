@@ -12,24 +12,6 @@ export const createPropertiesSlice: StateCreator<PropertiesState> = (
 
   clearProperties: () => set({ properties: [] }),
 
-  fetchUserProperties: async (userId: string) => {
-    try {
-      const { data: properties, error } = await supabase
-        .from("properties")
-        .select("*")
-        .eq("user_id", userId);
-
-      if (error) {
-        console.error("❌ Error fetching properties:", error);
-        return;
-      }
-
-      set({ properties });
-    } catch (error) {
-      console.error("❌ fetchUserProperties error:", error);
-    }
-  },
-
   addProperty: (newProperty: Property): void => {
     set((state) => ({
       properties: [...state.properties, newProperty],

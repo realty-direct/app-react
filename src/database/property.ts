@@ -35,3 +35,17 @@ export const fetchPropertyFromDB = async (
 
   return data; // ✅ Ensures correct typing
 };
+
+export const fetchAllPropertiesFromDB = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("properties")
+    .select("*")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("❌ Error fetching properties:", error);
+    return [];
+  }
+
+  return data;
+};

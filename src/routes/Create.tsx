@@ -23,7 +23,7 @@ import useRealtyStore from "../store/store";
 
 export default function Create(): JSX.Element {
   const navigate = useNavigate();
-  const { addProperty, profile, updatePropertyDetail } = useRealtyStore(); // ✅ Zustand store
+  const { addProperty, profile, createPropertyDetail } = useRealtyStore(); // ✅ Zustand store
   const [propertyDetails, setPropertyDetails] = useState<{
     address: string;
     propertyCategory: "residential" | "commercial" | "land" | "rural" | "";
@@ -82,7 +82,11 @@ export default function Create(): JSX.Element {
         throw new Error("Failed to update property details.");
 
       // ✅ Step 5: Update Zustand with new property details
-      await updatePropertyDetail(fetchedProperty.id, fetchedDetails);
+
+      createPropertyDetail(
+        fetchedProperty.id,
+        propertyDetails.propertyCategory
+      );
 
       // ✅ Step 6: Navigate to the new property page
       navigate(`/property/${fetchedProperty.id}`);

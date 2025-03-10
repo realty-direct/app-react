@@ -11,7 +11,7 @@ import type { FeatureType } from "../../store/slices/features.slice";
 import useRealtyStore from "../../store/store";
 import type { PropertyFeature } from "../../store/types";
 
-// Strictly typed feature categories (matches Supabase)
+// ✅ All original features retained
 const features: Record<FeatureType, string[]> = {
   inside: [
     "Broadband Connection",
@@ -69,8 +69,18 @@ export default function FeaturesTab() {
 
   if (!propertyId) return <Typography>No property selected.</Typography>;
 
-  const handleFeatureToggle = (feature: Omit<PropertyFeature, "id">) => {
-    toggleFeatureSelection(propertyId, feature); // ✅ No need to add `id`
+  // ✅ Ensure correct feature structure is passed to Zustand
+  const handleFeatureToggle = (
+    featureName: string,
+    featureType: FeatureType
+  ) => {
+    const feature: Omit<PropertyFeature, "id"> = {
+      property_id: propertyId,
+      feature_type: featureType,
+      feature_name: featureName,
+    };
+
+    toggleFeatureSelection(propertyId, feature);
   };
 
   return (
@@ -86,13 +96,9 @@ export default function FeaturesTab() {
           return (
             <Grid2 key={category}>
               <Typography variant="h6" gutterBottom>
-                {category === "inside"
-                  ? "Inside"
-                  : category === "heating_cooling"
-                    ? "Heating & Cooling"
-                    : category === "eco_friendly"
-                      ? "Eco-Friendly"
-                      : "Outdoor"}
+                {category
+                  .replace("_", " ") // ✅ Format category name properly
+                  .replace(/\b\w/g, (char) => char.toUpperCase())}
               </Typography>
               <Divider sx={{ mb: 1 }} />
               {items.map((item) => {
@@ -100,19 +106,13 @@ export default function FeaturesTab() {
                   (f) => f.property_id === propertyId && f.feature_name === item
                 );
 
-                const feature: Omit<PropertyFeature, "id"> = {
-                  property_id: propertyId,
-                  feature_type: featureType,
-                  feature_name: item,
-                };
-
                 return (
                   <FormControlLabel
                     key={item}
                     control={
                       <Checkbox
                         checked={isChecked}
-                        onChange={() => handleFeatureToggle(feature)}
+                        onChange={() => handleFeatureToggle(item, featureType)}
                       />
                     }
                     label={item}

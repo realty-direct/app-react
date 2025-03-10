@@ -39,3 +39,38 @@ export const fetchPropertyDetailInDb = async (
 
   return data; // ✅ Ensures correct typing
 };
+
+export const fetchUserPropertyDetailsFromDB = async (
+  userId: string
+): Promise<PropertyDetail[]> => {
+  const { data, error } = await supabase
+    .from("property_details")
+    .select("*")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("❌ Error fetching property details:", error);
+    return [];
+  }
+
+  return data || [];
+};
+
+export const fetchPropertyImagesFromDB = async (propertyIds: string[]) => {
+  if (propertyIds.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from("property_details")
+    .select("property_id, images")
+    .in("property_id", propertyIds);
+
+  if (error) {
+    console.error("❌ Error fetching images:", error);
+    return [];
+  }
+
+  return data.map((item) => ({
+    property_id: item.property_id,
+    images: item.images ?? null, // ✅ Ensure correct `Json | null` type
+  }));
+};
