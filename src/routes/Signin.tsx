@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { fetchUserProfile, signIn } from "../database/auth";
-import { useRealtyStore } from "../store/store";
+import { signIn } from "../database/auth";
 
 export default function Signin() {
   const navigate = useNavigate();
-  const { fetchUserProperties, setProfile } = useRealtyStore(); // Zustand session state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -25,33 +23,8 @@ export default function Signin() {
       return;
     }
 
-    const user = session.user; // ✅ Get the authenticated user
-
-    try {
-      // ✅ Fetch the user profile from `profiles`
-      const { profile, profileError } = await fetchUserProfile(user.id);
-
-      if (profileError || !profile)
-        throw new Error("Failed to load user profile");
-
-      setProfile({
-        id: user.id,
-        email: user.email ?? "",
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-      });
-
-      // ✅ Fetch properties
-      await fetchUserProperties(user.id);
-
-      // ✅ TypeScript **automatically infers** `properties` as `Property[]`
-
-      navigate("/"); // ✅ Redirect after successful login
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setLoading(false); // ✅ Always reset loading state
-    }
+    setLoading(false); // ✅ Always reset loading state
+    navigate("/"); // ✅ Redirect after successful login
   };
 
   return (
