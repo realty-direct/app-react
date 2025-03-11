@@ -1,27 +1,46 @@
-import type { TablesInsert } from "./database_types";
-import { supabase } from "./supabase";
+import type { TablesInsert } from "../database/database_types";
+import { supabase } from "../database/supabase";
 
-// ✅ Fetch property features from Supabase
-export const fetchPropertyFeaturesFromDB = async (propertyIds: string[]) => {
+export const fetchUserPropertiesFeaturesFromDB = async (
+  propertyIds: string[]
+) => {
+  if (propertyIds.length === 0) return [];
+
   const { data, error } = await supabase
     .from("property_features")
     .select("*")
-    .in("property_id", propertyIds);
+    .in("property_id", propertyIds); // ✅ Fetch all at once
 
   if (error) {
-    console.error("❌ Error fetching features:", error);
+    console.error("❌ Error fetching multiple property features:", error);
     return [];
   }
 
   return data;
 };
 
-// ✅ Save features to Supabase in one batch
-export const savePropertyFeaturesToDB = async (
+// ✅ Fetch property features from Supabase
+export const fetchUserPropertyFeaturesFromDB = async (propertyId: string) => {
+  const { data, error } = await supabase
+    .from("property_features")
+    .select("*")
+    .eq("property_id", propertyId);
+
+  if (error) {
+    console.error("❌ Error fetching property features:", error);
+    return [];
+  }
+
+  return data;
+};
+
+// ✅ Update property features in Supabase
+export const updatePropertyFeatureInDB = async (
   propertyId: string,
   features: Omit<TablesInsert<"property_features">, "id">[]
 ) => {
   try {
+    // Fetch existing features
     const { data: existingFeatures, error: fetchError } = await supabase
       .from("property_features")
       .select("id, feature_name")
@@ -36,6 +55,7 @@ export const savePropertyFeaturesToDB = async (
       existingFeatures.map((f) => f.feature_name)
     );
 
+    // Insert new features
     const newFeatures = features
       .filter((f) => !existingFeatureNames.has(f.feature_name))
       .map((f) => ({
@@ -44,6 +64,7 @@ export const savePropertyFeaturesToDB = async (
         feature_type: f.feature_type,
       }));
 
+    // Remove unchecked features
     const featuresToRemove = existingFeatures
       .filter(
         (f) =>
@@ -62,10 +83,10 @@ export const savePropertyFeaturesToDB = async (
       await supabase.from("property_features").insert(newFeatures);
     }
 
-    console.log("✅ Property features saved successfully!");
+    console.log("✅ Property features updated successfully!");
     return true;
   } catch (error) {
-    console.error("❌ savePropertyFeaturesToDB error:", error);
+    console.error("❌ updatePropertyFeatureInDB error:", error);
     return false;
   }
 };

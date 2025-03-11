@@ -17,7 +17,10 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useParams } from "react-router";
-import { uploadPropertyImage } from "../../database/supabase";
+import {
+  deletePropertyImageFromDB,
+  uploadPropertyImage,
+} from "../../database/supabase";
 import useRealtyStore from "../../store/store";
 
 export default function Media() {
@@ -26,11 +29,10 @@ export default function Media() {
 
   const {
     propertyDetails,
-    updateImageOrder,
+
     setMainImage,
     updatePropertyDetail: updatePropertyDetailInStore,
     updatePropertyDetail,
-    deletePropertyImage,
   } = useRealtyStore();
 
   const propertyDetail = propertyDetails.find(
@@ -104,7 +106,7 @@ export default function Media() {
 
     setLoading(true);
 
-    const success = await deletePropertyImage(propertyId, imageUrl);
+    const success = await deletePropertyImageFromDB(propertyId, imageUrl);
     if (success) {
       const updatedImages = images.filter(
         (img): img is { url: string } =>
@@ -211,13 +213,18 @@ export default function Media() {
       />
 
       <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
-        Upload floor plan(s)
+        Floor Plans
+      </Typography>
+
+      <Typography sx={{ mb: 2 }}>
+        Give potential buyers a real feel for the property layout. Add your
+        floor plans here, or let us organise one for you.
       </Typography>
 
       <Paper
         sx={{ p: 3, textAlign: "center", border: "1px dashed gray", mb: 3 }}
       >
-        <Typography variant="subtitle1">Drop your image here</Typography>
+        <Typography variant="subtitle1">{"Upload floorplan(s)"}</Typography>
         <input
           type="file"
           multiple

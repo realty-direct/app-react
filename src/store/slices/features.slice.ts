@@ -1,5 +1,4 @@
 import type { StateCreator } from "zustand";
-import { savePropertyFeaturesToDB } from "../../database/features"; // ✅ Import Supabase functions
 import type { PropertyFeature, PropertyFeaturesState } from "../types";
 
 export type FeatureType =
@@ -13,8 +12,12 @@ export const createPropertyFeaturesSlice: StateCreator<
 > = (set, get) => ({
   propertyFeatures: [],
 
-  setPropertyFeatures: (features: PropertyFeature[]) =>
-    set({ propertyFeatures: features }),
+  // ✅ Updates only the relevant property’s features
+  setPropertyFeatures: (features: PropertyFeature[]) => {
+    set(() => ({
+      propertyFeatures: features, // ✅ Store all features at once
+    }));
+  },
 
   clearPropertyFeatures: () => set({ propertyFeatures: [] }),
 
@@ -38,25 +41,8 @@ export const createPropertyFeaturesSlice: StateCreator<
                   f.feature_name === feature.feature_name
                 )
             )
-          : [
-              ...state.propertyFeatures,
-              { ...feature, id: crypto.randomUUID() },
-            ], // ✅ Temporary `id` for Zustand
+          : [...state.propertyFeatures, feature],
       };
     });
-  },
-
-  // ✅ Save all features to Supabase when "Continue" is clicked
-  savePropertyFeatures: async (propertyId: string) => {
-    const { propertyFeatures } = get();
-    const featuresForProperty = propertyFeatures.filter(
-      (f) => f.property_id === propertyId
-    );
-
-    const success = await savePropertyFeaturesToDB(
-      propertyId,
-      featuresForProperty
-    );
-    if (success) console.log("✅ Features synced with Supabase!");
   },
 });

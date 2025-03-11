@@ -1,12 +1,20 @@
 import type { Session } from "@supabase/supabase-js";
-import type { Database, Json } from "../database/database_types";
+import type { Database } from "../database/database_types";
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Property = Database["public"]["Tables"]["properties"]["Row"];
-export type PropertyDetail =
-  Database["public"]["Tables"]["property_details"]["Row"];
+export type PropertyDetail = Omit<
+  Database["public"]["Tables"]["property_details"]["Row"],
+  "images"
+> & {
+  images:
+    | Database["public"]["Tables"]["property_details"]["Row"]["images"]
+    | null;
+};
 export type PropertyFeature =
   Database["public"]["Tables"]["property_features"]["Row"];
+
+// ✅ Define Zustand store types
 
 export interface ProfileState {
   profile: Profile | null;
@@ -24,43 +32,32 @@ export interface PropertiesState {
   properties: Property[];
   setProperties: (properties: Property[]) => void;
   addProperty: (newProperty: Property) => void;
-  deleteProperty: (id: string) => Promise<void>;
   clearProperties: () => void;
 }
 
-// ✅ Updated PropertyDetailsState to support multiple property details
+// ✅ PropertyDetailsState supports multiple property details
 export interface PropertyDetailsState {
   propertyDetails: PropertyDetail[];
   setPropertyDetails: (details: PropertyDetail[]) => void;
-  createPropertyDetail: (propertyId: string, propertyCategory: string) => void;
   updatePropertyDetail: (
     propertyId: string,
     updates: Partial<PropertyDetail>
   ) => void;
-  fetchUserPropertyDetail: (propertyId: string) => Promise<void>;
-  savePropertyDetails: (propertyId: string) => Promise<void>;
-  updateImageOrder: (
-    propertyId: string,
-    images: {
-      url: string;
-    }[]
+  createPropertyDetail: (propertyId: string, propertyCategory: string) => void;
+
+  setPropertyImages: (
+    data: { property_id: string; images: PropertyDetail["images"] }[]
   ) => void;
-  setPropertyImages: (data: { property_id: string; images: Json[] }[]) => void;
   setMainImage: (propertyId: string, mainImageUrl: string) => void;
-  deletePropertyImage: (
-    propertyId: string,
-    imageUrl: string
-  ) => Promise<boolean>; // ✅ Ensure correct return type
 }
 
-// ✅ Define Zustand State for Property Features
+// ✅ Define Zustand Store for Property Features
 export interface PropertyFeaturesState {
-  propertyFeatures: PropertyFeature[];
+  propertyFeatures: (PropertyFeature | Omit<PropertyFeature, "id">)[];
   setPropertyFeatures: (features: PropertyFeature[]) => void;
   clearPropertyFeatures: () => void;
   toggleFeatureSelection: (
     propertyId: string,
-    feature: Omit<PropertyFeature, "id"> // ✅ Accepts features without `id`
+    feature: Omit<PropertyFeature, "id">
   ) => void;
-  savePropertyFeatures: (propertyId: string) => Promise<void>;
 }

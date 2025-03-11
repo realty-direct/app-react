@@ -1,6 +1,14 @@
 import { Alert, Box, Button, Grid2, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
 import { useParams } from "react-router"; // ✅ Added useParams
+import {
+  fetchPropertyDetailInDb,
+  updatePropertyDetailInDB,
+} from "../../database/details";
+import {
+  fetchUserPropertyFeaturesFromDB,
+  updatePropertyFeatureInDB,
+} from "../../database/features";
 import useRealtyStore from "../../store/store"; // ✅ Import Zustand store
 import Contact from "./Contact";
 import Description from "./Description";
@@ -15,21 +23,64 @@ import Summary from "./Summary";
 
 export default function Edit() {
   const { id: propertyId } = useParams(); // ✅ Get the property ID
-  const { savePropertyDetails, savePropertyFeatures } = useRealtyStore(); // ✅ Zustand function
+  const {
+    updatePropertyDetail,
+    setPropertyFeatures,
+    propertyDetails,
+    propertyFeatures,
+  } = useRealtyStore(); // ✅ Zustand function
   const [tabValue, setTabValue] = useState(0);
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+  const propertyDetail = propertyDetails.find(
+    (p) => p.property_id === propertyId
+  );
+
+  const propertyFeature = propertyFeatures.filter(
+    (p) => p.property_id === propertyId
+  );
+
+  // TODO: Inspections save logic needs to be added here.
+
+  // NOTE: On tab change we update the DB. This only runs on tab change.
+  const handleTabChange = async (
+    _event: React.SyntheticEvent,
+    newValue: number
+  ) => {
     if (tabValue === 1 && propertyId) {
-      savePropertyFeatures(propertyId);
+      await savePropertyFeatures(propertyId);
     }
     setTabValue(newValue);
   };
 
+  // NOTE: On continue we update the DB.
   const handleContinue = async () => {
-    if (!propertyId) return;
+    if (!propertyDetail || !propertyId) return;
 
-    await savePropertyDetails(propertyId); // ✅ Save to Supabase on Continue
-    await savePropertyFeatures(propertyId); // ✅ Save features
+    // First we update the DB with our changes from store
+
+    await updatePropertyDetailInDB(propertyId, propertyDetail);
+
+    if (propertyFeature) {
+      await updatePropertyFeatureInDB(propertyId, propertyFeature);
+    }
+
+    // We then fetch these changes
+
+    const propertyDetails = await fetchPropertyDetailInDb(propertyId);
+
+    const propertyFeatures = await fetchUserPropertyFeaturesFromDB(propertyId);
+
+    // We then sync the store with the DB
+
+    if (propertyDetails) {
+      updatePropertyDetail(propertyId, propertyDetails);
+    }
+
+    if (propertyFeatures) {
+      setPropertyFeatures(propertyId, propertyFeatures);
+    }
+
+    if (propertyFeatures) await savePropertyFeatures(propertyId); // ✅ Save features
 
     setTabValue((prev) => prev + 1);
   };

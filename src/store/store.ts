@@ -6,7 +6,8 @@ import {
   fetchPropertyImagesFromDB,
   fetchUserPropertyDetailsFromDB,
 } from "../database/details";
-import { fetchPropertyFeaturesFromDB } from "../database/features";
+
+import { fetchUserPropertiesFeaturesFromDB } from "../database/features";
 import { fetchAllPropertiesFromDB } from "../database/property";
 import { supabase } from "../database/supabase";
 import { createPropertyDetailsSlice } from "./slices/details.slice";
@@ -90,7 +91,8 @@ const restoreSessionAndData = async (session: Session | null) => {
 
     if (propertyIds.length > 0) {
       // ✅ Fetch property features & add to store
-      const propertyFeatures = await fetchPropertyFeaturesFromDB(propertyIds);
+      const propertyFeatures =
+        await fetchUserPropertiesFeaturesFromDB(propertyIds);
       store.setPropertyFeatures(propertyFeatures);
 
       // ✅ Fetch property images & update store

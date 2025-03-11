@@ -1,5 +1,6 @@
 import type { PropertyDetail } from "../store/types";
 import type { TablesUpdate } from "./database_types";
+import { logErrorToDB } from "./logs";
 import { supabase } from "./supabase";
 
 type PropertyDetailUpdate = TablesUpdate<"property_details">; // ✅ Ensure type safety
@@ -34,6 +35,7 @@ export const fetchPropertyDetailInDb = async (
 
   if (error) {
     console.error("❌ Error fetching property details:", error);
+    logErrorToDB(error);
     return null;
   }
 
