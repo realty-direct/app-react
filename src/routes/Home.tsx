@@ -6,6 +6,11 @@ import {
   CardActions,
   CardContent,
   CardMedia,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   TextField,
   Typography,
 } from "@mui/material";
@@ -20,6 +25,12 @@ export default function Home(): JSX.Element {
     useRealtyStore();
   const [searchQuery, setSearchQuery] = useState("");
 
+  // ✅ State for delete confirmation popup
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(
+    null
+  );
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
@@ -28,12 +39,30 @@ export default function Home(): JSX.Element {
     property.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleDeleteListing = async (id: string) => {
-    await deleteProperty(id);
+  // ✅ Open delete confirmation dialog
+  const handleOpenDeleteDialog = (id: string) => {
+    setSelectedPropertyId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  // ✅ Close delete dialog
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setSelectedPropertyId(null);
+  };
+
+  // ✅ Delete the property after confirmation
+  const handleDeleteConfirmed = async () => {
+    if (!selectedPropertyId) return;
+
+    await deleteProperty(selectedPropertyId);
+
     if (profile?.id) {
-      const properties = await fetchAllPropertiesFromDB(profile.id);
-      setProperties(properties);
+      const updatedProperties = await fetchAllPropertiesFromDB(profile.id);
+      setProperties(updatedProperties);
     }
+
+    handleCloseDeleteDialog(); // ✅ Close the dialog after deletion
   };
 
   const handleAddProperty = () => {
@@ -173,7 +202,7 @@ export default function Home(): JSX.Element {
                       <Button
                         size="small"
                         color="error"
-                        onClick={() => handleDeleteListing(property.id)}
+                        onClick={() => handleOpenDeleteDialog(property.id)}
                       >
                         <Delete />
                       </Button>
@@ -184,6 +213,30 @@ export default function Home(): JSX.Element {
             })}
         </Box>
       )}
+
+      {/* ✅ Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Delete Property?</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete this property? This action cannot be
+            undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteConfirmed} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
