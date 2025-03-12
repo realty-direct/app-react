@@ -49,3 +49,15 @@ export const fetchAllPropertiesFromDB = async (userId: string) => {
 
   return data;
 };
+
+export const deleteProperty = async (propertyId: string) => {
+  const { error } = await supabase
+    .from("properties")
+    .delete()
+    .eq("id", propertyId);
+
+  if (error) {
+    console.error("❌ Error deleting property:", error);
+    throw new Error("Error deleting property");
+  }
+};

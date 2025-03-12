@@ -11,11 +11,13 @@ import {
 } from "@mui/material";
 import { type JSX, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { deleteProperty, fetchAllPropertiesFromDB } from "../database/property";
 import useRealtyStore from "../store/store";
 
 export default function Home(): JSX.Element {
   const navigate = useNavigate();
-  const { properties, propertyDetails } = useRealtyStore();
+  const { properties, propertyDetails, profile, setProperties } =
+    useRealtyStore();
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,8 +28,12 @@ export default function Home(): JSX.Element {
     property.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleDeleteListing = (id: string) => {
-    navigate(`/edit-listing/${id}`);
+  const handleDeleteListing = async (id: string) => {
+    await deleteProperty(id);
+    if (profile?.id) {
+      const properties = await fetchAllPropertiesFromDB(profile.id);
+      setProperties(properties);
+    }
   };
 
   const handleAddProperty = () => {
