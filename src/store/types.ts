@@ -44,6 +44,7 @@ export interface PropertyDetailsState {
     updates: Partial<PropertyDetail>
   ) => void;
   createPropertyDetail: (propertyId: string, propertyCategory: string) => void;
+  updateImageOrder: (propertyId: string, images: { url: string }[]) => void;
 
   setPropertyImages: (
     data: { property_id: string; images: PropertyDetail["images"] }[]

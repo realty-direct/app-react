@@ -4,11 +4,11 @@ import { supabase } from "./supabase";
 
 export const createPropertyInDB = async (
   property: Omit<TablesInsert<"properties">, "id" | "created_at">
-) => {
+): Promise<Property | null> => {
   const { data, error } = await supabase
     .from("properties")
     .insert([property])
-    .select("id, created_at")
+    .select("*")
     .single();
 
   if (error || !data) {

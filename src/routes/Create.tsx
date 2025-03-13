@@ -14,11 +14,8 @@ import {
 import type { JSX } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import {
-  fetchPropertyDetailInDb,
-  updatePropertyDetailInDB,
-} from "../database/details";
-import { createPropertyInDB, fetchPropertyFromDB } from "../database/property";
+import { updatePropertyDetailInDB } from "../database/details";
+import { createPropertyInDB } from "../database/property";
 import useRealtyStore from "../store/store";
 
 export default function Create(): JSX.Element {
@@ -62,34 +59,24 @@ export default function Create(): JSX.Element {
 
       if (!newProperty) throw new Error("Failed to create property.");
 
-      // ✅ Step 2: Fetch the property from the database to ensure consistency
-      const fetchedProperty = await fetchPropertyFromDB(newProperty.id);
-
-      if (!fetchedProperty)
-        throw new Error("Failed to fetch property after creation.");
-
       // ✅ Step 3: Update Zustand with the fetched property
-      addProperty(fetchedProperty);
+      addProperty(newProperty);
 
       // ✅ Step 4: Update property details in the database and get the updated row
-      await updatePropertyDetailInDB(fetchedProperty.id, {
-        property_category: propertyDetails.propertyCategory,
-      });
-
-      const fetchedDetails = await fetchPropertyDetailInDb(fetchedProperty.id);
-
-      if (!fetchedDetails)
-        throw new Error("Failed to update property details.");
-
-      // ✅ Step 5: Update Zustand with new property details
-
-      createPropertyDetail(
-        fetchedProperty.id,
-        propertyDetails.propertyCategory
+      const fetchedPropertyDetail = await updatePropertyDetailInDB(
+        newProperty.id,
+        {
+          property_category: propertyDetails.propertyCategory,
+        }
       );
 
+      if (!fetchedPropertyDetail)
+        throw new Error("Failed to update property details.");
+
+      createPropertyDetail(newProperty.id, propertyDetails.propertyCategory);
+
       // ✅ Step 6: Navigate to the new property page
-      navigate(`/property/${fetchedProperty.id}`);
+      navigate(`/property/${newProperty.id}`);
     } catch (error) {
       // setError(error.message || "An unexpected error occurred.");
     } finally {

@@ -17,8 +17,6 @@ export default function Price() {
   const { propertyDetails, updatePropertyDetail: updatePropertyDetailInStore } =
     useRealtyStore();
 
-  console.log(propertyDetails);
-
   // Get the correct property details
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId

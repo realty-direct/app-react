@@ -6,7 +6,7 @@ import {
   updatePropertyDetailInDB,
 } from "../../database/details";
 import {
-  fetchUserPropertyFeaturesFromDB,
+  fetchUserPropertiesFeaturesFromDB,
   updatePropertyFeatureInDB,
 } from "../../database/features";
 import useRealtyStore from "../../store/store"; // ✅ Import Zustand store
@@ -16,7 +16,7 @@ import Details from "./Details";
 import Features from "./Features";
 import Inspections from "./Inspections";
 import ListingEnhancements from "./ListingEnhancements";
-import Media from "./Media";
+import Media from "./Media/Media";
 import Ownership from "./Ownership";
 import Price from "./Price";
 import Summary from "./Summary";
@@ -46,8 +46,8 @@ export default function Edit() {
     _event: React.SyntheticEvent,
     newValue: number
   ) => {
-    if (tabValue === 1 && propertyId) {
-      await savePropertyFeatures(propertyId);
+    if (tabValue === 1 && propertyId && propertyFeature.length > 0) {
+      await updatePropertyFeatureInDB(propertyId, propertyFeature);
     }
     setTabValue(newValue);
   };
@@ -56,31 +56,27 @@ export default function Edit() {
   const handleContinue = async () => {
     if (!propertyDetail || !propertyId) return;
 
-    // First we update the DB with our changes from store
-
+    // ✅ First, update the DB with changes from Zustand
     await updatePropertyDetailInDB(propertyId, propertyDetail);
 
-    if (propertyFeature) {
+    if (propertyFeature.length > 0) {
       await updatePropertyFeatureInDB(propertyId, propertyFeature);
     }
 
-    // We then fetch these changes
+    // ✅ Fetch the latest data from the DB
+    const updatedPropertyDetails = await fetchPropertyDetailInDb(propertyId);
+    const updatedPropertyFeatures = await fetchUserPropertiesFeaturesFromDB([
+      propertyId,
+    ]);
 
-    const propertyDetails = await fetchPropertyDetailInDb(propertyId);
-
-    const propertyFeatures = await fetchUserPropertyFeaturesFromDB(propertyId);
-
-    // We then sync the store with the DB
-
-    if (propertyDetails) {
-      updatePropertyDetail(propertyId, propertyDetails);
+    // ✅ Sync Zustand store with updated DB data
+    if (updatedPropertyDetails) {
+      updatePropertyDetail(propertyId, updatedPropertyDetails);
     }
 
-    if (propertyFeatures) {
-      setPropertyFeatures(propertyId, propertyFeatures);
+    if (updatedPropertyFeatures.length > 0) {
+      setPropertyFeatures(updatedPropertyFeatures);
     }
-
-    if (propertyFeatures) await savePropertyFeatures(propertyId); // ✅ Save features
 
     setTabValue((prev) => prev + 1);
   };

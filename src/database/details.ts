@@ -8,12 +8,12 @@ type PropertyDetailUpdate = TablesUpdate<"property_details">; // ✅ Ensure type
 export const updatePropertyDetailInDB = async (
   propertyId: string,
   updates: Partial<PropertyDetailUpdate> // ✅ Only allows valid update fields
-): Promise<void> => {
+): Promise<PropertyDetail | null> => {
   const { data, error } = await supabase
     .from("property_details")
     .update(updates)
     .eq("property_id", propertyId)
-    .select()
+    .select("*")
     .single();
 
   if (error || !data) {
