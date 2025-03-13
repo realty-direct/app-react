@@ -24,7 +24,13 @@ export const checkUserSession = async () => {
 };
 
 export const uploadPropertyImage = async (propertyId: string, file: File) => {
-  const filePath = `${propertyId}/${Date.now()}-${file.name.replace(/\s+/g, "-").toLowerCase()}`;
+  // ✅ Create a unique filename
+  const safeFileName = file.name
+    .replace(/\s+/g, "-") // Replace spaces with dashes
+    .replace(/[^a-zA-Z0-9.-]/g, "") // Remove special characters
+    .toLowerCase();
+
+  const filePath = `${propertyId}/${crypto.randomUUID()}-${safeFileName}`; // 🔥 Ensure uniqueness
 
   // ✅ Use the exact bucket name
   const { data, error } = await supabase.storage

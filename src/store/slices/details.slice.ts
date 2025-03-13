@@ -37,24 +37,20 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
   updateImageOrder: (propertyId: string, images: { url: string }[]) => {
     set((state) => ({
       propertyDetails: state.propertyDetails.map((property) =>
-        property.property_id === propertyId ? { ...property, images } : property
-      ),
-    }));
-
-    get().updatePropertyDetail(propertyId, { images });
-  },
-
-  setMainImage: (propertyId: string, mainImageUrl: string) => {
-    set((state) => ({
-      propertyDetails: state.propertyDetails.map((property) =>
         property.property_id === propertyId
-          ? { ...property, main_image: mainImageUrl }
+          ? { ...property, images, main_image: images[0]?.url || null } // ✅ Ensure first image is main
           : property
       ),
     }));
-
-    get().updatePropertyDetail(propertyId, { main_image: mainImageUrl });
   },
+  deletePropertyDetail: (propertyId: string) => {
+    set((state) => ({
+      propertyDetails: state.propertyDetails.filter(
+        (detail) => detail.property_id !== propertyId
+      ),
+    }));
+  },
+
   setPropertyImages: (data: { property_id: string; images: Json | null }[]) => {
     set((state) => ({
       propertyDetails: state.propertyDetails.map((property) => {

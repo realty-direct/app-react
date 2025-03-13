@@ -58,6 +58,16 @@ export const fetchUserPropertyDetailsFromDB = async (
   return data || [];
 };
 
+export const updatePropertyImagesInDB = async (
+  propertyId: string,
+  images: { url: string }[]
+): Promise<PropertyDetail | null> => {
+  return await updatePropertyDetailInDB(propertyId, {
+    images,
+    main_image: images.length > 0 ? images[0].url : null, // ✅ Clears main_image if no images
+  });
+};
+
 export const fetchPropertyImagesFromDB = async (propertyIds: string[]) => {
   if (propertyIds.length === 0) return [];
 

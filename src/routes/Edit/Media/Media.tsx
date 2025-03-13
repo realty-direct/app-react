@@ -3,7 +3,7 @@ import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useParams } from "react-router";
-import { updatePropertyDetailInDB } from "../../../database/details";
+import { updatePropertyImagesInDB } from "../../../database/details";
 import {
   deletePropertyImageFromDB,
   uploadPropertyImage,
@@ -15,12 +15,8 @@ export default function Media() {
   const { id } = useParams<{ id: string }>();
   const propertyId = id ?? "";
 
-  const {
-    propertyDetails,
-    updateImageOrder,
-    setMainImage,
-    updatePropertyDetail,
-  } = useRealtyStore();
+  const { propertyDetails, updateImageOrder, updatePropertyDetail } =
+    useRealtyStore();
 
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId
@@ -69,24 +65,31 @@ export default function Media() {
           ? [...images, ...uploadedImages]
           : [...floorPlans, ...uploadedImages];
 
-      const newPropertyDetail = await updatePropertyDetailInDB(propertyId, {
-        [type]: updatedList,
-      });
+      // ✅ Update DB and store
+      const updatedData = await updatePropertyImagesInDB(
+        propertyId,
+        updatedList
+      );
 
-      if (newPropertyDetail) {
-        await updatePropertyDetail(propertyId, newPropertyDetail);
-      }
+      if (updatedData && Array.isArray(updatedData.images)) {
+        // ✅ Filter out null values and ensure only valid `{ url: string }`
+        const validImages = updatedData.images.filter(
+          (img): img is { url: string } =>
+            img !== null &&
+            typeof img === "object" &&
+            "url" in img &&
+            typeof img.url === "string"
+        );
 
-      // ✅ Set first image as main image if none is set
-      if (type === "images" && updatedList.length > 0) {
-        setMainImage(propertyId, updatedList[0].url);
+        updateImageOrder(propertyId, validImages);
+      } else {
+        updateImageOrder(propertyId, []); // ✅ Always ensures an array
       }
     }
 
     setLoading(false);
   };
 
-  // ✅ Handle Image Deletion
   const handleDeleteImage = async (imageUrl: string) => {
     if (!propertyId) return;
 
@@ -96,11 +99,26 @@ export default function Media() {
 
     if (success) {
       const updatedImages = images.filter((img) => img.url !== imageUrl);
-      await updatePropertyDetail(propertyId, { images: updatedImages });
 
-      // ✅ Ensure a new main image is set if the main image was deleted
-      if (updatedImages.length > 0) {
-        setMainImage(propertyId, updatedImages[0].url);
+      // ✅ Ensure first image is main
+      const updatedData = await updatePropertyImagesInDB(
+        propertyId,
+        updatedImages
+      );
+
+      if (updatedData?.images && Array.isArray(updatedData.images)) {
+        // ✅ Filter to ensure only `{ url: string }`
+        const validImages = updatedData.images.filter(
+          (img): img is { url: string } =>
+            img !== null &&
+            typeof img === "object" &&
+            "url" in img &&
+            typeof img.url === "string"
+        );
+
+        updateImageOrder(propertyId, validImages);
+      } else {
+        updateImageOrder(propertyId, []); // ✅ Always pass an array
       }
     }
 
@@ -108,7 +126,7 @@ export default function Media() {
   };
 
   // ✅ Handle Drag and Drop Sorting
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -116,8 +134,26 @@ export default function Media() {
     const newIndex = images.findIndex((img) => img.url === over.id);
     const reorderedImages = arrayMove(images, oldIndex, newIndex);
 
-    updateImageOrder(propertyId, reorderedImages);
-    setMainImage(propertyId, reorderedImages[0].url);
+    // ✅ Update DB and store
+    const updatedData = await updatePropertyImagesInDB(
+      propertyId,
+      reorderedImages
+    );
+
+    if (updatedData?.images && Array.isArray(updatedData.images)) {
+      // ✅ Filter out null values and ensure only `{ url: string }`
+      const validImages = updatedData.images.filter(
+        (img): img is { url: string } =>
+          img !== null &&
+          typeof img === "object" &&
+          "url" in img &&
+          typeof img.url === "string"
+      );
+
+      updateImageOrder(propertyId, validImages);
+    } else {
+      updateImageOrder(propertyId, []); // ✅ Always ensures an array
+    }
   };
 
   return (

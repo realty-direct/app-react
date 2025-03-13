@@ -65,9 +65,6 @@ const Property = () => {
           <Typography variant="h5" sx={{ fontWeight: "bold", mb: 1 }}>
             {property.address}
           </Typography>
-          <Typography variant="body1" sx={{ color: "text.secondary", mb: 2 }}>
-            {details?.property_type?.toUpperCase()}
-          </Typography>
           <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
             {details?.description}
           </Typography>

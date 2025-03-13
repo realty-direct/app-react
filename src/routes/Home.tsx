@@ -21,8 +21,13 @@ import useRealtyStore from "../store/store";
 
 export default function Home(): JSX.Element {
   const navigate = useNavigate();
-  const { properties, propertyDetails, profile, setProperties } =
-    useRealtyStore();
+  const {
+    properties,
+    propertyDetails,
+    profile,
+    setProperties,
+    deletePropertyDetail,
+  } = useRealtyStore();
   const [searchQuery, setSearchQuery] = useState("");
 
   // ✅ State for delete confirmation popup
@@ -55,12 +60,19 @@ export default function Home(): JSX.Element {
   const handleDeleteConfirmed = async () => {
     if (!selectedPropertyId) return;
 
-    await deleteProperty(selectedPropertyId);
+    try {
+      await deleteProperty(selectedPropertyId);
+    } catch (error) {
+      console.error("❌ Error deleting property:", error);
+      return;
+    }
 
     if (profile?.id) {
       const updatedProperties = await fetchAllPropertiesFromDB(profile.id);
       setProperties(updatedProperties);
     }
+
+    deletePropertyDetail(selectedPropertyId);
 
     handleCloseDeleteDialog(); // ✅ Close the dialog after deletion
   };
@@ -186,7 +198,7 @@ export default function Home(): JSX.Element {
                         {property.address}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {details?.property_type?.toUpperCase() ||
+                        {details?.property_category?.toUpperCase() ||
                           "UNKNOWN TYPE"}
                       </Typography>
                     </CardContent>

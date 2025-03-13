@@ -45,11 +45,11 @@ export interface PropertyDetailsState {
   ) => void;
   createPropertyDetail: (propertyId: string, propertyCategory: string) => void;
   updateImageOrder: (propertyId: string, images: { url: string }[]) => void;
+  deletePropertyDetail: (propertyId: string) => void;
 
   setPropertyImages: (
     data: { property_id: string; images: PropertyDetail["images"] }[]
   ) => void;
-  setMainImage: (propertyId: string, mainImageUrl: string) => void;
 }
 
 // ✅ Define Zustand Store for Property Features
