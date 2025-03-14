@@ -68,6 +68,15 @@ export const updatePropertyImagesInDB = async (
   });
 };
 
+export const updatePropertyFloorPlansInDB = async (
+  propertyId: string,
+  floorPlans: { url: string }[]
+): Promise<PropertyDetail | null> => {
+  return await updatePropertyDetailInDB(propertyId, {
+    floor_plans: floorPlans,
+  });
+};
+
 export const fetchPropertyImagesFromDB = async (propertyIds: string[]) => {
   if (propertyIds.length === 0) return [];
 

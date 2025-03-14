@@ -6,10 +6,12 @@ export const SortableImage = ({
   image,
   isMain,
   onDelete,
+  showMainImageLabel,
 }: {
   image: { url: string };
   isMain: boolean;
   onDelete: () => void;
+  showMainImageLabel?: boolean;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: image.url });
@@ -35,7 +37,7 @@ export const SortableImage = ({
         }}
       >
         {/* "Main Image" Label */}
-        {isMain && (
+        {isMain && showMainImageLabel && (
           <Typography
             sx={{
               position: "absolute",

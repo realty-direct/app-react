@@ -46,6 +46,22 @@ export const uploadPropertyImage = async (propertyId: string, file: File) => {
     .data.publicUrl;
 };
 
+export const uploadFloorPlan = async (propertyId: string, file: File) => {
+  const filePath = `${propertyId}/${Date.now()}-${file.name.replace(/\s+/g, "-").toLowerCase()}`;
+
+  const { data, error } = await supabase.storage
+    .from("property-floorplans") // ✅ Correct bucket for floor plans
+    .upload(filePath, file, { cacheControl: "3600", upsert: false });
+
+  if (error) {
+    console.error("❌ Floor plan upload failed:", error);
+    return null;
+  }
+
+  return supabase.storage.from("property-floorplans").getPublicUrl(filePath)
+    .data.publicUrl;
+};
+
 export const deletePropertyImageFromDB = async (
   imageUrl: string
 ): Promise<boolean> => {

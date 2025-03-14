@@ -3,9 +3,13 @@ import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useParams } from "react-router";
-import { updatePropertyImagesInDB } from "../../../database/details";
+import {
+  updatePropertyFloorPlansInDB,
+  updatePropertyImagesInDB,
+} from "../../../database/details";
 import {
   deletePropertyImageFromDB,
+  uploadFloorPlan,
   uploadPropertyImage,
 } from "../../../database/supabase";
 import useRealtyStore from "../../../store/store";
@@ -51,7 +55,6 @@ export default function Media() {
     updatePropertyDetail(propertyId, { video_url: newURL });
   };
 
-  // ✅ Handle Upload for Photos and Floorplans
   const handleUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
     type: "images" | "floor_plans"
@@ -60,73 +63,78 @@ export default function Media() {
     if (!files) return;
 
     setLoading(true);
-    const uploadedImages: { url: string }[] = [];
+    const uploadedFiles: { url: string }[] = [];
 
     for (const file of Array.from(files)) {
-      const imageUrl = await uploadPropertyImage(propertyId, file);
-      if (imageUrl) uploadedImages.push({ url: imageUrl });
+      const fileUrl =
+        type === "images"
+          ? await uploadPropertyImage(propertyId, file) // Upload image
+          : await uploadFloorPlan(propertyId, file); // Upload floor plan
+
+      if (fileUrl) uploadedFiles.push({ url: fileUrl });
     }
 
-    if (uploadedImages.length > 0) {
+    if (uploadedFiles.length > 0) {
       const updatedList =
         type === "images"
-          ? [...images, ...uploadedImages]
-          : [...floorPlans, ...uploadedImages];
+          ? [...images, ...uploadedFiles]
+          : [...floorPlans, ...uploadedFiles];
 
       // ✅ Update DB and store
-      const updatedData = await updatePropertyImagesInDB(
-        propertyId,
-        updatedList
-      );
+      const updatedData =
+        type === "images"
+          ? await updatePropertyImagesInDB(propertyId, updatedList)
+          : await updatePropertyFloorPlansInDB(propertyId, updatedList);
 
-      if (updatedData && Array.isArray(updatedData.images)) {
-        // ✅ Filter out null values and ensure only valid `{ url: string }`
-        const validImages = updatedData.images.filter(
-          (img): img is { url: string } =>
-            img !== null &&
-            typeof img === "object" &&
-            "url" in img &&
-            typeof img.url === "string"
+      if (updatedData) {
+        const validFiles = (updatedData[type] as { url: string }[]).filter(
+          (file): file is { url: string } =>
+            file !== null &&
+            typeof file === "object" &&
+            "url" in file &&
+            typeof file.url === "string"
         );
 
-        updateImageOrder(propertyId, validImages);
-      } else {
-        updateImageOrder(propertyId, []); // ✅ Always ensures an array
+        if (type === "images") updateImageOrder(propertyId, validFiles);
+        else updatePropertyDetail(propertyId, { floor_plans: validFiles });
       }
     }
 
     setLoading(false);
   };
 
-  const handleDeleteImage = async (imageUrl: string) => {
+  const handleDeleteFile = async (
+    fileUrl: string,
+    type: "images" | "floor_plans"
+  ) => {
     if (!propertyId) return;
 
     setLoading(true);
 
-    const success = await deletePropertyImageFromDB(imageUrl);
+    const success = await deletePropertyImageFromDB(fileUrl); // ✅ Works for both images and floor plans
 
     if (success) {
-      const updatedImages = images.filter((img) => img.url !== imageUrl);
+      const updatedFiles =
+        type === "images"
+          ? images.filter((img) => img.url !== fileUrl)
+          : floorPlans.filter((fp) => fp.url !== fileUrl);
 
-      // ✅ Ensure first image is main
-      const updatedData = await updatePropertyImagesInDB(
-        propertyId,
-        updatedImages
-      );
+      const updatedData =
+        type === "images"
+          ? await updatePropertyImagesInDB(propertyId, updatedFiles)
+          : await updatePropertyFloorPlansInDB(propertyId, updatedFiles);
 
-      if (updatedData?.images && Array.isArray(updatedData.images)) {
-        // ✅ Filter to ensure only `{ url: string }`
-        const validImages = updatedData.images.filter(
-          (img): img is { url: string } =>
-            img !== null &&
-            typeof img === "object" &&
-            "url" in img &&
-            typeof img.url === "string"
+      if (updatedData) {
+        const validFiles = (updatedData[type] as { url: string }[]).filter(
+          (file): file is { url: string } =>
+            file !== null &&
+            typeof file === "object" &&
+            "url" in file &&
+            typeof file.url === "string"
         );
 
-        updateImageOrder(propertyId, validImages);
-      } else {
-        updateImageOrder(propertyId, []); // ✅ Always pass an array
+        if (type === "images") updateImageOrder(propertyId, validFiles);
+        else updatePropertyDetail(propertyId, { floor_plans: validFiles });
       }
     }
 
@@ -134,33 +142,35 @@ export default function Media() {
   };
 
   // ✅ Handle Drag and Drop Sorting
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = async (
+    event: DragEndEvent,
+    type: "images" | "floor_plans"
+  ) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = images.findIndex((img) => img.url === active.id);
-    const newIndex = images.findIndex((img) => img.url === over.id);
-    const reorderedImages = arrayMove(images, oldIndex, newIndex);
+    const list = type === "images" ? images : floorPlans;
+    const oldIndex = list.findIndex((item) => item.url === active.id);
+    const newIndex = list.findIndex((item) => item.url === over.id);
+    const reorderedList = arrayMove(list, oldIndex, newIndex);
 
     // ✅ Update DB and store
-    const updatedData = await updatePropertyImagesInDB(
-      propertyId,
-      reorderedImages
-    );
+    const updatedData =
+      type === "images"
+        ? await updatePropertyImagesInDB(propertyId, reorderedList)
+        : await updatePropertyFloorPlansInDB(propertyId, reorderedList);
 
-    if (updatedData?.images && Array.isArray(updatedData.images)) {
-      // ✅ Filter out null values and ensure only `{ url: string }`
-      const validImages = updatedData.images.filter(
-        (img): img is { url: string } =>
-          img !== null &&
-          typeof img === "object" &&
-          "url" in img &&
-          typeof img.url === "string"
+    if (updatedData) {
+      const validFiles = (updatedData[type] as { url: string }[]).filter(
+        (file): file is { url: string } =>
+          file !== null &&
+          typeof file === "object" &&
+          "url" in file &&
+          typeof file.url === "string"
       );
 
-      updateImageOrder(propertyId, validImages);
-    } else {
-      updateImageOrder(propertyId, []); // ✅ Always ensures an array
+      if (type === "images") updateImageOrder(propertyId, validFiles);
+      else updatePropertyDetail(propertyId, { floor_plans: validFiles });
     }
   };
 
@@ -198,16 +208,19 @@ export default function Media() {
         </label>
       </Paper>
 
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext
+        collisionDetection={closestCenter}
+        onDragEnd={(event) => handleDragEnd(event, "images")}
+      >
         <SortableContext items={images.map((img) => img.url)}>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
             {images.map((image, index) => (
               <SortableImage
                 key={image.url}
                 image={image}
-                // index={index}
+                showMainImageLabel={true}
                 isMain={index === 0}
-                onDelete={() => handleDeleteImage(image.url)}
+                onDelete={() => handleDeleteFile(image.url, "images")}
               />
             ))}
           </Box>
@@ -230,6 +243,9 @@ export default function Media() {
       <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
         Floor Plans
       </Typography>
+      <Typography sx={{ mb: 3 }}>
+        Please limit to maximum of <b>5</b> floor plans.
+      </Typography>
 
       <Paper
         sx={{ p: 3, textAlign: "center", border: "1px dashed gray", mb: 3 }}
@@ -238,7 +254,7 @@ export default function Media() {
         <input
           type="file"
           multiple
-          accept="image/*"
+          accept=".jpg,.jpeg,.png"
           onChange={(e) => handleUpload(e, "floor_plans")}
           style={{ display: "none" }}
           id="floorplan-upload"
@@ -249,6 +265,25 @@ export default function Media() {
           </Button>
         </label>
       </Paper>
+
+      <DndContext
+        collisionDetection={closestCenter}
+        onDragEnd={(event) => handleDragEnd(event, "floor_plans")}
+      >
+        <SortableContext items={floorPlans.map((img) => img.url)}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+            {floorPlans.map((image, index) => (
+              <SortableImage
+                key={image.url}
+                image={image}
+                showMainImageLabel={false}
+                isMain={index === 0}
+                onDelete={() => handleDeleteFile(image.url, "floor_plans")}
+              />
+            ))}
+          </Box>
+        </SortableContext>
+      </DndContext>
     </Box>
   );
 }
