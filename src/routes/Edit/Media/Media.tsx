@@ -40,8 +40,16 @@ export default function Media() {
       )
     : [];
 
-  const [videoURL, setVideoURL] = useState(propertyDetail.video_url || "");
   const [loading, setLoading] = useState(false);
+
+  const handleVideoURLChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newURL = event.target.value;
+
+    // ✅ Update Zustand store immediately
+    updatePropertyDetail(propertyId, { video_url: newURL });
+  };
 
   // ✅ Handle Upload for Photos and Floorplans
   const handleUpload = async (
@@ -214,8 +222,8 @@ export default function Media() {
         label="Video URL (External Link)"
         variant="filled"
         fullWidth
-        value={videoURL}
-        onChange={(e) => setVideoURL(e.target.value)}
+        value={propertyDetail.video_url || ""}
+        onChange={handleVideoURLChange}
         sx={{ mb: 3 }}
       />
 
