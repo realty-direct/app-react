@@ -2,19 +2,26 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Box, Button, Typography } from "@mui/material";
 
-export const SortableImage = ({
-  image,
-  isMain,
-  onDelete,
-  showMainImageLabel,
-}: {
+interface SortableImageProps {
   image: { url: string };
   isMain: boolean;
   onDelete: () => void;
   showMainImageLabel?: boolean;
-}) => {
+  disabled?: boolean;
+}
+
+export const SortableImage = ({
+  image,
+  isMain,
+  onDelete,
+  showMainImageLabel = false,
+  disabled = false,
+}: SortableImageProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: image.url });
+    useSortable({
+      id: image.url,
+      disabled,
+    });
 
   return (
     <Box
@@ -29,11 +36,18 @@ export const SortableImage = ({
           position: "relative",
           width: 120,
           height: 120,
-          cursor: "grab",
+          cursor: disabled ? "default" : "grab",
           borderRadius: 2,
           overflow: "hidden",
           transform: CSS.Transform.toString(transform),
           transition: transition || "transform 200ms ease-in-out",
+          opacity: disabled ? 0.7 : 1,
+          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+          "&:hover": {
+            boxShadow: disabled
+              ? "0 4px 8px rgba(0,0,0,0.1)"
+              : "0 6px 12px rgba(0,0,0,0.15)",
+          },
         }}
       >
         {/* "Main Image" Label */}
@@ -59,7 +73,11 @@ export const SortableImage = ({
           src={image.url}
           alt="Property"
           width="100%"
-          style={{ borderRadius: 8, height: "100%", objectFit: "cover" }}
+          style={{
+            borderRadius: 8,
+            height: "100%",
+            objectFit: "cover",
+          }}
         />
       </Box>
 
@@ -69,7 +87,14 @@ export const SortableImage = ({
           size="small"
           variant="text"
           onClick={() => window.open(image.url, "_blank")}
-          sx={{ color: "#1976d2", textTransform: "none", fontSize: 12 }}
+          sx={{
+            color: "#1976d2",
+            textTransform: "none",
+            fontSize: 12,
+            minWidth: "40px",
+            padding: "4px 8px",
+          }}
+          disabled={disabled}
         >
           View
         </Button>
@@ -77,7 +102,14 @@ export const SortableImage = ({
           size="small"
           variant="text"
           onClick={onDelete}
-          sx={{ color: "red", textTransform: "none", fontSize: 12 }}
+          sx={{
+            color: "error.main",
+            textTransform: "none",
+            fontSize: 12,
+            minWidth: "40px",
+            padding: "4px 8px",
+          }}
+          disabled={disabled}
         >
           Delete
         </Button>

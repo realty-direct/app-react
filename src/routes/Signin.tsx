@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { signIn } from "../database/auth";
 
 export default function Signin() {
@@ -14,21 +15,27 @@ export default function Signin() {
     setError(null);
     setLoading(true);
 
-    // ✅ Sign in the user
-    const { data: session, error: signInError } = await signIn(email, password);
+    try {
+      const { data: session, error: signInError } = await signIn(
+        email,
+        password
+      );
 
-    if (signInError || !session.user) {
-      setError(signInError?.message || "Login failed");
+      if (signInError || !session.user) {
+        setError(signInError?.message || "Login failed");
+        return;
+      }
+
+      navigate("/"); // Redirect after successful login
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setLoading(false); // ✅ Always reset loading state
-    navigate("/"); // ✅ Redirect after successful login
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center  w-full">
+    <div className="min-h-screen flex items-center justify-center w-full">
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <img
@@ -48,7 +55,7 @@ export default function Signin() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium ">
+              <label htmlFor="email" className="block text-sm font-medium">
                 Email address
               </label>
               <input
@@ -59,11 +66,12 @@ export default function Signin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                disabled={loading}
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium ">
+              <label htmlFor="password" className="block text-sm font-medium">
                 Password
               </label>
               <input
@@ -74,6 +82,7 @@ export default function Signin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                disabled={loading}
               />
             </div>
 
@@ -90,16 +99,43 @@ export default function Signin() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm 
+                className={`flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold leading-6 text-white shadow-sm 
                 hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 
                 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                {loading ? "Signing in..." : "Sign in"}
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <title>Signing in spinner</title>
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Signing in...
+                  </div>
+                ) : (
+                  "Sign in"
+                )}
               </button>
             </div>
           </form>
 
-          <p className="mt-10 text-center text-sm ">
+          <p className="mt-10 text-center text-sm">
             Not a member?{" "}
             <a
               href="/signup"
@@ -110,6 +146,11 @@ export default function Signin() {
           </p>
         </div>
       </div>
+
+      {/* Full-page loading overlay */}
+      {loading && (
+        <LoadingSpinner fullPage text="Signing you in..." transparent />
+      )}
     </div>
   );
 }

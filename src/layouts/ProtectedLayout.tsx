@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { supabase } from "../database/supabase";
 import useRealtyStore from "../store/store";
 
@@ -18,7 +19,7 @@ export default function ProtectedRoute() {
   }, []);
 
   if (checkingSession) {
-    return <p>Loading...</p>;
+    return <LoadingSpinner text="Verifying your session..." fullPage />;
   }
 
   if (!session) {

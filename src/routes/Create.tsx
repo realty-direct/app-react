@@ -14,13 +14,14 @@ import {
 import type { JSX } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { updatePropertyDetailInDB } from "../database/details";
 import { createPropertyInDB } from "../database/property";
 import useRealtyStore from "../store/store";
 
 export default function Create(): JSX.Element {
   const navigate = useNavigate();
-  const { addProperty, profile, createPropertyDetail } = useRealtyStore(); // ✅ Zustand store
+  const { addProperty, profile, createPropertyDetail } = useRealtyStore();
   const [propertyDetails, setPropertyDetails] = useState<{
     address: string;
     propertyCategory: "residential" | "commercial" | "land" | "rural" | "";
@@ -50,7 +51,7 @@ export default function Create(): JSX.Element {
     setError(null);
 
     try {
-      // ✅ Step 1: Create the property in the database
+      // Step 1: Create the property in the database
       const newProperty = await createPropertyInDB({
         user_id: profile.id,
         address: propertyDetails.address,
@@ -59,10 +60,10 @@ export default function Create(): JSX.Element {
 
       if (!newProperty) throw new Error("Failed to create property.");
 
-      // ✅ Step 3: Update Zustand with the fetched property
+      // Step 2: Update Zustand with the fetched property
       addProperty(newProperty);
 
-      // ✅ Step 4: Update property details in the database and get the updated row
+      // Step 3: Update property details in the database and get the updated row
       const fetchedPropertyDetail = await updatePropertyDetailInDB(
         newProperty.id,
         {
@@ -73,12 +74,13 @@ export default function Create(): JSX.Element {
       if (!fetchedPropertyDetail)
         throw new Error("Failed to update property details.");
 
+      // Step 4: Create property detail in Zustand
       createPropertyDetail(newProperty.id, propertyDetails.propertyCategory);
 
-      // ✅ Step 6: Navigate to the new property page
+      // Step 5: Navigate to the new property page
       navigate(`/property/${newProperty.id}`);
-    } catch (error) {
-      // setError(error.message || "An unexpected error occurred.");
+    } catch (error: any) {
+      setError(error.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -101,7 +103,6 @@ export default function Create(): JSX.Element {
             Enter Property Details
           </Typography>
 
-          {/* ✅ Removed the nested `<form>` */}
           <Box className="mt-4">
             {/* Address Input */}
             <Box className="mt-4 relative">
@@ -111,7 +112,8 @@ export default function Create(): JSX.Element {
                 name="address"
                 value={propertyDetails.address}
                 onChange={handleInputChange}
-                variant="outlined" // ✅ Explicitly define variant
+                variant="outlined"
+                disabled={loading}
               />
             </Box>
 
@@ -133,22 +135,22 @@ export default function Create(): JSX.Element {
               >
                 <FormControlLabel
                   value="residential"
-                  control={<Radio />}
+                  control={<Radio disabled={loading} />}
                   label="Residential"
                 />
                 <FormControlLabel
                   value="commercial"
-                  control={<Radio />}
+                  control={<Radio disabled={loading} />}
                   label="Commercial"
                 />
                 <FormControlLabel
                   value="rural"
-                  control={<Radio />}
+                  control={<Radio disabled={loading} />}
                   label="Rural"
                 />
                 <FormControlLabel
                   value="land"
-                  control={<Radio />}
+                  control={<Radio disabled={loading} />}
                   label="Land"
                 />
               </RadioGroup>
@@ -197,10 +199,21 @@ export default function Create(): JSX.Element {
         >
           Back
         </Button>
-        <Button variant="contained" onClick={handleContinue} disabled={loading}>
-          {loading ? "Creating..." : "Continue"}
+        <Button
+          variant="contained"
+          onClick={handleContinue}
+          disabled={loading}
+          sx={{ minWidth: "120px" }}
+        >
+          {loading ? (
+            <LoadingSpinner buttonMode text="Creating..." size={24} />
+          ) : (
+            "Continue"
+          )}
         </Button>
       </div>
+
+      {/* No full page spinner to avoid flicker */}
     </Box>
   );
 }

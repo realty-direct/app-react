@@ -14,8 +14,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { type JSX, useState } from "react";
+import { type JSX, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { deleteProperty, fetchAllPropertiesFromDB } from "../database/property";
 import useRealtyStore from "../store/store";
 
@@ -28,13 +29,34 @@ export default function Home(): JSX.Element {
     setProperties,
     deletePropertyDetail,
   } = useRealtyStore();
-  const [searchQuery, setSearchQuery] = useState("");
 
-  // ✅ State for delete confirmation popup
+  // Add loading states
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(
     null
   );
+
+  // Fetch properties on component mount
+  useEffect(() => {
+    const fetchProperties = async () => {
+      if (!profile?.id) return;
+
+      setIsLoading(true);
+      try {
+        const updatedProperties = await fetchAllPropertiesFromDB(profile.id);
+        setProperties(updatedProperties);
+      } catch (error) {
+        console.error("❌ Error fetching properties:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, [profile?.id, setProperties]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
@@ -44,37 +66,38 @@ export default function Home(): JSX.Element {
     property.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // ✅ Open delete confirmation dialog
+  // Open delete confirmation dialog
   const handleOpenDeleteDialog = (id: string) => {
     setSelectedPropertyId(id);
     setDeleteDialogOpen(true);
   };
 
-  // ✅ Close delete dialog
+  // Close delete dialog
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
     setSelectedPropertyId(null);
   };
 
-  // ✅ Delete the property after confirmation
+  // Delete the property after confirmation
   const handleDeleteConfirmed = async () => {
     if (!selectedPropertyId) return;
 
+    setIsDeleting(true);
     try {
       await deleteProperty(selectedPropertyId);
+
+      if (profile?.id) {
+        const updatedProperties = await fetchAllPropertiesFromDB(profile.id);
+        setProperties(updatedProperties);
+      }
+
+      deletePropertyDetail(selectedPropertyId);
     } catch (error) {
       console.error("❌ Error deleting property:", error);
-      return;
+    } finally {
+      setIsDeleting(false);
+      handleCloseDeleteDialog();
     }
-
-    if (profile?.id) {
-      const updatedProperties = await fetchAllPropertiesFromDB(profile.id);
-      setProperties(updatedProperties);
-    }
-
-    deletePropertyDetail(selectedPropertyId);
-
-    handleCloseDeleteDialog(); // ✅ Close the dialog after deletion
   };
 
   const handleAddProperty = () => {
@@ -127,7 +150,10 @@ export default function Home(): JSX.Element {
         sx={{ mb: 4, minWidth: "100%" }}
       />
 
-      {filteredProperties.length === 0 ? (
+      {/* Loading State for Properties */}
+      {isLoading ? (
+        <LoadingSpinner text="Loading your properties..." />
+      ) : filteredProperties.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
           No properties found.
         </Typography>
@@ -140,11 +166,11 @@ export default function Home(): JSX.Element {
                 new Date(a.created_at ?? "").getTime()
             )
             .map((property) => {
-              // ✅ Get property details
+              // Get property details
               const details = propertyDetails.find(
                 (detail) => detail.property_id === property.id
               );
-              const mainImage = details?.main_image; // ✅ Use main_image if available
+              const mainImage = details?.main_image;
 
               return (
                 <Card
@@ -173,16 +199,24 @@ export default function Home(): JSX.Element {
                       alt={property.address}
                     />
                   ) : (
-                    <BrokenImageOutlined
+                    <Box
                       sx={{
-                        fontSize: 60,
-                        alignSelf: "center",
-                        color: "grey.600",
                         width: { xs: "100%", sm: 250 },
+                        height: { xs: 160, sm: 200 },
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "grey.100",
                       }}
-                    />
+                    >
+                      <BrokenImageOutlined
+                        sx={{
+                          fontSize: 60,
+                          color: "grey.600",
+                        }}
+                      />
+                    </Box>
                   )}
-                  {/* Property Image */}
 
                   {/* Property Details */}
                   <Box
@@ -226,7 +260,7 @@ export default function Home(): JSX.Element {
         </Box>
       )}
 
-      {/* ✅ Delete Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialogOpen}
         onClose={handleCloseDeleteDialog}
@@ -241,14 +275,25 @@ export default function Home(): JSX.Element {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="inherit">
+          <Button
+            onClick={handleCloseDeleteDialog}
+            color="inherit"
+            disabled={isDeleting}
+          >
             Cancel
           </Button>
-          <Button onClick={handleDeleteConfirmed} color="error">
-            Delete
+          <Button
+            onClick={handleDeleteConfirmed}
+            color="error"
+            disabled={isDeleting}
+          >
+            {isDeleting ? "Deleting..." : "Delete"}
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Full page loading overlay for delete operation */}
+      {isDeleting && <LoadingSpinner fullPage text="Deleting property..." />}
     </Box>
   );
 }
