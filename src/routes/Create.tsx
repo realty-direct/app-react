@@ -2,6 +2,7 @@ import {
   Alert,
   Box,
   Button,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   Radio,
@@ -14,7 +15,6 @@ import {
 import type { JSX } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import LoadingSpinner from "../components/LoadingSpinner";
 import { updatePropertyDetailInDB } from "../database/details";
 import { createPropertyInDB } from "../database/property";
 import useRealtyStore from "../store/store";
@@ -81,8 +81,7 @@ export default function Create(): JSX.Element {
       navigate(`/property/${newProperty.id}`);
     } catch (error: any) {
       setError(error.message || "An unexpected error occurred.");
-    } finally {
-      setLoading(false);
+      setLoading(false); // Make sure to reset loading state on error
     }
   };
 
@@ -206,14 +205,15 @@ export default function Create(): JSX.Element {
           sx={{ minWidth: "120px" }}
         >
           {loading ? (
-            <LoadingSpinner buttonMode text="Creating..." size={24} />
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <CircularProgress size={16} sx={{ mr: 1 }} />
+              Creating...
+            </Box>
           ) : (
             "Continue"
           )}
         </Button>
       </div>
-
-      {/* No full page spinner to avoid flicker */}
     </Box>
   );
 }

@@ -1,4 +1,5 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 
 interface LoadingSpinnerProps {
   size?: number;
@@ -13,7 +14,10 @@ interface LoadingSpinnerProps {
   text?: string;
   fullPage?: boolean;
   transparent?: boolean;
-  buttonMode?: boolean; // New prop for inline button loading
+  buttonMode?: boolean; // For inline button loading
+  inline?: boolean; // New prop for simpler inline loading without button styling
+  thickness?: number; // Control thickness of the spinner
+  delay?: number; // Optional delay before showing spinner (ms)
 }
 
 /**
@@ -27,12 +31,32 @@ const LoadingSpinner = ({
   fullPage = false,
   transparent = false,
   buttonMode = false,
+  inline = false,
+  thickness = 4,
+  delay = 0,
 }: LoadingSpinnerProps) => {
+  // Add delayed rendering to prevent flicker for quick operations
+  if (delay > 0) {
+    const [show, setShow] = useState(false);
+
+    useEffect(() => {
+      const timer = setTimeout(() => setShow(true), delay);
+      return () => clearTimeout(timer);
+    }, [delay]);
+
+    if (!show) return null;
+  }
+
+  // Inline mode (simplest version, just the spinner)
+  if (inline) {
+    return <CircularProgress size={size} color={color} thickness={thickness} />;
+  }
+
   // Button loading mode - for inline loading in buttons
   if (buttonMode) {
     return (
       <Box display="flex" alignItems="center" justifyContent="center">
-        <CircularProgress size={size / 2} color={color} thickness={5} />
+        <CircularProgress size={size / 2} color={color} thickness={thickness} />
         {text && (
           <Typography variant="button" sx={{ ml: 1 }}>
             {text}
@@ -53,7 +77,7 @@ const LoadingSpinner = ({
         p: 3,
       }}
     >
-      <CircularProgress size={size} color={color} />
+      <CircularProgress size={size} color={color} thickness={thickness} />
       {text && (
         <Typography
           variant="body2"

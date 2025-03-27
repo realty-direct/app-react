@@ -1,7 +1,14 @@
-import { Alert, Box, Button, Grid2, Tab, Tabs } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Grid2,
+  Tab,
+  Tabs,
+} from "@mui/material";
 import { useState } from "react";
 import { useParams } from "react-router";
-import LoadingSpinner from "../../components/LoadingSpinner";
 import {
   fetchPropertyDetailInDb,
   updatePropertyDetailInDB,
@@ -44,43 +51,38 @@ export default function Edit() {
     (p) => p.property_id === propertyId
   );
 
-  // On tab change we update the DB
+  // On tab change we update the DB if necessary
   const handleTabChange = async (
     _event: React.SyntheticEvent,
     newValue: number
   ) => {
-    if (!propertyId) return;
+    if (!propertyId || loading) return; // Prevent tab change while loading
 
     // Only save if changing from Features tab since it has special save logic
     if (tabValue === 1 && propertyFeature.length > 0) {
-      // Set a local loading state just for the Features tab, not full-page loading
-      const saveBtn = document.querySelector("[data-feature-save]");
-      if (saveBtn) {
-        saveBtn.textContent = "Saving...";
-        saveBtn.setAttribute("disabled", "true");
-      }
+      setLoading(true);
+      setActionType("navigate");
 
       try {
         await updatePropertyFeatureInDB(propertyId, propertyFeature);
+        // Change tab after successful save
+        setTabValue(newValue);
       } catch (error) {
         console.error("Error saving features:", error);
       } finally {
-        if (saveBtn) {
-          saveBtn.textContent = "Continue";
-          saveBtn.removeAttribute("disabled");
-        }
+        setLoading(false);
+        setActionType("");
       }
+    } else {
+      // If not coming from Features tab, change immediately
+      setTabValue(newValue);
     }
-
-    // Change tab immediately for better UX
-    setTabValue(newValue);
   };
 
   // On continue we update the DB
   const handleContinue = async () => {
     if (!propertyDetail || !propertyId) return;
 
-    // Just set local button loading state, not full-page
     setLoading(true);
     setActionType("save");
 
@@ -118,16 +120,8 @@ export default function Edit() {
   };
 
   const handleBack = () => {
+    if (loading) return; // Prevent navigation while loading
     setTabValue((prev) => prev - 1);
-  };
-
-  const getLoadingText = () => {
-    if (actionType === "save") {
-      return "Saving your changes...";
-    } else if (actionType === "navigate") {
-      return "Updating...";
-    }
-    return "Loading...";
   };
 
   return (
@@ -155,18 +149,22 @@ export default function Edit() {
           sx={{
             borderBottom: 1,
             borderColor: "divider",
+            "& .MuiTab-root": {
+              opacity: loading ? 0.5 : 1,
+              pointerEvents: loading ? "none" : "auto",
+            },
           }}
         >
-          <Tab label="Details" disabled={loading} />
-          <Tab label="Features" disabled={loading} />
-          <Tab label="Price" disabled={loading} />
-          <Tab label="Photos and Media" disabled={loading} />
-          <Tab label="Ownership" disabled={loading} />
-          <Tab label="Description" disabled={loading} />
-          <Tab label="Contact" disabled={loading} />
-          <Tab label="Inspections" disabled={loading} />
-          <Tab label="Listing Enhancements" disabled={loading} />
-          <Tab label="Summary" disabled={loading} />
+          <Tab label="Details" />
+          <Tab label="Features" />
+          <Tab label="Price" />
+          <Tab label="Photos and Media" />
+          <Tab label="Ownership" />
+          <Tab label="Description" />
+          <Tab label="Contact" />
+          <Tab label="Inspections" />
+          <Tab label="Listing Enhancements" />
+          <Tab label="Summary" />
         </Tabs>
       </Grid2>
 
@@ -212,7 +210,10 @@ export default function Edit() {
             data-feature-save
           >
             {loading && actionType === "save" ? (
-              <LoadingSpinner buttonMode text="Saving..." size={24} />
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <CircularProgress size={16} sx={{ mr: 1 }} />
+                Saving...
+              </Box>
             ) : (
               "Continue"
             )}
@@ -224,8 +225,6 @@ export default function Edit() {
       <Grid2 size={3} p={3}>
         Insert side info here
       </Grid2>
-
-      {/* No full-page loading overlay to avoid flicker */}
     </Grid2>
   );
 }

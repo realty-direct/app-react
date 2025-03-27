@@ -6,6 +6,7 @@ import {
   CardActions,
   CardContent,
   CardMedia,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -92,11 +93,11 @@ export default function Home(): JSX.Element {
       }
 
       deletePropertyDetail(selectedPropertyId);
+      handleCloseDeleteDialog(); // Close the dialog after successful deletion
     } catch (error) {
       console.error("❌ Error deleting property:", error);
     } finally {
       setIsDeleting(false);
-      handleCloseDeleteDialog();
     }
   };
 
@@ -260,10 +261,10 @@ export default function Home(): JSX.Element {
         </Box>
       )}
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation Dialog - Improved with inline loading state */}
       <Dialog
         open={deleteDialogOpen}
-        onClose={handleCloseDeleteDialog}
+        onClose={isDeleting ? undefined : handleCloseDeleteDialog}
         aria-labelledby="delete-dialog-title"
         aria-describedby="delete-dialog-description"
       >
@@ -286,14 +287,21 @@ export default function Home(): JSX.Element {
             onClick={handleDeleteConfirmed}
             color="error"
             disabled={isDeleting}
+            sx={{ minWidth: "75px" }}
           >
-            {isDeleting ? "Deleting..." : "Delete"}
+            {isDeleting ? (
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <CircularProgress size={16} sx={{ mr: 1 }} color="inherit" />
+                <span>Deleting</span>
+              </Box>
+            ) : (
+              "Delete"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Full page loading overlay for delete operation */}
-      {isDeleting && <LoadingSpinner fullPage text="Deleting property..." />}
+      {/* Remove full-page loading overlay for delete operation */}
     </Box>
   );
 }
