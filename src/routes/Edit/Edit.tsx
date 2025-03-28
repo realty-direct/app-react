@@ -1,14 +1,7 @@
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Grid2,
-  Tab,
-  Tabs,
-} from "@mui/material";
-import { useState } from "react";
+import { Alert, Box, Button, Grid2, Tab, Tabs } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import {
   fetchPropertyDetailInDb,
   updatePropertyDetailInDB,
@@ -37,11 +30,18 @@ export default function Edit() {
     propertyDetails,
     propertyFeatures,
   } = useRealtyStore();
-  const [tabValue, setTabValue] = useState(0);
 
-  // Add loading states
+  const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [actionType, setActionType] = useState<"save" | "navigate" | "">("");
+
+  // Track if component is mounted and initialized
+  const isInitialized = useRef(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Use refs to track saved state to prevent recreation on re-renders
+  const lastSavedDetailsRef = useRef<any>(null);
+  const lastSavedFeaturesRef = useRef<any>(null);
 
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId
@@ -51,37 +51,46 @@ export default function Edit() {
     (p) => p.property_id === propertyId
   );
 
-  // On tab change we update the DB if necessary
-  const handleTabChange = async (
-    _event: React.SyntheticEvent,
-    newValue: number
-  ) => {
-    if (!propertyId || loading) return; // Prevent tab change while loading
-
-    // Only save if changing from Features tab since it has special save logic
-    if (tabValue === 1 && propertyFeature.length > 0) {
-      setLoading(true);
-      setActionType("navigate");
-
-      try {
-        await updatePropertyFeatureInDB(propertyId, propertyFeature);
-        // Change tab after successful save
-        setTabValue(newValue);
-      } catch (error) {
-        console.error("Error saving features:", error);
-      } finally {
-        setLoading(false);
-        setActionType("");
-      }
-    } else {
-      // If not coming from Features tab, change immediately
-      setTabValue(newValue);
+  // Initialize last saved state only once
+  useEffect(() => {
+    if (propertyDetail && !lastSavedDetailsRef.current) {
+      lastSavedDetailsRef.current = JSON.parse(JSON.stringify(propertyDetail));
     }
-  };
 
-  // On continue we update the DB
-  const handleContinue = async () => {
-    if (!propertyDetail || !propertyId) return;
+    if (propertyFeature.length > 0 && !lastSavedFeaturesRef.current) {
+      lastSavedFeaturesRef.current = JSON.parse(
+        JSON.stringify(propertyFeature)
+      );
+    }
+
+    // Mark as initialized after the first render cycle
+    if (propertyDetail && !isInitialized.current) {
+      isInitialized.current = true;
+    }
+  }, [propertyDetail, propertyFeature]);
+
+  // Track changes by comparing current state with last saved state
+  useEffect(() => {
+    // Only check for changes after initialization to prevent false positives
+    if (
+      isInitialized.current &&
+      propertyDetail &&
+      lastSavedDetailsRef.current
+    ) {
+      const detailsChanged =
+        JSON.stringify(lastSavedDetailsRef.current) !==
+        JSON.stringify(propertyDetail);
+      const featuresChanged =
+        JSON.stringify(lastSavedFeaturesRef.current) !==
+        JSON.stringify(propertyFeature);
+
+      setHasUnsavedChanges(detailsChanged || featuresChanged);
+    }
+  }, [propertyDetail, propertyFeature]);
+
+  // Save Function - shared between tab change and continue button
+  const saveChanges = async () => {
+    if (!propertyDetail || !propertyId || !hasUnsavedChanges) return false;
 
     setLoading(true);
     setActionType("save");
@@ -103,25 +112,78 @@ export default function Edit() {
       // Sync Zustand store with updated DB data
       if (updatedPropertyDetails) {
         updatePropertyDetail(propertyId, updatedPropertyDetails);
+        lastSavedDetailsRef.current = JSON.parse(
+          JSON.stringify(updatedPropertyDetails)
+        );
       }
 
       if (updatedPropertyFeatures.length > 0) {
         setPropertyFeatures(updatedPropertyFeatures);
+        lastSavedFeaturesRef.current = JSON.parse(
+          JSON.stringify(updatedPropertyFeatures)
+        );
       }
 
-      // Navigate to next tab
-      setTabValue((prev) => prev + 1);
+      setHasUnsavedChanges(false);
+      return true;
     } catch (error) {
       console.error("Error saving property data:", error);
+      return false;
     } finally {
       setLoading(false);
       setActionType("");
     }
   };
 
-  const handleBack = () => {
-    if (loading) return; // Prevent navigation while loading
-    setTabValue((prev) => prev - 1);
+  // On tab change, save if there are changes
+  const handleTabChange = async (
+    _event: React.SyntheticEvent,
+    newValue: number
+  ) => {
+    if (!propertyId || loading || !isInitialized.current) return;
+
+    // If there are unsaved changes, save before changing tabs
+    if (hasUnsavedChanges) {
+      const success = await saveChanges();
+
+      // Only change tab if save was successful
+      if (success) {
+        setTabValue(newValue);
+      }
+    } else {
+      // If no changes, just change the tab
+      setTabValue(newValue);
+    }
+  };
+
+  // On continue button click
+  const handleContinue = async () => {
+    if (loading || !isInitialized.current) return;
+
+    if (hasUnsavedChanges) {
+      const success = await saveChanges();
+
+      if (success) {
+        // Navigate to next tab after successful save
+        setTabValue((prev) => prev + 1);
+      }
+    } else {
+      // If no changes to save, just navigate
+      setTabValue((prev) => prev + 1);
+    }
+  };
+
+  const handleBack = async () => {
+    if (loading || !isInitialized.current) return;
+
+    if (hasUnsavedChanges) {
+      const success = await saveChanges();
+      if (success) {
+        setTabValue((prev) => prev - 1);
+      }
+    } else {
+      setTabValue((prev) => prev - 1);
+    }
   };
 
   return (
@@ -149,22 +211,18 @@ export default function Edit() {
           sx={{
             borderBottom: 1,
             borderColor: "divider",
-            "& .MuiTab-root": {
-              opacity: loading ? 0.5 : 1,
-              pointerEvents: loading ? "none" : "auto",
-            },
           }}
         >
-          <Tab label="Details" />
-          <Tab label="Features" />
-          <Tab label="Price" />
-          <Tab label="Photos and Media" />
-          <Tab label="Ownership" />
-          <Tab label="Description" />
-          <Tab label="Contact" />
-          <Tab label="Inspections" />
-          <Tab label="Listing Enhancements" />
-          <Tab label="Summary" />
+          <Tab label="Details" disabled={loading} />
+          <Tab label="Features" disabled={loading} />
+          <Tab label="Price" disabled={loading} />
+          <Tab label="Photos and Media" disabled={loading} />
+          <Tab label="Ownership" disabled={loading} />
+          <Tab label="Description" disabled={loading} />
+          <Tab label="Contact" disabled={loading} />
+          <Tab label="Inspections" disabled={loading} />
+          <Tab label="Listing Enhancements" disabled={loading} />
+          <Tab label="Summary" disabled={loading} />
         </Tabs>
       </Grid2>
 
@@ -180,9 +238,12 @@ export default function Edit() {
         {tabValue === 7 && <Inspections />}
         {tabValue === 8 && <ListingEnhancements />}
         {tabValue === 9 && <Summary />}
-        <Alert severity="info" role="alert" icon={undefined}>
+
+        {/* Just the standard note - removed alerts about unsaved changes */}
+        <Alert severity="info" role="alert" icon={undefined} sx={{ mt: 2 }}>
           Please note: You can skip this section at any time
         </Alert>
+
         <Box
           sx={{
             display: "flex",
@@ -210,10 +271,7 @@ export default function Edit() {
             data-feature-save
           >
             {loading && actionType === "save" ? (
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <CircularProgress size={16} sx={{ mr: 1 }} />
-                Saving...
-              </Box>
+              <LoadingSpinner buttonMode text="Saving..." size={24} />
             ) : (
               "Continue"
             )}
@@ -225,6 +283,8 @@ export default function Edit() {
       <Grid2 size={3} p={3}>
         Insert side info here
       </Grid2>
+
+      {/* No full-screen loading overlay */}
     </Grid2>
   );
 }
