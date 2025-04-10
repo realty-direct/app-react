@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { deleteFileFromStorage } from "./files";
+import { directFloorPlanDelete } from "./files";
 
 // ✅ Move these to .env in production
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -67,24 +67,46 @@ export const deletePropertyImageFromDB = async (
   imageUrl: string
 ): Promise<boolean> => {
   try {
-    console.log("⚙️ Starting image deletion process for:", imageUrl);
+    console.log("⚙️ Starting deletion process for:", imageUrl);
 
-    // Use the improved deleteFileFromStorage function
-    const success = await deleteFileFromStorage(imageUrl);
+    // For floor plans, use our specialized direct method
+    if (imageUrl.includes("property-floorplans")) {
+      console.log("📐 Detected floor plan - using direct method");
+      const success = await directFloorPlanDelete(imageUrl);
 
-    if (!success) {
-      console.error("❌ Failed to delete image from storage:", imageUrl);
-      console.error(`
-      ⚠️ IMPORTANT: This is likely an RLS (Row Level Security) permission issue.
-      Check your Supabase storage bucket policies to ensure they allow:
-      
-      1. The current authenticated user to delete files
-      2. The appropriate policy exists for the bucket (property_photographs or property-floorplans)
-      `);
+      if (!success) {
+        console.error("❌ Failed to delete floor plan:", imageUrl);
+        return false;
+      }
+
+      console.log("✅ Successfully deleted floor plan");
+      return true;
+    }
+
+    // For regular photographs, use standard deletion method
+    let bucketName = "property_photographs";
+    let filePath;
+
+    filePath = imageUrl.split(
+      "/storage/v1/object/public/property_photographs/"
+    )[1];
+
+    if (!filePath) {
+      console.error("❌ Could not extract file path from URL:", imageUrl);
       return false;
     }
 
-    console.log("✅ Successfully deleted image from storage:", imageUrl);
+    // Simple direct approach for photos - this seems to be working
+    const { error } = await supabase.storage
+      .from(bucketName)
+      .remove([filePath]);
+
+    if (error) {
+      console.error(`❌ Failed to delete photograph:`, error);
+      return false;
+    }
+
+    console.log("✅ Successfully deleted photograph from storage");
     return true;
   } catch (error) {
     console.error("❌ deletePropertyImageFromDB error:", error);
