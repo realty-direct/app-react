@@ -1,3 +1,4 @@
+// File: src/routes/Edit/Edit.tsx
 import { Alert, Box, Button, Grid2, Tab, Tabs } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
@@ -77,25 +78,70 @@ export default function Edit() {
       propertyDetail &&
       lastSavedDetailsRef.current
     ) {
+      // For deep comparison, we need to handle arrays/objects carefully
       const detailsChanged =
-        JSON.stringify(lastSavedDetailsRef.current) !==
-        JSON.stringify(propertyDetail);
-      const featuresChanged =
-        JSON.stringify(lastSavedFeaturesRef.current) !==
-        JSON.stringify(propertyFeature);
+        JSON.stringify(sortObjectKeys(lastSavedDetailsRef.current)) !==
+        JSON.stringify(sortObjectKeys(propertyDetail));
 
-      setHasUnsavedChanges(detailsChanged || featuresChanged);
+      const featuresChanged =
+        JSON.stringify(sortObjectKeys(lastSavedFeaturesRef.current || [])) !==
+        JSON.stringify(sortObjectKeys(propertyFeature || []));
+
+      const hasChanges = detailsChanged || featuresChanged;
+
+      if (hasChanges !== hasUnsavedChanges) {
+        console.log(
+          hasChanges
+            ? "Changes detected in property data"
+            : "No changes in property data"
+        );
+        setHasUnsavedChanges(hasChanges);
+      }
     }
-  }, [propertyDetail, propertyFeature]);
+  }, [propertyDetail, propertyFeature, hasUnsavedChanges]);
+
+  // Helper function to sort object keys for consistent comparison
+  const sortObjectKeys = (obj: any) => {
+    if (!obj) return obj;
+
+    // If it's an array, sort each object in the array
+    if (Array.isArray(obj)) {
+      return [...obj].map(sortObjectKeys);
+    }
+
+    // If it's an object, sort its keys
+    if (obj !== null && typeof obj === "object") {
+      return Object.keys(obj)
+        .sort()
+        .reduce(
+          (result, key) => {
+            result[key] = sortObjectKeys(obj[key]);
+            return result;
+          },
+          {} as Record<string, any>
+        );
+    }
+
+    // Otherwise return the value as is
+    return obj;
+  };
 
   // Save Function - shared between tab change and continue button
   const saveChanges = async () => {
-    if (!propertyDetail || !propertyId || !hasUnsavedChanges) return false;
+    if (!propertyDetail || !propertyId) return false;
+
+    // Double check if there are actually changes before saving
+    if (!hasUnsavedChanges) {
+      console.log("No changes detected, skipping save operation");
+      return true;
+    }
 
     setLoading(true);
     setActionType("save");
 
     try {
+      console.log("Saving changes to database");
+
       // First, update the DB with changes from Zustand
       await updatePropertyDetailInDB(propertyId, propertyDetail);
 
@@ -125,6 +171,7 @@ export default function Edit() {
       }
 
       setHasUnsavedChanges(false);
+      console.log("Save operation completed successfully");
       return true;
     } catch (error) {
       console.error("Error saving property data:", error);
@@ -144,6 +191,7 @@ export default function Edit() {
 
     // If there are unsaved changes, save before changing tabs
     if (hasUnsavedChanges) {
+      console.log("Saving changes before tab change");
       const success = await saveChanges();
 
       // Only change tab if save was successful
@@ -152,8 +200,9 @@ export default function Edit() {
       }
       return;
     }
-    
-    // If no changes, just change the tab
+
+    // If no changes, just change the tab without saving
+    console.log("No changes to save, just changing tab");
     setTabValue(newValue);
   };
 
@@ -170,7 +219,7 @@ export default function Edit() {
       }
       return;
     }
-    
+
     // If no changes to save, just navigate
     setTabValue((prev) => prev + 1);
   };
@@ -185,7 +234,7 @@ export default function Edit() {
       }
       return;
     }
-    
+
     setTabValue((prev) => prev - 1);
   };
 

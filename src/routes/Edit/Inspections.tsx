@@ -69,9 +69,15 @@ export default function Inspections() {
   useEffect(() => {
     const loadInspections = async () => {
       if (propertyId) {
+        console.log(`Loading inspections for property ${propertyId}`);
+
         // Filter property inspections that match this property ID
         const currentInspections = propertyInspections.filter(
           (insp) => insp.property_id === propertyId
+        );
+
+        console.log(
+          `Found ${currentInspections.length} inspections for this property`
         );
 
         // Group inspections by type
@@ -84,6 +90,7 @@ export default function Inspections() {
 
         // Set local state if we have inspections
         if (openHouse.length > 0) {
+          console.log(`Setting ${openHouse.length} open house times`);
           setOpenHouseTimes(
             openHouse.map((i) => ({
               id: i.id,
@@ -96,6 +103,9 @@ export default function Inspections() {
         }
 
         if (privateInspection.length > 0) {
+          console.log(
+            `Setting ${privateInspection.length} private inspection times`
+          );
           setPrivateInspectionTimes(
             privateInspection.map((i) => ({
               id: i.id,
@@ -119,7 +129,12 @@ export default function Inspections() {
 
   // Function to save inspections to DB
   const saveInspections = async () => {
-    if (!propertyId) return;
+    if (!propertyId) {
+      console.warn("Cannot save inspections: No property ID provided");
+      return;
+    }
+
+    console.log("Starting inspection save operation");
 
     // Validate and filter out inspections with incomplete data
     const validOpenHouse = openHouseTimes.filter((t) => {
@@ -132,56 +147,124 @@ export default function Inspections() {
       return isValid && !t.hasError;
     });
 
+    console.log(
+      `Found ${validOpenHouse.length} valid open house inspections and ${validPrivate.length} valid private inspections`
+    );
+
     // Create new inspection objects (excludes inspections with IDs which are already in the DB)
     const newOpenHouse: PropertyInspection[] = validOpenHouse
       .filter((t) => !t.id)
-      .map((t) => ({
-        property_id: propertyId,
-        inspection_date: t.date?.toISOString().split("T")[0] || "",
-        start_time: t.start,
-        end_time: t.end,
-        inspection_type: "open_house",
-      }));
+      .map((t) => {
+        if (!t.date) {
+          console.error("Missing date for inspection", t);
+          return null;
+        }
+
+        // Format date correctly, ensuring we use UTC to avoid timezone issues
+        let formattedDate: string;
+        try {
+          // Handle both Date objects and string dates
+          const dateObj =
+            typeof t.date === "string" ? new Date(t.date) : t.date;
+          formattedDate = dateObj.toISOString().split("T")[0];
+        } catch (error) {
+          console.error("Error formatting date", t.date, error);
+          return null;
+        }
+
+        return {
+          property_id: propertyId,
+          inspection_date: formattedDate,
+          start_time: t.start,
+          end_time: t.end,
+          inspection_type: "open_house",
+        };
+      })
+      .filter((item): item is PropertyInspection => item !== null);
 
     const newPrivate: PropertyInspection[] = validPrivate
       .filter((t) => !t.id)
-      .map((t) => ({
-        property_id: propertyId,
-        inspection_date: t.date?.toISOString().split("T")[0] || "",
-        start_time: t.start,
-        end_time: t.end,
-        inspection_type: "private",
-      }));
+      .map((t) => {
+        if (!t.date) {
+          console.error("Missing date for inspection", t);
+          return null;
+        }
+
+        // Format date correctly, ensuring we use UTC to avoid timezone issues
+        let formattedDate: string;
+        try {
+          // Handle both Date objects and string dates
+          const dateObj =
+            typeof t.date === "string" ? new Date(t.date) : t.date;
+          formattedDate = dateObj.toISOString().split("T")[0];
+        } catch (error) {
+          console.error("Error formatting date", t.date, error);
+          return null;
+        }
+
+        return {
+          property_id: propertyId,
+          inspection_date: formattedDate,
+          start_time: t.start,
+          end_time: t.end,
+          inspection_type: "private",
+        };
+      })
+      .filter((item): item is PropertyInspection => item !== null);
 
     // Combine all new inspections
     const newInspections = [...newOpenHouse, ...newPrivate];
+    console.log(`Total new inspections to save: ${newInspections.length}`);
 
     // Save to DB if we have new inspections
     if (newInspections.length > 0) {
-      const savedInspections = await createMultipleInspections(newInspections);
+      try {
+        console.log("Creating multiple inspections in database");
+        const savedInspections =
+          await createMultipleInspections(newInspections);
+        console.log(
+          `Successfully saved ${savedInspections.length} inspections`
+        );
 
-      // Update state with saved inspections
-      if (savedInspections.length > 0) {
-        setPropertyInspections([
-          ...propertyInspections.filter((i) => i.property_id !== propertyId),
-          ...propertyInspections.filter(
-            (i) =>
-              i.property_id === propertyId &&
-              (i.inspection_type !== "open_house" || i.id) &&
-              (i.inspection_type !== "private" || i.id)
-          ),
-          ...savedInspections,
-        ]);
+        // Update Zustand store with saved inspections
+        if (savedInspections.length > 0) {
+          // Keep existing inspections that are not from this property
+          const otherPropertyInspections = propertyInspections.filter(
+            (i) => i.property_id !== propertyId
+          );
+
+          // Keep existing inspections from this property that already have IDs
+          const existingPropertyInspections = propertyInspections.filter(
+            (i) => i.property_id === propertyId && i.id
+          );
+
+          // Combine with newly saved inspections
+          const updatedInspections = [
+            ...otherPropertyInspections,
+            ...existingPropertyInspections,
+            ...savedInspections,
+          ];
+
+          console.log(
+            `Updating Zustand store with ${updatedInspections.length} total inspections`
+          );
+          setPropertyInspections(updatedInspections);
+        }
+      } catch (error) {
+        console.error("Failed to save inspections:", error);
       }
+    } else {
+      console.log("No new inspections to save");
     }
   };
 
   // Save inspections when component unmounts
   useEffect(() => {
     return () => {
+      console.log("Component unmounting, saving inspections");
       saveInspections();
     };
-  }, []);
+  }, [propertyId]);
 
   // Handle date change
   const handleDateChange = (
@@ -256,8 +339,16 @@ export default function Inspections() {
 
     if (time.id) {
       // If the inspection has an ID, delete it from the database
-      await deletePropertyInspection(time.id);
-      removeInspection(time.id);
+      console.log(`Deleting inspection with ID: ${time.id}`);
+      try {
+        await deletePropertyInspection(time.id);
+        removeInspection(time.id);
+        console.log(`Inspection ${time.id} successfully deleted`);
+      } catch (error) {
+        console.error(`Failed to delete inspection ${time.id}:`, error);
+      }
+    } else {
+      console.log(`Removing unsaved inspection at index ${index}`);
     }
 
     // Update local state
@@ -344,7 +435,12 @@ export default function Inspections() {
                 fullWidth
                 value={time.start}
                 onChange={(e) =>
-                  handleTimeChange(index, "start", e.target.value, false)
+                  handleTimeChange(
+                    index,
+                    "start",
+                    e.target.value as string,
+                    false
+                  )
                 }
                 sx={{ flex: 1 }}
               >
@@ -365,7 +461,12 @@ export default function Inspections() {
                 fullWidth
                 value={time.end}
                 onChange={(e) =>
-                  handleTimeChange(index, "end", e.target.value, false)
+                  handleTimeChange(
+                    index,
+                    "end",
+                    e.target.value as string,
+                    false
+                  )
                 }
                 sx={{ flex: 1 }}
                 error={time.hasError}
@@ -476,7 +577,12 @@ export default function Inspections() {
                 fullWidth
                 value={time.start}
                 onChange={(e) =>
-                  handleTimeChange(index, "start", e.target.value, true)
+                  handleTimeChange(
+                    index,
+                    "start",
+                    e.target.value as string,
+                    true
+                  )
                 }
                 sx={{ flex: 1 }}
               >
@@ -497,7 +603,7 @@ export default function Inspections() {
                 fullWidth
                 value={time.end}
                 onChange={(e) =>
-                  handleTimeChange(index, "end", e.target.value, true)
+                  handleTimeChange(index, "end", e.target.value as string, true)
                 }
                 sx={{ flex: 1 }}
                 error={time.hasError}
