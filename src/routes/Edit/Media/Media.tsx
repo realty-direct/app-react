@@ -146,6 +146,8 @@ export default function Media() {
     setLoadingType(type);
 
     try {
+      // This calls our enhanced deletePropertyImageFromDB function
+      // which now properly removes files from storage
       const success = await deletePropertyImageFromDB(fileUrl);
 
       if (success) {
@@ -240,7 +242,8 @@ export default function Media() {
       return isUploading
         ? "Uploading property images..."
         : "Deleting property image...";
-    } else if (loadingType === "floorPlans") {
+    }
+    if (loadingType === "floorPlans") {
       return isUploading
         ? "Uploading floor plans..."
         : "Deleting floor plan...";

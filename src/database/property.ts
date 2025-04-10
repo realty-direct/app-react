@@ -1,5 +1,6 @@
 import type { Property } from "../store/types";
 import type { TablesInsert } from "./database_types";
+import { cleanupAllPropertyFiles } from "./files";
 import { supabase } from "./supabase";
 
 export const createPropertyInDB = async (
@@ -51,13 +52,48 @@ export const fetchAllPropertiesFromDB = async (userId: string) => {
 };
 
 export const deleteProperty = async (propertyId: string) => {
-  const { error } = await supabase
-    .from("properties")
-    .delete()
-    .eq("id", propertyId);
+  try {
+    // First delete property details and features to maintain referential integrity
+    const { error: detailsError } = await supabase
+      .from("property_details")
+      .delete()
+      .eq("property_id", propertyId);
 
-  if (error) {
-    console.error("❌ Error deleting property:", error);
-    throw new Error("Error deleting property");
+    if (detailsError) {
+      console.error("❌ Error deleting property details:", detailsError);
+      // Continue with deletion even if this fails
+    }
+
+    const { error: featuresError } = await supabase
+      .from("property_features")
+      .delete()
+      .eq("property_id", propertyId);
+
+    if (featuresError) {
+      console.error("❌ Error deleting property features:", featuresError);
+      // Continue with deletion even if this fails
+    }
+
+    // Clean up storage files in all buckets
+    await cleanupAllPropertyFiles(propertyId);
+
+    // Finally, delete the property record itself
+    const { error } = await supabase
+      .from("properties")
+      .delete()
+      .eq("id", propertyId);
+
+    if (error) {
+      console.error("❌ Error deleting property:", error);
+      throw new Error("Error deleting property");
+    }
+
+    console.log(
+      `✅ Property ${propertyId} and its resources deleted successfully`
+    );
+    return true;
+  } catch (error) {
+    console.error("❌ Error in deleteProperty:", error);
+    throw error;
   }
 };

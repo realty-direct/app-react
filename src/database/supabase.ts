@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { deleteFileFromStorage } from "./files";
 
 // ✅ Move these to .env in production
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -66,26 +67,27 @@ export const deletePropertyImageFromDB = async (
   imageUrl: string
 ): Promise<boolean> => {
   try {
-    const filePath = imageUrl.split(
-      "/storage/v1/object/public/property_photographs/"
-    )[1];
-    if (!filePath) {
-      console.error("❌ Invalid file path:", imageUrl);
+    console.log("⚙️ Starting image deletion process for:", imageUrl);
+
+    // Use the improved deleteFileFromStorage function
+    const success = await deleteFileFromStorage(imageUrl);
+
+    if (!success) {
+      console.error("❌ Failed to delete image from storage:", imageUrl);
+      console.error(`
+      ⚠️ IMPORTANT: This is likely an RLS (Row Level Security) permission issue.
+      Check your Supabase storage bucket policies to ensure they allow:
+      
+      1. The current authenticated user to delete files
+      2. The appropriate policy exists for the bucket (property_photographs or property-floorplans)
+      `);
       return false;
     }
 
-    const { error } = await supabase.storage
-      .from("property_photographs")
-      .remove([filePath]);
-    if (error) {
-      console.error("❌ Error deleting image from storage:", error);
-      return false;
-    }
-
-    console.log("✅ Image deleted successfully:", imageUrl);
+    console.log("✅ Successfully deleted image from storage:", imageUrl);
     return true;
   } catch (error) {
-    console.error("❌ deletePropertyImage error:", error);
+    console.error("❌ deletePropertyImageFromDB error:", error);
     return false;
   }
 };
