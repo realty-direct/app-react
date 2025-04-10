@@ -12,14 +12,15 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
     set({ propertyDetails: details }),
 
   createPropertyDetail: (propertyId: string, propertyCategory: string) => {
+    const newDetail: Partial<PropertyDetail> = {
+      property_id: propertyId,
+      property_category: propertyCategory,
+      images: [],
+      floor_plans: [],
+    };
+
     set((state) => ({
-      propertyDetails: [
-        ...state.propertyDetails,
-        {
-          property_id: propertyId,
-          property_category: propertyCategory,
-        } as PropertyDetail, // ✅ Type assertion to satisfy TypeScript
-      ],
+      propertyDetails: [...state.propertyDetails, newDetail as PropertyDetail],
     }));
   },
 
@@ -54,7 +55,10 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
     }));
   },
 
-  updateIdentificationDocument: (propertyId: string, documentUrl: string | null) => {
+  updateIdentificationDocument: (
+    propertyId: string,
+    documentUrl: string | null
+  ) => {
     set((state) => ({
       propertyDetails: state.propertyDetails.map((property) =>
         property.property_id === propertyId
@@ -89,7 +93,7 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
           (img) => img.property_id === property.property_id
         );
         return propertyData
-          ? { ...property, images: (propertyData.images as Json) || [] } // ✅ Ensure images type matches Json
+          ? { ...property, images: propertyData.images || [] }
           : property;
       }),
     }));

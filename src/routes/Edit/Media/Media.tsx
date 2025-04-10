@@ -116,7 +116,7 @@ export default function Media() {
             images?: { url: string }[];
             floor_plans?: { url: string }[];
           };
-          
+
           const validFiles = (
             (updatedData as MediaUpdateData)[
               type === "images" ? "images" : "floor_plans"
@@ -171,7 +171,7 @@ export default function Media() {
             images?: { url: string }[];
             floor_plans?: { url: string }[];
           };
-          
+
           const validFiles = (
             (updatedData as MediaUpdateData)[
               type === "images" ? "images" : "floor_plans"

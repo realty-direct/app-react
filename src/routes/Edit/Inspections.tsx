@@ -72,7 +72,7 @@ export default function Inspections() {
     const inspections: Inspection[] = [];
 
     // Add open house inspections
-    openHouseTimes.forEach((time) => {
+    for (const time of openHouseTimes) {
       if (time.date && !time.hasError) {
         try {
           const inspectionDate = time.date.toISOString().split("T")[0];
@@ -102,10 +102,10 @@ export default function Inspections() {
           console.error("Error processing open house date:", error);
         }
       }
-    });
+    }
 
     // Add private inspections
-    privateInspectionTimes.forEach((time) => {
+    for (const time of privateInspectionTimes) {
       if (time.date && !time.hasError) {
         try {
           const inspectionDate = time.date.toISOString().split("T")[0];
@@ -135,7 +135,7 @@ export default function Inspections() {
           console.error("Error processing private inspection date:", error);
         }
       }
-    });
+    }
 
     // Update Zustand with all inspections (from other properties + updated ones for this property)
     setPropertyInspections([...currentPropertyInspections, ...inspections]);
