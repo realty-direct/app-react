@@ -63,11 +63,15 @@ export default function Create(): JSX.Element {
       // Step 2: Update Zustand with the fetched property
       addProperty(newProperty);
 
-      // Step 3: Update property details in the database and get the updated row
+      // Step 3: Update property details in the database with property category
+      // and pre-fill the contact details from the user's profile
       const fetchedPropertyDetail = await updatePropertyDetailInDB(
         newProperty.id,
         {
           property_category: propertyDetails.propertyCategory,
+          contact_name: `${profile.first_name} ${profile.last_name}`.trim(),
+          contact_email: profile.email,
+          contact_phone: "", // We don't have phone in profile, so leaving it empty
         }
       );
 

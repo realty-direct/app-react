@@ -5,13 +5,13 @@ import { supabase } from "./supabase";
  * Uploads a file to the specified Supabase storage bucket with proper error handling
  * @param propertyId - The ID of the property
  * @param file - The file to upload
- * @param bucketName - The storage bucket name ('property_photographs' or 'property-floorplans')
+ * @param bucketName - The storage bucket name ('property_photographs', 'property-floorplans', 'property-ownership', or 'property-identification')
  * @returns The public URL of the uploaded file, or null on failure
  */
 export const uploadFile = async (
   propertyId: string,
   file: File,
-  bucketName: 'property_photographs' | 'property-floorplans'
+  bucketName: 'property_photographs' | 'property-floorplans' | 'property-ownership' | 'property-identification'
 ): Promise<string | null> => {
   // Create a unique filename
   const safeFileName = file.name
@@ -52,6 +52,20 @@ export const uploadFloorPlan = async (propertyId: string, file: File): Promise<s
 };
 
 /**
+ * Uploads a rates notice to the property-ownership bucket
+ */
+export const uploadRatesNotice = async (propertyId: string, file: File): Promise<string | null> => {
+  return uploadFile(propertyId, file, 'property-ownership');
+};
+
+/**
+ * Uploads an identification document to the property-identification bucket
+ */
+export const uploadIdentification = async (propertyId: string, file: File): Promise<string | null> => {
+  return uploadFile(propertyId, file, 'property-identification');
+};
+
+/**
  * Deletes a file from Supabase storage based on its public URL
  * Uses the recommended Supabase approach with proper error handling
  */
@@ -73,6 +87,16 @@ export const deleteFileFromStorage = async (
       bucketName = "property-floorplans";
       filePath = fileUrl.split(
         "/storage/v1/object/public/property-floorplans/"
+      )[1];
+    } else if (fileUrl.includes("property-ownership")) {
+      bucketName = "property-ownership";
+      filePath = fileUrl.split(
+        "/storage/v1/object/public/property-ownership/"
+      )[1];
+    } else if (fileUrl.includes("property-identification")) {
+      bucketName = "property-identification";
+      filePath = fileUrl.split(
+        "/storage/v1/object/public/property-identification/"
       )[1];
     }
 
@@ -372,12 +396,26 @@ export const deletePropertyImageFromDB = async (
     }
 
     // For regular photographs, use standard deletion method
-    const bucketName = "property_photographs";
-    const filePath = imageUrl.split(
-      "/storage/v1/object/public/property_photographs/"
-    )[1];
+    let bucketName = "property_photographs";
+    let pathPart;
+    
+    if (imageUrl.includes("property_photographs")) {
+      pathPart = imageUrl.split(
+        "/storage/v1/object/public/property_photographs/"
+      )[1];
+    } else if (imageUrl.includes("property-ownership")) {
+      bucketName = "property-ownership";
+      pathPart = imageUrl.split(
+        "/storage/v1/object/public/property-ownership/"
+      )[1];
+    } else if (imageUrl.includes("property-identification")) {
+      bucketName = "property-identification";
+      pathPart = imageUrl.split(
+        "/storage/v1/object/public/property-identification/"
+      )[1];
+    }
 
-    if (!filePath) {
+    if (!pathPart) {
       console.error("❌ Could not extract file path from URL:", imageUrl);
       return false;
     }
@@ -385,14 +423,14 @@ export const deletePropertyImageFromDB = async (
     // Simple direct approach for photos - this seems to be working
     const { error } = await supabase.storage
       .from(bucketName)
-      .remove([filePath]);
+      .remove([pathPart]);
 
     if (error) {
-      console.error(`❌ Failed to delete photograph:`, error);
+      console.error(`❌ Failed to delete file:`, error);
       return false;
     }
 
-    console.log("✅ Successfully deleted photograph from storage");
+    console.log(`✅ Successfully deleted file from ${bucketName}`);
     return true;
   } catch (error) {
     console.error("❌ deletePropertyImageFromDB error:", error);
@@ -641,8 +679,25 @@ export const cleanupAllPropertyFiles = async (
     console.error(`❌ Error cleaning up floor plans: ${error}`);
   }
 
+  // Cleanup ownership documents
+  let ownershipResult = false;
+  try {
+    ownershipResult = await cleanupStorageBucket(propertyId, "property-ownership");
+  } catch (error) {
+    console.error(`❌ Error cleaning up ownership documents: ${error}`);
+  }
+
+  // Cleanup identification documents
+  let identificationResult = false;
+  try {
+    identificationResult = await cleanupStorageBucket(propertyId, "property-identification");
+  } catch (error) {
+    console.error(`❌ Error cleaning up identification documents: ${error}`);
+  }
+
   console.log(
-    `📊 Cleanup results - Photos: ${photosResult ? "✅" : "❌"}, Floor Plans: ${floorPlansResult ? "✅" : "❌"}`
+    `📊 Cleanup results - Photos: ${photosResult ? "✅" : "❌"}, Floor Plans: ${floorPlansResult ? "✅" : "❌"}, 
+    Ownership: ${ownershipResult ? "✅" : "❌"}, Identification: ${identificationResult ? "✅" : "❌"}`
   );
 
   // Even if some operations "failed", consider the cleanup done

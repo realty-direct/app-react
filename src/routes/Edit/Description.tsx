@@ -6,15 +6,64 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import useRealtyStore from "../../store/store";
 
 export default function Description() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const { id } = useParams<{ id: string }>();
+  const propertyId = id ?? "";
+  
+  const { propertyDetails, updatePropertyDetail } = useRealtyStore();
+  const propertyDetail = propertyDetails.find(
+    (p) => p.property_id === propertyId
+  );
 
   // Character limits
   const TITLE_LIMIT = 80;
   const DESCRIPTION_LIMIT = 5000;
+
+  // State to track form values
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [useCopywritingService, setUseCopywritingService] = useState(false);
+
+  // Initialize form with data from store when component mounts or propertyDetail changes
+  useEffect(() => {
+    if (propertyDetail) {
+      setTitle(propertyDetail.listing_title || "");
+      setDescription(propertyDetail.description || "");
+    }
+  }, [propertyDetail]);
+
+  // Update property details in the store when form values change
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    if (newTitle.length <= TITLE_LIMIT) {
+      setTitle(newTitle);
+      if (propertyDetail && propertyId) {
+        updatePropertyDetail(propertyId, {
+          listing_title: newTitle,
+        });
+      }
+    }
+  };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDescription = e.target.value;
+    if (newDescription.length <= DESCRIPTION_LIMIT) {
+      setDescription(newDescription);
+      if (propertyDetail && propertyId) {
+        updatePropertyDetail(propertyId, {
+          description: newDescription,
+        });
+      }
+    }
+  };
+
+  if (!propertyDetail) {
+    return <Typography>Loading property details...</Typography>;
+  }
 
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
@@ -37,11 +86,7 @@ export default function Description() {
         variant="filled"
         fullWidth
         value={title}
-        onChange={(e) => {
-          if (e.target.value.length <= TITLE_LIMIT) {
-            setTitle(e.target.value);
-          }
-        }}
+        onChange={handleTitleChange}
         helperText={`${title.length} / ${TITLE_LIMIT} characters`}
         sx={{ mb: 3 }}
       />
@@ -62,11 +107,7 @@ export default function Description() {
         multiline
         rows={6}
         value={description}
-        onChange={(e) => {
-          if (e.target.value.length <= DESCRIPTION_LIMIT) {
-            setDescription(e.target.value);
-          }
-        }}
+        onChange={handleDescriptionChange}
         helperText={`${description.length} / ${DESCRIPTION_LIMIT} characters`}
         sx={{ mb: 3 }}
       />
@@ -81,7 +122,12 @@ export default function Description() {
 
       {/* Professional Copywriting Service */}
       <FormControlLabel
-        control={<Radio />}
+        control={
+          <Radio 
+            checked={useCopywritingService}
+            onChange={(e) => setUseCopywritingService(e.target.checked)}
+          />
+        }
         label="Let our professional copywriters handle it! ($120.00)"
       />
     </Box>

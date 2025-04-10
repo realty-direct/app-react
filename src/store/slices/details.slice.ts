@@ -43,6 +43,37 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
       ),
     }));
   },
+
+  updateOwnershipDocument: (propertyId: string, documentUrl: string | null) => {
+    set((state) => ({
+      propertyDetails: state.propertyDetails.map((property) =>
+        property.property_id === propertyId
+          ? { ...property, ownership_document: documentUrl }
+          : property
+      ),
+    }));
+  },
+
+  updateIdentificationDocument: (propertyId: string, documentUrl: string | null) => {
+    set((state) => ({
+      propertyDetails: state.propertyDetails.map((property) =>
+        property.property_id === propertyId
+          ? { ...property, identification_document: documentUrl }
+          : property
+      ),
+    }));
+  },
+
+  updateOwnershipVerification: (propertyId: string, isVerified: boolean) => {
+    set((state) => ({
+      propertyDetails: state.propertyDetails.map((property) =>
+        property.property_id === propertyId
+          ? { ...property, ownership_verified: isVerified }
+          : property
+      ),
+    }));
+  },
+
   deletePropertyDetail: (propertyId: string) => {
     set((state) => ({
       propertyDetails: state.propertyDetails.filter(

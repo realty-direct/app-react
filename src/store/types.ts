@@ -1,5 +1,6 @@
 import type { Session } from "@supabase/supabase-js";
 import type { Database } from "../database/database_types";
+import type { PropertyInspection } from "../database/inspections";
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Property = Database["public"]["Tables"]["properties"]["Row"];
@@ -13,6 +14,8 @@ export type PropertyDetail = Omit<
 };
 export type PropertyFeature =
   Database["public"]["Tables"]["property_features"]["Row"];
+
+export type Inspection = Database["public"]["Tables"]["property_inspections"]["Row"];
 
 // ✅ Define Zustand store types
 
@@ -45,6 +48,9 @@ export interface PropertyDetailsState {
   ) => void;
   createPropertyDetail: (propertyId: string, propertyCategory: string) => void;
   updateImageOrder: (propertyId: string, images: { url: string }[]) => void;
+  updateOwnershipDocument: (propertyId: string, documentUrl: string | null) => void;
+  updateIdentificationDocument: (propertyId: string, documentUrl: string | null) => void;
+  updateOwnershipVerification: (propertyId: string, isVerified: boolean) => void;
   deletePropertyDetail: (propertyId: string) => void;
 
   setPropertyImages: (
@@ -61,4 +67,14 @@ export interface PropertyFeaturesState {
     propertyId: string,
     feature: Omit<PropertyFeature, "id">
   ) => void;
+}
+
+// Define Zustand Store for Property Inspections
+export interface PropertyInspectionsState {
+  propertyInspections: Inspection[];
+  setPropertyInspections: (inspections: Inspection[]) => void;
+  addPropertyInspection: (inspection: PropertyInspection) => void;
+  updatePropertyInspection: (inspectionId: string, updates: Partial<Inspection>) => void;
+  deletePropertyInspection: (inspectionId: string) => void;
+  clearPropertyInspections: () => void;
 }

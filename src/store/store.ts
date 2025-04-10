@@ -8,10 +8,12 @@ import {
 } from "../database/details";
 
 import { fetchUserPropertiesFeaturesFromDB } from "../database/features";
+import { fetchPropertyInspections } from "../database/inspections";
 import { fetchAllPropertiesFromDB } from "../database/property";
 import { supabase } from "../database/supabase";
 import { createPropertyDetailsSlice } from "./slices/details.slice";
 import { createPropertyFeaturesSlice } from "./slices/features.slice";
+import { createPropertyInspectionsSlice } from "./slices/inspections.slice";
 import { createPropertiesSlice } from "./slices/properties.slice";
 import { createSessionSlice } from "./slices/session.slice";
 import { createProfileSlice } from "./slices/user.slice";
@@ -20,6 +22,7 @@ import type {
   PropertiesState,
   PropertyDetailsState,
   PropertyFeaturesState,
+  PropertyInspectionsState,
   SessionState,
 } from "./types";
 
@@ -27,7 +30,8 @@ export type StoreState = ProfileState &
   PropertiesState &
   PropertyDetailsState &
   SessionState &
-  PropertyFeaturesState;
+  PropertyFeaturesState &
+  PropertyInspectionsState;
 
 export const useRealtyStore = create<StoreState>()(
   persist(
@@ -37,6 +41,7 @@ export const useRealtyStore = create<StoreState>()(
       ...createPropertyDetailsSlice(set, get, api),
       ...createSessionSlice(set, get, api),
       ...createPropertyFeaturesSlice(set, get, api),
+      ...createPropertyInspectionsSlice(set, get, api),
     }),
     {
       name: "realty-store",
@@ -46,7 +51,8 @@ export const useRealtyStore = create<StoreState>()(
         profile: state.profile,
         properties: state.properties,
         propertyDetails: state.propertyDetails,
-        propertyFeatures: state.propertyFeatures, // ✅ Persist property features
+        propertyFeatures: state.propertyFeatures,
+        propertyInspections: state.propertyInspections,
       }),
     }
   )
@@ -76,7 +82,6 @@ const restoreSessionAndData = async (session: Session | null) => {
     store.setProfile(profile);
 
     //# Get properties and add to store
-
     const properties = await fetchAllPropertiesFromDB(session.user.id);
     store.setProperties(properties);
 
@@ -98,6 +103,14 @@ const restoreSessionAndData = async (session: Session | null) => {
       // ✅ Fetch property images & update store
       const propertyImages = await fetchPropertyImagesFromDB(propertyIds);
       store.setPropertyImages(propertyImages);
+
+      // ✅ Fetch property inspections for the user's properties
+      for (const propertyId of propertyIds) {
+        const inspections = await fetchPropertyInspections(propertyId);
+        if (inspections.length > 0) {
+          store.setPropertyInspections(inspections);
+        }
+      }
     }
   } catch (error) {
     console.error("❌ Error restoring session and fetching data:", error);

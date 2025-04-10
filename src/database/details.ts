@@ -77,6 +77,33 @@ export const updatePropertyFloorPlansInDB = async (
   });
 };
 
+export const updatePropertyOwnershipDocumentInDB = async (
+  propertyId: string,
+  documentUrl: string
+): Promise<PropertyDetail | null> => {
+  return await updatePropertyDetailInDB(propertyId, {
+    ownership_document: documentUrl,
+  });
+};
+
+export const updatePropertyIdentificationDocumentInDB = async (
+  propertyId: string,
+  documentUrl: string
+): Promise<PropertyDetail | null> => {
+  return await updatePropertyDetailInDB(propertyId, {
+    identification_document: documentUrl,
+  });
+};
+
+export const updateOwnershipVerificationStatus = async (
+  propertyId: string,
+  isVerified: boolean
+): Promise<PropertyDetail | null> => {
+  return await updatePropertyDetailInDB(propertyId, {
+    ownership_verified: isVerified
+  });
+};
+
 export const fetchPropertyImagesFromDB = async (propertyIds: string[]) => {
   if (propertyIds.length === 0) return [];
 
