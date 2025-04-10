@@ -12,8 +12,6 @@ type PropertyInspectionUpdate = TablesUpdate<"property_inspections">;
  */
 export const fetchPropertyInspections = async (propertyId: string) => {
   try {
-    console.log(`Fetching inspections for property ${propertyId}`);
-
     const { data, error } = await supabase
       .from("property_inspections")
       .select("*")
@@ -44,8 +42,6 @@ export const createPropertyInspection = async (
   inspection: PropertyInspection
 ) => {
   try {
-    console.log("Creating property inspection:", inspection);
-
     // Validate required fields
     if (
       !inspection.property_id ||
@@ -70,7 +66,6 @@ export const createPropertyInspection = async (
       return null;
     }
 
-    console.log("✅ Inspection created successfully:", data);
     return data;
   } catch (error) {
     console.error("❌ Unexpected error in createPropertyInspection:", error);
@@ -86,8 +81,6 @@ export const updatePropertyInspection = async (
   updates: PropertyInspectionUpdate
 ) => {
   try {
-    console.log(`Updating inspection ${inspectionId} with:`, updates);
-
     const { data, error } = await supabase
       .from("property_inspections")
       .update(updates)
@@ -101,7 +94,6 @@ export const updatePropertyInspection = async (
       return null;
     }
 
-    console.log("✅ Inspection updated successfully:", data);
     return data;
   } catch (error) {
     console.error("❌ Unexpected error in updatePropertyInspection:", error);
@@ -114,8 +106,6 @@ export const updatePropertyInspection = async (
  */
 export const deletePropertyInspection = async (inspectionId: string) => {
   try {
-    console.log(`Deleting inspection ${inspectionId}`);
-
     const { error } = await supabase
       .from("property_inspections")
       .delete()
@@ -127,7 +117,6 @@ export const deletePropertyInspection = async (inspectionId: string) => {
       return false;
     }
 
-    console.log("✅ Inspection deleted successfully");
     return true;
   } catch (error) {
     console.error("❌ Unexpected error in deletePropertyInspection:", error);
@@ -142,13 +131,10 @@ export const createMultipleInspections = async (
   inspections: PropertyInspection[]
 ) => {
   if (inspections.length === 0) {
-    console.log("No inspections provided to create");
     return [];
   }
 
   try {
-    console.log(`Creating ${inspections.length} inspections`, inspections);
-
     // Ensure all required fields are present
     const validInspections = inspections.filter((insp) => {
       if (
@@ -180,39 +166,9 @@ export const createMultipleInspections = async (
       return [];
     }
 
-    console.log(`Successfully created ${data?.length || 0} inspections`);
     return data || [];
   } catch (error) {
     console.error("❌ Unexpected error in createMultipleInspections:", error);
     return [];
-  }
-};
-
-/**
- * Deletes all inspections for a property
- */
-export const deleteAllPropertyInspections = async (propertyId: string) => {
-  try {
-    console.log(`Deleting all inspections for property ${propertyId}`);
-
-    const { error } = await supabase
-      .from("property_inspections")
-      .delete()
-      .eq("property_id", propertyId);
-
-    if (error) {
-      console.error("❌ Error deleting all property inspections:", error);
-      logErrorToDB(error);
-      return false;
-    }
-
-    console.log("✅ All inspections for property deleted successfully");
-    return true;
-  } catch (error) {
-    console.error(
-      "❌ Unexpected error in deleteAllPropertyInspections:",
-      error
-    );
-    return false;
   }
 };

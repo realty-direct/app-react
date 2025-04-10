@@ -16,11 +16,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import type { PropertyInspection } from "../../database/inspections";
-import {
-  createMultipleInspections,
-  deletePropertyInspection,
-} from "../../database/inspections";
+import type { Inspection } from "../../database/inspections";
 import useRealtyStore from "../../store/store";
 
 interface InspectionTime {
@@ -65,12 +61,90 @@ export default function Inspections() {
     InspectionTime[]
   >([{ date: null, start: "09:00", end: "09:15", hasError: false }]);
 
+  // Helper function to convert time state to inspection objects for Zustand
+  const updateZustandInspections = () => {
+    if (!propertyId) return;
+
+    const currentPropertyInspections = propertyInspections.filter(
+      (insp) => insp.property_id !== propertyId
+    );
+
+    const inspections: Inspection[] = [];
+
+    // Add open house inspections
+    openHouseTimes.forEach((time) => {
+      if (time.date && !time.hasError) {
+        try {
+          const inspectionDate = time.date.toISOString().split("T")[0];
+
+          if (time.id) {
+            // Existing inspection
+            inspections.push({
+              id: time.id,
+              property_id: propertyId,
+              inspection_date: inspectionDate,
+              start_time: time.start,
+              end_time: time.end,
+              inspection_type: "open_house",
+            });
+          } else {
+            // New inspection
+            inspections.push({
+              id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              property_id: propertyId,
+              inspection_date: inspectionDate,
+              start_time: time.start,
+              end_time: time.end,
+              inspection_type: "open_house",
+            });
+          }
+        } catch (error) {
+          console.error("Error processing open house date:", error);
+        }
+      }
+    });
+
+    // Add private inspections
+    privateInspectionTimes.forEach((time) => {
+      if (time.date && !time.hasError) {
+        try {
+          const inspectionDate = time.date.toISOString().split("T")[0];
+
+          if (time.id) {
+            // Existing inspection
+            inspections.push({
+              id: time.id,
+              property_id: propertyId,
+              inspection_date: inspectionDate,
+              start_time: time.start,
+              end_time: time.end,
+              inspection_type: "private",
+            });
+          } else {
+            // New inspection
+            inspections.push({
+              id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              property_id: propertyId,
+              inspection_date: inspectionDate,
+              start_time: time.start,
+              end_time: time.end,
+              inspection_type: "private",
+            });
+          }
+        } catch (error) {
+          console.error("Error processing private inspection date:", error);
+        }
+      }
+    });
+
+    // Update Zustand with all inspections (from other properties + updated ones for this property)
+    setPropertyInspections([...currentPropertyInspections, ...inspections]);
+  };
+
   // Fetch inspections when component mounts
   useEffect(() => {
     const loadInspections = async () => {
       if (propertyId) {
-        console.log(`Loading inspections for property ${propertyId}`);
-
         // Filter property inspections that match this property ID
         const currentInspections = propertyInspections.filter(
           (insp) => insp.property_id === propertyId
@@ -90,7 +164,6 @@ export default function Inspections() {
 
         // Set local state if we have inspections
         if (openHouse.length > 0) {
-          console.log(`Setting ${openHouse.length} open house times`);
           setOpenHouseTimes(
             openHouse.map((i) => ({
               id: i.id,
@@ -120,151 +193,12 @@ export default function Inspections() {
     };
 
     loadInspections();
-  }, [propertyId, propertyInspections]);
+  }, [propertyId, propertyInspections.length]); // Only run when propertyId or the length of inspections changes
 
   // Validate time (ensure start is before end)
   const validateTimeRange = (start: string, end: string): boolean => {
     return start < end;
   };
-
-  // Function to save inspections to DB
-  const saveInspections = async () => {
-    if (!propertyId) {
-      console.warn("Cannot save inspections: No property ID provided");
-      return;
-    }
-
-    console.log("Starting inspection save operation");
-
-    // Validate and filter out inspections with incomplete data
-    const validOpenHouse = openHouseTimes.filter((t) => {
-      const isValid = t.date && validateTimeRange(t.start, t.end);
-      return isValid && !t.hasError;
-    });
-
-    const validPrivate = privateInspectionTimes.filter((t) => {
-      const isValid = t.date && validateTimeRange(t.start, t.end);
-      return isValid && !t.hasError;
-    });
-
-    console.log(
-      `Found ${validOpenHouse.length} valid open house inspections and ${validPrivate.length} valid private inspections`
-    );
-
-    // Create new inspection objects (excludes inspections with IDs which are already in the DB)
-    const newOpenHouse: PropertyInspection[] = validOpenHouse
-      .filter((t) => !t.id)
-      .map((t) => {
-        if (!t.date) {
-          console.error("Missing date for inspection", t);
-          return null;
-        }
-
-        // Format date correctly, ensuring we use UTC to avoid timezone issues
-        let formattedDate: string;
-        try {
-          // Handle both Date objects and string dates
-          const dateObj =
-            typeof t.date === "string" ? new Date(t.date) : t.date;
-          formattedDate = dateObj.toISOString().split("T")[0];
-        } catch (error) {
-          console.error("Error formatting date", t.date, error);
-          return null;
-        }
-
-        return {
-          property_id: propertyId,
-          inspection_date: formattedDate,
-          start_time: t.start,
-          end_time: t.end,
-          inspection_type: "open_house",
-        };
-      })
-      .filter((item): item is PropertyInspection => item !== null);
-
-    const newPrivate: PropertyInspection[] = validPrivate
-      .filter((t) => !t.id)
-      .map((t) => {
-        if (!t.date) {
-          console.error("Missing date for inspection", t);
-          return null;
-        }
-
-        // Format date correctly, ensuring we use UTC to avoid timezone issues
-        let formattedDate: string;
-        try {
-          // Handle both Date objects and string dates
-          const dateObj =
-            typeof t.date === "string" ? new Date(t.date) : t.date;
-          formattedDate = dateObj.toISOString().split("T")[0];
-        } catch (error) {
-          console.error("Error formatting date", t.date, error);
-          return null;
-        }
-
-        return {
-          property_id: propertyId,
-          inspection_date: formattedDate,
-          start_time: t.start,
-          end_time: t.end,
-          inspection_type: "private",
-        };
-      })
-      .filter((item): item is PropertyInspection => item !== null);
-
-    // Combine all new inspections
-    const newInspections = [...newOpenHouse, ...newPrivate];
-    console.log(`Total new inspections to save: ${newInspections.length}`);
-
-    // Save to DB if we have new inspections
-    if (newInspections.length > 0) {
-      try {
-        console.log("Creating multiple inspections in database");
-        const savedInspections =
-          await createMultipleInspections(newInspections);
-        console.log(
-          `Successfully saved ${savedInspections.length} inspections`
-        );
-
-        // Update Zustand store with saved inspections
-        if (savedInspections.length > 0) {
-          // Keep existing inspections that are not from this property
-          const otherPropertyInspections = propertyInspections.filter(
-            (i) => i.property_id !== propertyId
-          );
-
-          // Keep existing inspections from this property that already have IDs
-          const existingPropertyInspections = propertyInspections.filter(
-            (i) => i.property_id === propertyId && i.id
-          );
-
-          // Combine with newly saved inspections
-          const updatedInspections = [
-            ...otherPropertyInspections,
-            ...existingPropertyInspections,
-            ...savedInspections,
-          ];
-
-          console.log(
-            `Updating Zustand store with ${updatedInspections.length} total inspections`
-          );
-          setPropertyInspections(updatedInspections);
-        }
-      } catch (error) {
-        console.error("Failed to save inspections:", error);
-      }
-    } else {
-      console.log("No new inspections to save");
-    }
-  };
-
-  // Save inspections when component unmounts
-  useEffect(() => {
-    return () => {
-      console.log("Component unmounting, saving inspections");
-      saveInspections();
-    };
-  }, [propertyId]);
 
   // Handle date change
   const handleDateChange = (
@@ -276,9 +210,15 @@ export default function Inspections() {
       times.map((item, i) => (i === index ? { ...item, date: newDate } : item));
 
     if (isPrivate) {
-      setPrivateInspectionTimes(updateTimes(privateInspectionTimes));
+      const newTimes = updateTimes(privateInspectionTimes);
+      setPrivateInspectionTimes(newTimes);
+      // Update Zustand only after state is set
+      setTimeout(() => updateZustandInspections(), 0);
     } else {
-      setOpenHouseTimes(updateTimes(openHouseTimes));
+      const newTimes = updateTimes(openHouseTimes);
+      setOpenHouseTimes(newTimes);
+      // Update Zustand only after state is set
+      setTimeout(() => updateZustandInspections(), 0);
     }
   };
 
@@ -289,47 +229,89 @@ export default function Inspections() {
     value: string,
     isPrivate: boolean
   ) => {
-    const times = isPrivate ? privateInspectionTimes : openHouseTimes;
-    const time = times[index];
-
-    // Validate time range
-    let hasError = false;
-    let errorMessage = "";
-
-    if (field === "start" && value >= time.end) {
-      hasError = true;
-      errorMessage = "Start time must be before end time";
-    } else if (field === "end" && value <= time.start) {
-      hasError = true;
-      errorMessage = "End time must be after start time";
-    }
-
-    const updateTimes = (times: InspectionTime[]): InspectionTime[] =>
-      times.map((item, i) =>
-        i === index ? { ...item, [field]: value, hasError, errorMessage } : item
-      );
-
     if (isPrivate) {
-      setPrivateInspectionTimes(updateTimes(privateInspectionTimes));
+      const times = [...privateInspectionTimes];
+      const time = times[index];
+
+      // Validate time range
+      let hasError = false;
+      let errorMessage = "";
+
+      if (field === "start" && value >= time.end) {
+        hasError = true;
+        errorMessage = "Start time must be before end time";
+      } else if (field === "end" && value <= time.start) {
+        hasError = true;
+        errorMessage = "End time must be after start time";
+      }
+
+      // Create a new time object with updated field
+      const updatedTime = {
+        ...time,
+        [field]: value,
+        hasError,
+        errorMessage,
+      };
+
+      // Update the time at the specific index
+      times[index] = updatedTime;
+
+      // Update state with new array
+      setPrivateInspectionTimes(times);
+
+      // Update Zustand after state update
+      setTimeout(() => updateZustandInspections(), 0);
     } else {
-      setOpenHouseTimes(updateTimes(openHouseTimes));
+      const times = [...openHouseTimes];
+      const time = times[index];
+
+      // Validate time range
+      let hasError = false;
+      let errorMessage = "";
+
+      if (field === "start" && value >= time.end) {
+        hasError = true;
+        errorMessage = "Start time must be before end time";
+      } else if (field === "end" && value <= time.start) {
+        hasError = true;
+        errorMessage = "End time must be after start time";
+      }
+
+      // Create a new time object with updated field
+      const updatedTime = {
+        ...time,
+        [field]: value,
+        hasError,
+        errorMessage,
+      };
+
+      // Update the time at the specific index
+      times[index] = updatedTime;
+
+      // Update state with new array
+      setOpenHouseTimes(times);
+
+      // Update Zustand after state update
+      setTimeout(() => updateZustandInspections(), 0);
     }
   };
 
   // Function to add new open house time
   const addOpenHouseTime = () => {
-    setOpenHouseTimes([
+    const newTimes = [
       ...openHouseTimes,
       { date: null, start: "09:00", end: "09:15", hasError: false },
-    ]);
+    ];
+    setOpenHouseTimes(newTimes);
   };
 
   // Function to add new private inspection time
   const addPrivateInspectionTime = () => {
-    setPrivateInspectionTimes([
+    const newTimes = [
       ...privateInspectionTimes,
       { date: null, start: "09:00", end: "09:15", hasError: false },
-    ]);
+    ];
+    setPrivateInspectionTimes(newTimes);
   };
 
   // Function to remove an entry
@@ -338,28 +320,23 @@ export default function Inspections() {
     const time = times[index];
 
     if (time.id) {
-      // If the inspection has an ID, delete it from the database
-      console.log(`Deleting inspection with ID: ${time.id}`);
-      try {
-        await deletePropertyInspection(time.id);
-        removeInspection(time.id);
-        console.log(`Inspection ${time.id} successfully deleted`);
-      } catch (error) {
-        console.error(`Failed to delete inspection ${time.id}:`, error);
-      }
+      // If the inspection has an ID, delete it from the database via Zustand
+
+      removeInspection(time.id);
     } else {
-      console.log(`Removing unsaved inspection at index ${index}`);
     }
 
     // Update local state
-    const updateTimes = (items: InspectionTime[]): InspectionTime[] =>
-      items.filter((_, i) => i !== index);
-
     if (isPrivate) {
-      setPrivateInspectionTimes(updateTimes(privateInspectionTimes));
+      const newTimes = privateInspectionTimes.filter((_, i) => i !== index);
+      setPrivateInspectionTimes(newTimes);
     } else {
-      setOpenHouseTimes(updateTimes(openHouseTimes));
+      const newTimes = openHouseTimes.filter((_, i) => i !== index);
+      setOpenHouseTimes(newTimes);
     }
+
+    // Update Zustand after state update
+    setTimeout(() => updateZustandInspections(), 0);
   };
 
   return (
@@ -494,7 +471,12 @@ export default function Inspections() {
           </Paper>
         ))}
 
-        <Button variant="outlined" onClick={addOpenHouseTime} sx={{ mb: 3 }}>
+        <Button
+          variant="outlined"
+          onClick={addOpenHouseTime}
+          sx={{ mb: 3 }}
+          onMouseUp={() => setTimeout(() => updateZustandInspections(), 50)}
+        >
           Add an open house time
         </Button>
 
@@ -635,8 +617,19 @@ export default function Inspections() {
           variant="outlined"
           onClick={addPrivateInspectionTime}
           sx={{ mt: 2 }}
+          onMouseUp={() => setTimeout(() => updateZustandInspections(), 50)}
         >
           Add a private inspection time
+        </Button>
+
+        {/* Manual sync button to help with debugging */}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={updateZustandInspections}
+          sx={{ mt: 4, display: "none" }} // Hidden in production, enable for debugging
+        >
+          Save Inspections
         </Button>
       </Box>
     </LocalizationProvider>

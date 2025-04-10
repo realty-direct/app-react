@@ -83,7 +83,6 @@ export const updatePropertyFeatureInDB = async (
       await supabase.from("property_features").insert(newFeatures);
     }
 
-    console.log("✅ Property features updated successfully!");
     return true;
   } catch (error) {
     console.error("❌ updatePropertyFeatureInDB error:", error);

@@ -53,15 +53,13 @@ export const fetchAllPropertiesFromDB = async (userId: string) => {
 
 export const deleteProperty = async (propertyId: string) => {
   try {
-    console.log(`🔄 Starting deletion process for property ${propertyId}`);
-
     // IMPORTANT: Clean up all storage files BEFORE deleting the database records
     // Otherwise, the RLS policies won't work after the property is deleted
-    console.log(`🗑️ Cleaning up storage files for property ${propertyId}`);
+
     await cleanupAllPropertyFiles(propertyId);
 
     // Now delete property details and features
-    console.log(`🗑️ Deleting property details for ${propertyId}`);
+
     const { error: detailsError } = await supabase
       .from("property_details")
       .delete()
@@ -72,7 +70,6 @@ export const deleteProperty = async (propertyId: string) => {
       // Continue with deletion even if this fails
     }
 
-    console.log(`🗑️ Deleting property features for ${propertyId}`);
     const { error: featuresError } = await supabase
       .from("property_features")
       .delete()
@@ -84,7 +81,7 @@ export const deleteProperty = async (propertyId: string) => {
     }
 
     // Finally, delete the property record itself
-    console.log(`🗑️ Deleting main property record ${propertyId}`);
+
     const { error } = await supabase
       .from("properties")
       .delete()

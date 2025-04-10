@@ -24,7 +24,6 @@ export default function ProtectedRoute() {
 
   // No session means redirect to sign in
   if (!session) {
-    console.log("No active session found, redirecting to sign in page");
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 

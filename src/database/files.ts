@@ -11,7 +11,11 @@ import { supabase } from "./supabase";
 export const uploadFile = async (
   propertyId: string,
   file: File,
-  bucketName: 'property_photographs' | 'property-floorplans' | 'property-ownership' | 'property-identification'
+  bucketName:
+    | "property_photographs"
+    | "property-floorplans"
+    | "property-ownership"
+    | "property-identification"
 ): Promise<string | null> => {
   // Create a unique filename
   const safeFileName = file.name
@@ -33,36 +37,48 @@ export const uploadFile = async (
     return null;
   }
 
-  return supabase.storage.from(bucketName).getPublicUrl(filePath)
-    .data.publicUrl;
+  return supabase.storage.from(bucketName).getPublicUrl(filePath).data
+    .publicUrl;
 };
 
 /**
  * Uploads a property image to the property_photographs bucket
  */
-export const uploadPropertyImage = async (propertyId: string, file: File): Promise<string | null> => {
-  return uploadFile(propertyId, file, 'property_photographs');
+export const uploadPropertyImage = async (
+  propertyId: string,
+  file: File
+): Promise<string | null> => {
+  return uploadFile(propertyId, file, "property_photographs");
 };
 
 /**
  * Uploads a floor plan to the property-floorplans bucket
  */
-export const uploadFloorPlan = async (propertyId: string, file: File): Promise<string | null> => {
-  return uploadFile(propertyId, file, 'property-floorplans');
+export const uploadFloorPlan = async (
+  propertyId: string,
+  file: File
+): Promise<string | null> => {
+  return uploadFile(propertyId, file, "property-floorplans");
 };
 
 /**
  * Uploads a rates notice to the property-ownership bucket
  */
-export const uploadRatesNotice = async (propertyId: string, file: File): Promise<string | null> => {
-  return uploadFile(propertyId, file, 'property-ownership');
+export const uploadRatesNotice = async (
+  propertyId: string,
+  file: File
+): Promise<string | null> => {
+  return uploadFile(propertyId, file, "property-ownership");
 };
 
 /**
  * Uploads an identification document to the property-identification bucket
  */
-export const uploadIdentification = async (propertyId: string, file: File): Promise<string | null> => {
-  return uploadFile(propertyId, file, 'property-identification');
+export const uploadIdentification = async (
+  propertyId: string,
+  file: File
+): Promise<string | null> => {
+  return uploadFile(propertyId, file, "property-identification");
 };
 
 /**
@@ -76,8 +92,6 @@ export const deleteFileFromStorage = async (
     // Extract the file path from the URL
     let bucketName = "property_photographs";
     let filePath;
-
-    console.log("🔍 Attempting to delete file:", fileUrl);
 
     if (fileUrl.includes("property_photographs")) {
       filePath = fileUrl.split(
@@ -104,8 +118,6 @@ export const deleteFileFromStorage = async (
       console.error("❌ Could not extract file path from URL:", fileUrl);
       return false;
     }
-
-    console.log(`🔧 Extracted path: ${filePath} from bucket: ${bucketName}`);
 
     // Verify authentication
     const {
@@ -151,9 +163,6 @@ export const deleteFileFromStorage = async (
     // Check response and log results
     if (data && Array.isArray(data)) {
       if (data.length === 0) {
-        console.log(
-          "⚠️ Supabase returned empty data array. File might not exist."
-        );
         return true; // Consider it a success if there's no error
       }
 
@@ -164,12 +173,11 @@ export const deleteFileFromStorage = async (
         return false;
       }
 
-      console.log(`✅ Successfully deleted ${data.length} files:`, data);
       return true;
     }
 
     // If we got here with no errors, consider it a success
-    console.log(`✅ File deletion successful for ${filePath}`);
+
     return true;
   } catch (error) {
     console.error("❌ Unexpected error in deleteFileFromStorage:", error);
@@ -205,10 +213,6 @@ export const deleteFloorPlan = async (fileUrl: string): Promise<boolean> => {
     const propertyId = segments[0];
     const fileName = segments.slice(1).join("/");
 
-    console.log(
-      `🔧 Deleting floor plan: propertyId=${propertyId}, fileName=${fileName}`
-    );
-
     // First list all files in the folder to make sure we see it
     const { data: fileList, error: listError } = await supabase.storage
       .from("property-floorplans")
@@ -219,11 +223,9 @@ export const deleteFloorPlan = async (fileUrl: string): Promise<boolean> => {
       return false;
     }
 
-    console.log(`📁 Files in folder before deletion:`, fileList);
     const fileExists = fileList.some((file) => file.name === fileName);
 
     if (!fileExists) {
-      console.log(`⚠️ File not found in listing, may already be deleted`);
       return true;
     }
 
@@ -237,24 +239,19 @@ export const deleteFloorPlan = async (fileUrl: string): Promise<boolean> => {
       return false;
     }
 
-    console.log(`📊 Deletion response:`, data);
-
     // Verify deletion by listing again
     const { data: afterList } = await supabase.storage
       .from("property-floorplans")
       .list(propertyId);
 
-    console.log(`📁 Files in folder after deletion:`, afterList);
-    const stillExists = afterList.some((file) => file.name === fileName);
+    const stillExists =
+      afterList?.some((file) => file.name === fileName) ?? false;
 
     if (stillExists) {
-      console.error(`❌ File still exists after deletion!`);
+      console.error("❌ File still exists after deletion!");
       return false;
     }
 
-    console.log(
-      `✅ Floor plan deletion verified: File no longer in directory listing`
-    );
     return true;
   } catch (error) {
     console.error("❌ Unexpected error in deleteFloorPlan:", error);
@@ -270,8 +267,6 @@ export const directFloorPlanDelete = async (
   fileUrl: string
 ): Promise<boolean> => {
   try {
-    console.log("🔍 Starting robust floor plan deletion for:", fileUrl);
-
     // Extract path components
     const pathPart = fileUrl.split(
       "/storage/v1/object/public/property-floorplans/"
@@ -282,14 +277,12 @@ export const directFloorPlanDelete = async (
     }
 
     // Use the full path as extracted from URL
-    console.log(`🔧 Using exact path: ${pathPart}`);
 
     // Try multiple deletion approaches
     let deleted = false;
 
     // Approach 1: Standard removal
     try {
-      console.log("🔄 Trying standard removal...");
       const { data, error } = await supabase.storage
         .from("property-floorplans")
         .remove([pathPart]);
@@ -297,7 +290,6 @@ export const directFloorPlanDelete = async (
       if (error) {
         console.warn("⚠️ Standard removal failed:", error);
       } else {
-        console.log("✅ Standard removal succeeded:", data);
         deleted = true;
       }
     } catch (e) {
@@ -307,7 +299,6 @@ export const directFloorPlanDelete = async (
     // If first approach failed, try the second approach with URL encoding
     if (!deleted) {
       try {
-        console.log("🔄 Trying URL-encoded path removal...");
         // URL encode the path for special characters
         const encodedPath = pathPart
           .split("/")
@@ -321,7 +312,6 @@ export const directFloorPlanDelete = async (
         if (error) {
           console.warn("⚠️ URL-encoded removal failed:", error);
         } else {
-          console.log("✅ URL-encoded removal succeeded:", data);
           deleted = true;
         }
       } catch (e) {
@@ -332,15 +322,10 @@ export const directFloorPlanDelete = async (
     // If previous approaches failed, try with individual components
     if (!deleted) {
       try {
-        console.log("🔄 Trying component-based removal...");
         const segments = pathPart.split("/");
         if (segments.length >= 2) {
           const propertyId = segments[0];
           const fileName = segments.slice(1).join("/");
-
-          console.log(
-            `🔧 Removing with propertyId=${propertyId}, fileName=${fileName}`
-          );
 
           const { data, error } = await supabase.storage
             .from("property-floorplans")
@@ -349,7 +334,6 @@ export const directFloorPlanDelete = async (
           if (error) {
             console.warn("⚠️ Component-based removal failed:", error);
           } else {
-            console.log("✅ Component-based removal succeeded:", data);
             deleted = true;
           }
         }
@@ -359,10 +343,9 @@ export const directFloorPlanDelete = async (
     }
 
     if (deleted) {
-      console.log("✅ Successfully deleted floor plan file");
       return true;
     }
-    
+
     console.error("❌ All deletion attempts failed");
     return false;
   } catch (error) {
@@ -379,11 +362,8 @@ export const deletePropertyImageFromDB = async (
   imageUrl: string
 ): Promise<boolean> => {
   try {
-    console.log("⚙️ Starting deletion process for:", imageUrl);
-
     // For floor plans, use our specialized direct method
     if (imageUrl.includes("property-floorplans")) {
-      console.log("📐 Detected floor plan - using direct method");
       const success = await directFloorPlanDelete(imageUrl);
 
       if (!success) {
@@ -391,14 +371,13 @@ export const deletePropertyImageFromDB = async (
         return false;
       }
 
-      console.log("✅ Successfully deleted floor plan");
       return true;
     }
 
     // For regular photographs, use standard deletion method
     let bucketName = "property_photographs";
     let pathPart;
-    
+
     if (imageUrl.includes("property_photographs")) {
       pathPart = imageUrl.split(
         "/storage/v1/object/public/property_photographs/"
@@ -426,11 +405,10 @@ export const deletePropertyImageFromDB = async (
       .remove([pathPart]);
 
     if (error) {
-      console.error(`❌ Failed to delete file:`, error);
+      console.error("❌ Failed to delete file:", error);
       return false;
     }
 
-    console.log(`✅ Successfully deleted file from ${bucketName}`);
     return true;
   } catch (error) {
     console.error("❌ deletePropertyImageFromDB error:", error);
@@ -447,8 +425,6 @@ export const cleanupStorageBucket = async (
   bucketName: string
 ): Promise<boolean> => {
   try {
-    console.log(`🔍 Listing files in ${bucketName}/${propertyId}`);
-
     // Verify authentication
     const {
       data: { session },
@@ -474,10 +450,6 @@ export const cleanupStorageBucket = async (
     }
 
     if (files && files.length > 0) {
-      console.log(
-        `📁 Found ${files.length} files to delete in ${bucketName}/${propertyId}`
-      );
-
       // Create an array of paths to delete
       const filePaths = files.map((file) => `${propertyId}/${file.name}`);
 
@@ -492,39 +464,27 @@ export const cleanupStorageBucket = async (
           deleteError
         );
         return false;
-      } else {
-        console.log(
-          `✅ Deleted files from ${bucketName}/${propertyId}:`,
-          deleteData
-        );
+      }
+      // Verify deletion by listing again
+      const { data: afterList, error: afterError } = await supabase.storage
+        .from(bucketName)
+        .list(propertyId);
 
-        // Verify deletion by listing again
-        const { data: afterList, error: afterError } = await supabase.storage
-          .from(bucketName)
-          .list(propertyId);
-
-        if (afterError) {
-          console.log(
-            `ℹ️ Error listing after deletion, might be deleted successfully:`,
-            afterError
-          );
-          return true;
-        }
-
-        if (afterList && afterList.length > 0) {
-          console.warn(
-            `⚠️ Some files may remain in ${bucketName}/${propertyId}:`,
-            afterList
-          );
-          return false;
-        }
-
+      if (afterError) {
         return true;
       }
-    } else {
-      console.log(`ℹ️ No files found in ${bucketName}/${propertyId}`);
+
+      if (afterList && afterList.length > 0) {
+        console.warn(
+          `⚠️ Some files may remain in ${bucketName}/${propertyId}:`,
+          afterList
+        );
+        return false;
+      }
+
       return true;
     }
+    return true;
   } catch (error) {
     console.error(
       `❌ Error cleaning up ${bucketName} for property ${propertyId}:`,
@@ -542,10 +502,6 @@ export const directCleanupFloorPlans = async (
   propertyId: string
 ): Promise<boolean> => {
   try {
-    console.log(
-      `🔄 Starting direct cleanup of floor plans for property ${propertyId}`
-    );
-
     // First list all files in the property folder
     const { data: files, error: listError } = await supabase.storage
       .from("property-floorplans")
@@ -558,11 +514,8 @@ export const directCleanupFloorPlans = async (
 
     // If no files found, we're done
     if (!files || files.length === 0) {
-      console.log(`ℹ️ No floor plans found for property ${propertyId}`);
       return true;
     }
-
-    console.log(`📁 Found ${files.length} floor plans to delete`);
 
     // Create paths for each file to delete
     const filePaths = files.map((file) => `${propertyId}/${file.name}`);
@@ -572,7 +525,6 @@ export const directCleanupFloorPlans = async (
 
     for (const path of filePaths) {
       try {
-        console.log(`🗑️ Deleting floor plan: ${path}`);
         const { data, error } = await supabase.storage
           .from("property-floorplans")
           .remove([path]);
@@ -582,15 +534,12 @@ export const directCleanupFloorPlans = async (
             `❌ Error deleting floor plan ${path}: ${error.message}`
           );
         } else {
-          console.log(`✅ Successfully deleted floor plan: ${path}`);
           successCount++;
         }
       } catch (fileError) {
         console.error(`❌ Exception deleting floor plan: ${fileError}`);
       }
     }
-
-    console.log(`📊 Deleted ${successCount}/${filePaths.length} floor plans`);
 
     // Even if some files failed, return true to allow the property deletion to continue
     return true;
@@ -609,8 +558,6 @@ export const cleanupPropertyPhotographs = async (
   propertyId: string
 ): Promise<boolean> => {
   try {
-    console.log(`🔍 Cleaning up photographs for property ${propertyId}`);
-
     // List all files in the property folder
     const { data: files, error: listError } = await supabase.storage
       .from("property_photographs")
@@ -625,8 +572,6 @@ export const cleanupPropertyPhotographs = async (
     }
 
     if (files && files.length > 0) {
-      console.log(`📁 Found ${files.length} photographs to delete`);
-
       // Create an array of paths to delete
       const filePaths = files.map((file) => `${propertyId}/${file.name}`);
 
@@ -639,11 +584,9 @@ export const cleanupPropertyPhotographs = async (
         console.error(`❌ Error deleting photographs:`, deleteError);
         return false;
       } else {
-        console.log(`✅ Deleted all photographs for property ${propertyId}`);
         return true;
       }
     } else {
-      console.log(`ℹ️ No photographs found for property ${propertyId}`);
       return true;
     }
   } catch (error) {
@@ -659,10 +602,6 @@ export const cleanupPropertyPhotographs = async (
 export const cleanupAllPropertyFiles = async (
   propertyId: string
 ): Promise<boolean> => {
-  console.log(
-    `🔄 Starting cleanup for all files related to property ${propertyId}`
-  );
-
   // First cleanup property_photographs
   let photosResult = false;
   try {
@@ -682,7 +621,10 @@ export const cleanupAllPropertyFiles = async (
   // Cleanup ownership documents
   let ownershipResult = false;
   try {
-    ownershipResult = await cleanupStorageBucket(propertyId, "property-ownership");
+    ownershipResult = await cleanupStorageBucket(
+      propertyId,
+      "property-ownership"
+    );
   } catch (error) {
     console.error(`❌ Error cleaning up ownership documents: ${error}`);
   }
@@ -690,15 +632,13 @@ export const cleanupAllPropertyFiles = async (
   // Cleanup identification documents
   let identificationResult = false;
   try {
-    identificationResult = await cleanupStorageBucket(propertyId, "property-identification");
+    identificationResult = await cleanupStorageBucket(
+      propertyId,
+      "property-identification"
+    );
   } catch (error) {
     console.error(`❌ Error cleaning up identification documents: ${error}`);
   }
-
-  console.log(
-    `📊 Cleanup results - Photos: ${photosResult ? "✅" : "❌"}, Floor Plans: ${floorPlansResult ? "✅" : "❌"}, 
-    Ownership: ${ownershipResult ? "✅" : "❌"}, Identification: ${identificationResult ? "✅" : "❌"}`
-  );
 
   // Even if some operations "failed", consider the cleanup done
   // to not block the property deletion

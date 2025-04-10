@@ -11,6 +11,11 @@ import {
   fetchUserPropertiesFeaturesFromDB,
   updatePropertyFeatureInDB,
 } from "../../database/features";
+import {
+  createMultipleInspections,
+  fetchPropertyInspections,
+  updatePropertyInspection,
+} from "../../database/inspections";
 import useRealtyStore from "../../store/store";
 import Contact from "./Contact";
 import Description from "./Description";
@@ -30,6 +35,8 @@ export default function Edit() {
     setPropertyFeatures,
     propertyDetails,
     propertyFeatures,
+    propertyInspections,
+    setPropertyInspections,
   } = useRealtyStore();
 
   const [tabValue, setTabValue] = useState(0);
@@ -43,6 +50,7 @@ export default function Edit() {
   // Use refs to track saved state to prevent recreation on re-renders
   const lastSavedDetailsRef = useRef<typeof propertyDetail>(null);
   const lastSavedFeaturesRef = useRef<typeof propertyFeature>(null);
+  const lastSavedInspectionsRef = useRef<typeof propertyInspections>([]);
 
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId
@@ -50,6 +58,10 @@ export default function Edit() {
 
   const propertyFeature = propertyFeatures.filter(
     (p) => p.property_id === propertyId
+  );
+
+  const currentInspections = propertyInspections.filter(
+    (insp) => insp.property_id === propertyId
   );
 
   // Initialize last saved state only once
@@ -64,11 +76,17 @@ export default function Edit() {
       );
     }
 
+    if (currentInspections.length > 0 && !lastSavedInspectionsRef.current) {
+      lastSavedInspectionsRef.current = JSON.parse(
+        JSON.stringify(currentInspections)
+      );
+    }
+
     // Mark as initialized after the first render cycle
     if (propertyDetail && !isInitialized.current) {
       isInitialized.current = true;
     }
-  }, [propertyDetail, propertyFeature]);
+  }, [propertyDetail, propertyFeature, currentInspections]);
 
   // Track changes by comparing current state with last saved state
   useEffect(() => {
@@ -87,7 +105,13 @@ export default function Edit() {
         JSON.stringify(sortObjectKeys(lastSavedFeaturesRef.current || [])) !==
         JSON.stringify(sortObjectKeys(propertyFeature || []));
 
-      const hasChanges = detailsChanged || featuresChanged;
+      const inspectionsChanged =
+        JSON.stringify(
+          sortObjectKeys(lastSavedInspectionsRef.current || [])
+        ) !== JSON.stringify(sortObjectKeys(currentInspections || []));
+
+      const hasChanges =
+        detailsChanged || featuresChanged || inspectionsChanged;
 
       if (hasChanges !== hasUnsavedChanges) {
         console.log(
@@ -98,7 +122,7 @@ export default function Edit() {
         setHasUnsavedChanges(hasChanges);
       }
     }
-  }, [propertyDetail, propertyFeature, hasUnsavedChanges]);
+  }, [propertyDetail, propertyFeature, currentInspections, hasUnsavedChanges]);
 
   // Helper function to sort object keys for consistent comparison
   const sortObjectKeys = (obj: any) => {
@@ -132,7 +156,6 @@ export default function Edit() {
 
     // Double check if there are actually changes before saving
     if (!hasUnsavedChanges) {
-      console.log("No changes detected, skipping save operation");
       return true;
     }
 
@@ -140,8 +163,6 @@ export default function Edit() {
     setActionType("save");
 
     try {
-      console.log("Saving changes to database");
-
       // First, update the DB with changes from Zustand
       await updatePropertyDetailInDB(propertyId, propertyDetail);
 
@@ -149,11 +170,50 @@ export default function Edit() {
         await updatePropertyFeatureInDB(propertyId, propertyFeature);
       }
 
+      // Handle inspections
+      if (currentInspections.length > 0) {
+        // Split inspections into existing and new
+        const existingInspections = currentInspections.filter(
+          (insp) => insp.id && !insp.id.toString().startsWith("temp-")
+        );
+
+        const newInspections = currentInspections
+          .filter((insp) => !insp.id || insp.id.toString().startsWith("temp-"))
+          .map(({ id, ...rest }) => rest); // Remove temporary IDs
+
+        // Update existing inspections
+        if (existingInspections.length > 0) {
+          console.log(
+            `Updating ${existingInspections.length} existing inspections`
+          );
+          for (const insp of existingInspections) {
+            if (insp.id) {
+              await updatePropertyInspection(insp.id, {
+                inspection_date: insp.inspection_date,
+                start_time: insp.start_time,
+                end_time: insp.end_time,
+                inspection_type: insp.inspection_type,
+              });
+            }
+          }
+        }
+
+        // Create new inspections
+        if (newInspections.length > 0) {
+          const createdInspections =
+            await createMultipleInspections(newInspections);
+          console.log(
+            `Successfully created ${createdInspections.length} inspections`
+          );
+        }
+      }
+
       // Fetch the latest data from the DB
       const updatedPropertyDetails = await fetchPropertyDetailInDb(propertyId);
       const updatedPropertyFeatures = await fetchUserPropertiesFeaturesFromDB([
         propertyId,
       ]);
+      const updatedInspections = await fetchPropertyInspections(propertyId);
 
       // Sync Zustand store with updated DB data
       if (updatedPropertyDetails) {
@@ -170,8 +230,22 @@ export default function Edit() {
         );
       }
 
+      // Update inspections in store
+      if (updatedInspections.length > 0) {
+        // Keep inspections from other properties
+        const otherInspections = propertyInspections.filter(
+          (insp) => insp.property_id !== propertyId
+        );
+
+        // Set all inspections
+        setPropertyInspections([...otherInspections, ...updatedInspections]);
+        lastSavedInspectionsRef.current = JSON.parse(
+          JSON.stringify(updatedInspections)
+        );
+      }
+
       setHasUnsavedChanges(false);
-      console.log("Save operation completed successfully");
+
       return true;
     } catch (error) {
       console.error("Error saving property data:", error);
@@ -191,7 +265,6 @@ export default function Edit() {
 
     // If there are unsaved changes, save before changing tabs
     if (hasUnsavedChanges) {
-      console.log("Saving changes before tab change");
       const success = await saveChanges();
 
       // Only change tab if save was successful
@@ -202,7 +275,7 @@ export default function Edit() {
     }
 
     // If no changes, just change the tab without saving
-    console.log("No changes to save, just changing tab");
+
     setTabValue(newValue);
   };
 

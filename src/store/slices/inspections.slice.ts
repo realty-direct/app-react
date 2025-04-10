@@ -1,15 +1,10 @@
-// File: src/store/slices/inspections.slice.ts
 import type { StateCreator } from "zustand";
+import type { PropertyInspection } from "../../database/inspections";
 import {
   createPropertyInspection,
   deletePropertyInspection,
-  updatePropertyInspection,
 } from "../../database/inspections";
-import type {
-  Inspection,
-  PropertyInspection,
-  PropertyInspectionsState,
-} from "../types";
+import type { Inspection, PropertyInspectionsState } from "../types";
 
 export const createPropertyInspectionsSlice: StateCreator<
   PropertyInspectionsState
@@ -17,8 +12,6 @@ export const createPropertyInspectionsSlice: StateCreator<
   propertyInspections: [],
 
   setPropertyInspections: (inspections: Inspection[]) => {
-    console.log(`Setting ${inspections.length} inspections in Zustand store`);
-
     // Make sure we're not adding duplicates
     const uniqueInspections = inspections.reduce((acc, current) => {
       // If we already have this inspection by ID, don't add it again
@@ -37,8 +30,6 @@ export const createPropertyInspectionsSlice: StateCreator<
 
   // Add a new inspection to the store (optimistic update)
   addPropertyInspection: async (inspection: PropertyInspection) => {
-    console.log("Adding new inspection to store:", inspection);
-
     // First update the local state (optimistic update)
     const tempId = `temp-${Date.now()}`; // Create a temporary ID for optimistic UI
     const tempInspection = { ...inspection, id: tempId };
@@ -56,7 +47,6 @@ export const createPropertyInspectionsSlice: StateCreator<
 
       // Update the local state with the DB-saved inspection (replace the temp one)
       if (savedInspection) {
-        console.log("Inspection saved successfully:", savedInspection);
         set((state) => ({
           propertyInspections: state.propertyInspections
             .filter((insp) => insp.id !== tempId)
@@ -87,8 +77,6 @@ export const createPropertyInspectionsSlice: StateCreator<
     inspectionId: string,
     updates: Partial<Inspection>
   ) => {
-    console.log("Updating inspection:", inspectionId, updates);
-
     // First update the local state (optimistic update)
     set((state) => ({
       propertyInspections: state.propertyInspections.map((inspection) =>
@@ -98,24 +86,11 @@ export const createPropertyInspectionsSlice: StateCreator<
       ),
     }));
 
-    // Then save to the database
-    try {
-      const updatedInspection = await updatePropertyInspection(
-        inspectionId,
-        updates
-      );
-      if (!updatedInspection) {
-        console.error("Failed to update inspection in database");
-      }
-    } catch (error) {
-      console.error("Error updating inspection:", error);
-    }
+    // We'll let the Edit.tsx handle the actual database update
   },
 
   // Delete an inspection
   deletePropertyInspection: async (inspectionId: string) => {
-    console.log("Deleting inspection:", inspectionId);
-
     // First update the local state (optimistic delete)
     set((state) => ({
       propertyInspections: state.propertyInspections.filter(
@@ -136,7 +111,6 @@ export const createPropertyInspectionsSlice: StateCreator<
 
   // Clear all inspections from store
   clearPropertyInspections: () => {
-    console.log("Clearing all inspections from store");
     set({ propertyInspections: [] });
   },
 });
