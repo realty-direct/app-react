@@ -19,7 +19,7 @@ import {
   deletePropertyImageFromDB,
   uploadFloorPlan,
   uploadPropertyImage,
-} from "../../../database/supabase";
+} from "../../../database/files";
 import useRealtyStore from "../../../store/store";
 import { SortableImage } from "./SortableImage";
 
@@ -112,10 +112,15 @@ export default function Media() {
             : await updatePropertyFloorPlansInDB(propertyId, updatedList);
 
         if (updatedData) {
+          type MediaUpdateData = {
+            images?: { url: string }[];
+            floor_plans?: { url: string }[];
+          };
+          
           const validFiles = (
-            (updatedData as any)[
+            (updatedData as MediaUpdateData)[
               type === "images" ? "images" : "floor_plans"
-            ] as { url: string }[]
+            ] || []
           ).filter(
             (file): file is { url: string } =>
               file !== null &&
@@ -162,10 +167,15 @@ export default function Media() {
             : await updatePropertyFloorPlansInDB(propertyId, updatedFiles);
 
         if (updatedData) {
+          type MediaUpdateData = {
+            images?: { url: string }[];
+            floor_plans?: { url: string }[];
+          };
+          
           const validFiles = (
-            (updatedData as any)[
+            (updatedData as MediaUpdateData)[
               type === "images" ? "images" : "floor_plans"
-            ] as { url: string }[]
+            ] || []
           ).filter(
             (file): file is { url: string } =>
               file !== null &&

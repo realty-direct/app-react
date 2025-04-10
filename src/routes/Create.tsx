@@ -88,7 +88,7 @@ export default function Create(): JSX.Element {
   return (
     <Box className="w-full">
       {/* Sticky Tabs */}
-      <div className="sticky top-0 z-50  shadow-md">
+      <div className="sticky top-0 z-50 shadow-md">
         <Tabs value={0} aria-label="Property details tab">
           <Tab label="Property Details" />
         </Tabs>

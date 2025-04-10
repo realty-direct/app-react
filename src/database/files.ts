@@ -2,6 +2,56 @@
 import { supabase } from "./supabase";
 
 /**
+ * Uploads a file to the specified Supabase storage bucket with proper error handling
+ * @param propertyId - The ID of the property
+ * @param file - The file to upload
+ * @param bucketName - The storage bucket name ('property_photographs' or 'property-floorplans')
+ * @returns The public URL of the uploaded file, or null on failure
+ */
+export const uploadFile = async (
+  propertyId: string,
+  file: File,
+  bucketName: 'property_photographs' | 'property-floorplans'
+): Promise<string | null> => {
+  // Create a unique filename
+  const safeFileName = file.name
+    .replace(/\s+/g, "-") // Replace spaces with dashes
+    .replace(/[^a-zA-Z0-9.-]/g, "") // Remove special characters
+    .toLowerCase();
+
+  // Use consistent unique ID generation
+  const uniqueId = crypto.randomUUID();
+  const filePath = `${propertyId}/${uniqueId}-${safeFileName}`;
+
+  // Upload to the specified bucket
+  const { data, error } = await supabase.storage
+    .from(bucketName)
+    .upload(filePath, file, { cacheControl: "3600", upsert: false });
+
+  if (error) {
+    console.error(`❌ Upload to ${bucketName} failed:`, error);
+    return null;
+  }
+
+  return supabase.storage.from(bucketName).getPublicUrl(filePath)
+    .data.publicUrl;
+};
+
+/**
+ * Uploads a property image to the property_photographs bucket
+ */
+export const uploadPropertyImage = async (propertyId: string, file: File): Promise<string | null> => {
+  return uploadFile(propertyId, file, 'property_photographs');
+};
+
+/**
+ * Uploads a floor plan to the property-floorplans bucket
+ */
+export const uploadFloorPlan = async (propertyId: string, file: File): Promise<string | null> => {
+  return uploadFile(propertyId, file, 'property-floorplans');
+};
+
+/**
  * Deletes a file from Supabase storage based on its public URL
  * Uses the recommended Supabase approach with proper error handling
  */
@@ -287,12 +337,65 @@ export const directFloorPlanDelete = async (
     if (deleted) {
       console.log("✅ Successfully deleted floor plan file");
       return true;
-    } else {
-      console.error("❌ All deletion attempts failed");
-      return false;
     }
+    
+    console.error("❌ All deletion attempts failed");
+    return false;
   } catch (error) {
     console.error("❌ Error in directFloorPlanDelete:", error);
+    return false;
+  }
+};
+
+/**
+ * Generic function to delete an image from storage based on its URL
+ * Handles both property photographs and floor plans
+ */
+export const deletePropertyImageFromDB = async (
+  imageUrl: string
+): Promise<boolean> => {
+  try {
+    console.log("⚙️ Starting deletion process for:", imageUrl);
+
+    // For floor plans, use our specialized direct method
+    if (imageUrl.includes("property-floorplans")) {
+      console.log("📐 Detected floor plan - using direct method");
+      const success = await directFloorPlanDelete(imageUrl);
+
+      if (!success) {
+        console.error("❌ Failed to delete floor plan:", imageUrl);
+        return false;
+      }
+
+      console.log("✅ Successfully deleted floor plan");
+      return true;
+    }
+
+    // For regular photographs, use standard deletion method
+    const bucketName = "property_photographs";
+    const filePath = imageUrl.split(
+      "/storage/v1/object/public/property_photographs/"
+    )[1];
+
+    if (!filePath) {
+      console.error("❌ Could not extract file path from URL:", imageUrl);
+      return false;
+    }
+
+    // Simple direct approach for photos - this seems to be working
+    const { error } = await supabase.storage
+      .from(bucketName)
+      .remove([filePath]);
+
+    if (error) {
+      console.error(`❌ Failed to delete photograph:`, error);
+      return false;
+    }
+
+    console.log("✅ Successfully deleted photograph from storage");
+    return true;
+  } catch (error) {
+    console.error("❌ deletePropertyImageFromDB error:", error);
     return false;
   }
 };

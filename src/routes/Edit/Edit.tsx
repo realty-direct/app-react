@@ -40,8 +40,8 @@ export default function Edit() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Use refs to track saved state to prevent recreation on re-renders
-  const lastSavedDetailsRef = useRef<any>(null);
-  const lastSavedFeaturesRef = useRef<any>(null);
+  const lastSavedDetailsRef = useRef<typeof propertyDetail>(null);
+  const lastSavedFeaturesRef = useRef<typeof propertyFeature>(null);
 
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId
@@ -150,10 +150,11 @@ export default function Edit() {
       if (success) {
         setTabValue(newValue);
       }
-    } else {
-      // If no changes, just change the tab
-      setTabValue(newValue);
+      return;
     }
+    
+    // If no changes, just change the tab
+    setTabValue(newValue);
   };
 
   // On continue button click
@@ -167,10 +168,11 @@ export default function Edit() {
         // Navigate to next tab after successful save
         setTabValue((prev) => prev + 1);
       }
-    } else {
-      // If no changes to save, just navigate
-      setTabValue((prev) => prev + 1);
+      return;
     }
+    
+    // If no changes to save, just navigate
+    setTabValue((prev) => prev + 1);
   };
 
   const handleBack = async () => {
@@ -181,9 +183,10 @@ export default function Edit() {
       if (success) {
         setTabValue((prev) => prev - 1);
       }
-    } else {
-      setTabValue((prev) => prev - 1);
+      return;
     }
+    
+    setTabValue((prev) => prev - 1);
   };
 
   return (

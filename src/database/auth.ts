@@ -1,5 +1,15 @@
 import { supabase } from "./supabase";
 
+// ✅ Check User Session (Returns `user` object or `null`)
+export const checkUserSession = async () => {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    console.error("❌ Error fetching user session:", error.message);
+    return null;
+  }
+  return data.user || null;
+};
+
 // ✅ Sign Up User
 export const signUp = async (
   email: string,
