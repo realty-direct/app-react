@@ -1,8 +1,14 @@
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import HouseIcon from "@mui/icons-material/House";
+import PersonIcon from "@mui/icons-material/Person";
 import {
   Box,
   Button,
+  Chip,
+  Divider,
   FormHelperText,
   IconButton,
   MenuItem,
@@ -10,11 +16,13 @@ import {
   Select,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import type { Inspection } from "../../database/inspections";
 import useRealtyStore from "../../store/store";
@@ -43,7 +51,18 @@ const generateTimeOptions = () => {
 
 const TIME_OPTIONS = generateTimeOptions();
 
+// Format time for display (convert 24h to 12h format)
+const formatTimeDisplay = (time24h: string) => {
+  const [hours, minutes] = time24h.split(":");
+  const hoursNum = parseInt(hours, 10);
+  const period = hoursNum >= 12 ? "PM" : "AM";
+  const hours12 = hoursNum % 12 || 12;
+  return `${hours12}:${minutes} ${period}`;
+};
+
 export default function Inspections() {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const { id } = useParams<{ id: string }>();
   const propertyId = id ?? "";
 
@@ -53,23 +72,55 @@ export default function Inspections() {
     deletePropertyInspection: removeInspection,
   } = useRealtyStore();
 
-  // Local state for form management
-  const [openHouseTimes, setOpenHouseTimes] = useState<InspectionTime[]>([
-    { date: null, start: "09:00", end: "09:15", hasError: false },
-  ]);
+  // Get inspections for this property directly from the store
+  const currentPropertyInspections = propertyInspections.filter(
+    (insp) => insp.property_id === propertyId
+  );
+
+  const currentOpenHouses = currentPropertyInspections.filter(
+    (insp) => insp.inspection_type === "public"
+  );
+
+  const currentPrivateInspections = currentPropertyInspections.filter(
+    (insp) => insp.inspection_type === "private"
+  );
+
+  // Initialize with current inspections from the store or a default empty one
+  const [openHouseTimes, setOpenHouseTimes] = useState<InspectionTime[]>(
+    currentOpenHouses.length > 0
+      ? currentOpenHouses.map((i) => ({
+          id: i.id,
+          date: new Date(i.inspection_date),
+          start: i.start_time,
+          end: i.end_time,
+          hasError: false,
+        }))
+      : [{ date: null, start: "09:00", end: "10:00", hasError: false }]
+  );
+
   const [privateInspectionTimes, setPrivateInspectionTimes] = useState<
     InspectionTime[]
-  >([{ date: null, start: "09:00", end: "09:15", hasError: false }]);
+  >(
+    currentPrivateInspections.length > 0
+      ? currentPrivateInspections.map((i) => ({
+          id: i.id,
+          date: new Date(i.inspection_date),
+          start: i.start_time,
+          end: i.end_time,
+          hasError: false,
+        }))
+      : [{ date: null, start: "09:00", end: "10:00", hasError: false }]
+  );
 
   // Helper function to convert time state to inspection objects for Zustand
   const updateZustandInspections = () => {
     if (!propertyId) return;
 
-    const currentPropertyInspections = propertyInspections.filter(
+    const otherPropertiesInspections = propertyInspections.filter(
       (insp) => insp.property_id !== propertyId
     );
 
-    const inspections: Inspection[] = [];
+    const newInspections: Inspection[] = [];
 
     // Add open house inspections
     for (const time of openHouseTimes) {
@@ -79,23 +130,23 @@ export default function Inspections() {
 
           if (time.id) {
             // Existing inspection
-            inspections.push({
+            newInspections.push({
               id: time.id,
               property_id: propertyId,
               inspection_date: inspectionDate,
               start_time: time.start,
               end_time: time.end,
-              inspection_type: "open_house",
+              inspection_type: "public",
             });
           } else {
             // New inspection
-            inspections.push({
-              id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            newInspections.push({
+              id: `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
               property_id: propertyId,
               inspection_date: inspectionDate,
               start_time: time.start,
               end_time: time.end,
-              inspection_type: "open_house",
+              inspection_type: "public",
             });
           }
         } catch (error) {
@@ -112,7 +163,7 @@ export default function Inspections() {
 
           if (time.id) {
             // Existing inspection
-            inspections.push({
+            newInspections.push({
               id: time.id,
               property_id: propertyId,
               inspection_date: inspectionDate,
@@ -122,8 +173,8 @@ export default function Inspections() {
             });
           } else {
             // New inspection
-            inspections.push({
-              id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            newInspections.push({
+              id: `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
               property_id: propertyId,
               inspection_date: inspectionDate,
               start_time: time.start,
@@ -137,67 +188,8 @@ export default function Inspections() {
       }
     }
 
-    // Update Zustand with all inspections (from other properties + updated ones for this property)
-    setPropertyInspections([...currentPropertyInspections, ...inspections]);
-  };
-
-  // Fetch inspections when component mounts
-  useEffect(() => {
-    const loadInspections = async () => {
-      if (propertyId) {
-        // Filter property inspections that match this property ID
-        const currentInspections = propertyInspections.filter(
-          (insp) => insp.property_id === propertyId
-        );
-
-        console.log(
-          `Found ${currentInspections.length} inspections for this property`
-        );
-
-        // Group inspections by type
-        const openHouse = currentInspections.filter(
-          (i) => i.inspection_type === "open_house"
-        );
-        const privateInspection = currentInspections.filter(
-          (i) => i.inspection_type === "private"
-        );
-
-        // Set local state if we have inspections
-        if (openHouse.length > 0) {
-          setOpenHouseTimes(
-            openHouse.map((i) => ({
-              id: i.id,
-              date: new Date(i.inspection_date),
-              start: i.start_time,
-              end: i.end_time,
-              hasError: false,
-            }))
-          );
-        }
-
-        if (privateInspection.length > 0) {
-          console.log(
-            `Setting ${privateInspection.length} private inspection times`
-          );
-          setPrivateInspectionTimes(
-            privateInspection.map((i) => ({
-              id: i.id,
-              date: new Date(i.inspection_date),
-              start: i.start_time,
-              end: i.end_time,
-              hasError: false,
-            }))
-          );
-        }
-      }
-    };
-
-    loadInspections();
-  }, [propertyId, propertyInspections.length]); // Only run when propertyId or the length of inspections changes
-
-  // Validate time (ensure start is before end)
-  const validateTimeRange = (start: string, end: string): boolean => {
-    return start < end;
+    // Update Zustand with all inspections
+    setPropertyInspections([...otherPropertiesInspections, ...newInspections]);
   };
 
   // Handle date change
@@ -210,16 +202,13 @@ export default function Inspections() {
       times.map((item, i) => (i === index ? { ...item, date: newDate } : item));
 
     if (isPrivate) {
-      const newTimes = updateTimes(privateInspectionTimes);
-      setPrivateInspectionTimes(newTimes);
-      // Update Zustand only after state is set
-      setTimeout(() => updateZustandInspections(), 0);
+      setPrivateInspectionTimes(updateTimes(privateInspectionTimes));
     } else {
-      const newTimes = updateTimes(openHouseTimes);
-      setOpenHouseTimes(newTimes);
-      // Update Zustand only after state is set
-      setTimeout(() => updateZustandInspections(), 0);
+      setOpenHouseTimes(updateTimes(openHouseTimes));
     }
+
+    // Update Zustand after state is set
+    setTimeout(updateZustandInspections, 0);
   };
 
   // Handle time changes
@@ -229,408 +218,625 @@ export default function Inspections() {
     value: string,
     isPrivate: boolean
   ) => {
-    if (isPrivate) {
-      const times = [...privateInspectionTimes];
-      const time = times[index];
+    const times = isPrivate ? [...privateInspectionTimes] : [...openHouseTimes];
+    const time = times[index];
 
-      // Validate time range
-      let hasError = false;
-      let errorMessage = "";
+    // Validate time range
+    let hasError = false;
+    let errorMessage = "";
 
-      if (field === "start" && value >= time.end) {
-        hasError = true;
-        errorMessage = "Start time must be before end time";
-      } else if (field === "end" && value <= time.start) {
-        hasError = true;
-        errorMessage = "End time must be after start time";
-      }
-
-      // Create a new time object with updated field
-      const updatedTime = {
-        ...time,
-        [field]: value,
-        hasError,
-        errorMessage,
-      };
-
-      // Update the time at the specific index
-      times[index] = updatedTime;
-
-      // Update state with new array
-      setPrivateInspectionTimes(times);
-
-      // Update Zustand after state update
-      setTimeout(() => updateZustandInspections(), 0);
-    } else {
-      const times = [...openHouseTimes];
-      const time = times[index];
-
-      // Validate time range
-      let hasError = false;
-      let errorMessage = "";
-
-      if (field === "start" && value >= time.end) {
-        hasError = true;
-        errorMessage = "Start time must be before end time";
-      } else if (field === "end" && value <= time.start) {
-        hasError = true;
-        errorMessage = "End time must be after start time";
-      }
-
-      // Create a new time object with updated field
-      const updatedTime = {
-        ...time,
-        [field]: value,
-        hasError,
-        errorMessage,
-      };
-
-      // Update the time at the specific index
-      times[index] = updatedTime;
-
-      // Update state with new array
-      setOpenHouseTimes(times);
-
-      // Update Zustand after state update
-      setTimeout(() => updateZustandInspections(), 0);
+    if (field === "start" && value >= time.end) {
+      hasError = true;
+      errorMessage = "Start time must be before end time";
+    } else if (field === "end" && value <= time.start) {
+      hasError = true;
+      errorMessage = "End time must be after start time";
     }
+
+    // Create a new time object with updated field
+    const updatedTime = {
+      ...time,
+      [field]: value,
+      hasError,
+      errorMessage,
+    };
+
+    // Update the time at the specific index
+    times[index] = updatedTime;
+
+    // Update state with new array
+    if (isPrivate) {
+      setPrivateInspectionTimes(times);
+    } else {
+      setOpenHouseTimes(times);
+    }
+
+    // Update Zustand after state update
+    setTimeout(updateZustandInspections, 0);
   };
 
   // Function to add new open house time
   const addOpenHouseTime = () => {
-    const newTimes = [
+    setOpenHouseTimes([
       ...openHouseTimes,
-      { date: null, start: "09:00", end: "09:15", hasError: false },
-    ];
-    setOpenHouseTimes(newTimes);
+      { date: null, start: "09:00", end: "10:00", hasError: false },
+    ]);
   };
 
   // Function to add new private inspection time
   const addPrivateInspectionTime = () => {
-    const newTimes = [
+    setPrivateInspectionTimes([
       ...privateInspectionTimes,
-      { date: null, start: "09:00", end: "09:15", hasError: false },
-    ];
-    setPrivateInspectionTimes(newTimes);
+      { date: null, start: "09:00", end: "10:00", hasError: false },
+    ]);
   };
 
   // Function to remove an entry
-  const removeTime = async (index: number, isPrivate: boolean) => {
+  const removeTime = (index: number, isPrivate: boolean) => {
     const times = isPrivate ? privateInspectionTimes : openHouseTimes;
     const time = times[index];
 
     if (time.id) {
       // If the inspection has an ID, delete it from the database via Zustand
-
       removeInspection(time.id);
-    } else {
     }
 
     // Update local state
     if (isPrivate) {
-      const newTimes = privateInspectionTimes.filter((_, i) => i !== index);
-      setPrivateInspectionTimes(newTimes);
+      setPrivateInspectionTimes(
+        privateInspectionTimes.filter((_, i) => i !== index)
+      );
     } else {
-      const newTimes = openHouseTimes.filter((_, i) => i !== index);
-      setOpenHouseTimes(newTimes);
+      setOpenHouseTimes(openHouseTimes.filter((_, i) => i !== index));
     }
 
     // Update Zustand after state update
-    setTimeout(() => updateZustandInspections(), 0);
+    setTimeout(updateZustandInspections, 0);
   };
+
+  // Check if we have any scheduled inspections
+  const hasScheduledOpenHouses = openHouseTimes.some(
+    (time) => time.date !== null
+  );
+  const hasScheduledPrivateInspections = privateInspectionTimes.some(
+    (time) => time.date !== null
+  );
+
+  // Dynamic background colors based on theme mode
+  const summaryBgColor = isDarkMode ? "#1a2035" : "#f5f9ff";
+  const summaryBorderColor = isDarkMode ? "#2d3748" : "#e0e9fd";
+  const scheduledBgColor = isDarkMode ? "#1e293b" : "#f8f9fa";
+  const infoBgColor = isDarkMode ? "#1a2035" : "#f8f8f8";
+  const borderColor = isDarkMode ? "#2d3748" : "#e0e0e0";
+  const errorBorderColor = isDarkMode ? "#f44336" : "#f44336";
+  const deleteBtnHoverBg = isDarkMode ? "#451419" : "#ffebee";
+  const deleteBtnHoverBorder = isDarkMode ? "#8b2130" : "#ffcdd2";
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box sx={{ p: { xs: 2, sm: 6 } }}>
         {/* Header */}
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
-          Inspections (Optional)
+        <Typography
+          variant="h5"
+          gutterBottom
+          sx={{ fontWeight: "bold", mb: 3 }}
+        >
+          Property Inspections
         </Typography>
+
+        {/* Summary of scheduled inspections */}
+        <Paper
+          elevation={2}
+          sx={{
+            p: 3,
+            mb: 4,
+            backgroundColor: summaryBgColor,
+            border: `1px solid ${summaryBorderColor}`,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+            <EventAvailableIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6">Inspection Schedule Summary</Typography>
+          </Box>
+
+          <Divider sx={{ mb: 2 }} />
+
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Box>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                <HouseIcon
+                  sx={{ mr: 1, color: "primary.main", fontSize: 20 }}
+                />
+                <Typography variant="subtitle1">
+                  Open House Inspections
+                </Typography>
+              </Box>
+
+              {hasScheduledOpenHouses ? (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, ml: 4 }}>
+                  {openHouseTimes
+                    .filter((time) => time.date !== null)
+                    .map((time, index) => (
+                      <Chip
+                        key={`summary-open-${index}`}
+                        label={`${format(time.date as Date, "dd MMM")} · ${formatTimeDisplay(time.start)} - ${formatTimeDisplay(time.end)}`}
+                        color="primary"
+                        variant="outlined"
+                        sx={{ borderRadius: 1, mb: 1 }}
+                      />
+                    ))}
+                </Box>
+              ) : (
+                <Typography
+                  variant="body2"
+                  sx={{ ml: 4, color: "text.secondary" }}
+                >
+                  No open house inspections scheduled
+                </Typography>
+              )}
+            </Box>
+
+            <Box>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                <PersonIcon
+                  sx={{ mr: 1, color: "primary.main", fontSize: 20 }}
+                />
+                <Typography variant="subtitle1">Private Inspections</Typography>
+              </Box>
+
+              {hasScheduledPrivateInspections ? (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, ml: 4 }}>
+                  {privateInspectionTimes
+                    .filter((time) => time.date !== null)
+                    .map((time, index) => (
+                      <Chip
+                        key={`summary-private-${index}`}
+                        label={`${format(time.date as Date, "dd MMM")} · ${formatTimeDisplay(time.start)} - ${formatTimeDisplay(time.end)}`}
+                        color="secondary"
+                        variant="outlined"
+                        sx={{ borderRadius: 1, mb: 1 }}
+                      />
+                    ))}
+                </Box>
+              ) : (
+                <Typography
+                  variant="body2"
+                  sx={{ ml: 4, color: "text.secondary" }}
+                >
+                  No private inspections scheduled
+                </Typography>
+              )}
+            </Box>
+          </Box>
+        </Paper>
 
         {/* Open House Section */}
-        <Typography sx={{ mb: 2 }}>
-          Set an open house time for prospective buyers or tenants to view your
-          property.
-        </Typography>
+        <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+            <HouseIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6">Open House Inspections</Typography>
+          </Box>
 
-        {openHouseTimes.map((time, index) => (
-          <Paper
-            sx={{
-              p: 3,
-              mb: 2,
-              border: time.hasError ? "1px solid red" : "none",
-            }}
-            key={`open-house-${time.id || index}`}
-          >
-            <Box
+          <Typography sx={{ mb: 3 }}>
+            Set open house times when multiple prospective buyers can view your
+            property simultaneously.
+          </Typography>
+
+          {openHouseTimes.map((time, index) => (
+            <Paper
+              elevation={0}
               sx={{
-                display: "flex",
-                flexDirection: { xs: "column", sm: "row" },
-                gap: 2,
+                p: 3,
                 mb: 2,
+                border: time.hasError
+                  ? `1px solid ${errorBorderColor}`
+                  : `1px solid ${borderColor}`,
+                borderRadius: 1,
+                backgroundColor: time.date
+                  ? scheduledBgColor
+                  : "background.paper",
+                position: "relative",
               }}
+              key={`open-house-${time.id || index}`}
             >
-              <DatePicker
-                label="Date *"
-                value={time.date}
-                onChange={(newDate) => handleDateChange(index, newDate, false)}
-                slotProps={{
-                  textField: {
-                    variant: "filled",
-                    fullWidth: true,
-                    required: true,
-                  },
-                }}
-              />
+              {time.date && (
+                <Chip
+                  size="small"
+                  label="Scheduled"
+                  color="primary"
+                  sx={{
+                    position: "absolute",
+                    top: 10,
+                    right: 10,
+                    borderRadius: 1,
+                  }}
+                />
+              )}
 
               <Box
                 sx={{
                   display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  width: "100%",
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: 2,
+                  mb: 2,
                 }}
               >
-                <AccessTimeIcon />
-                <Typography variant="body2">
-                  Times are in 15 minute intervals:
-                </Typography>
-              </Box>
-            </Box>
+                <DatePicker
+                  label="Inspection Date *"
+                  value={time.date}
+                  onChange={(newDate) =>
+                    handleDateChange(index, newDate, false)
+                  }
+                  slotProps={{
+                    textField: {
+                      variant: "outlined",
+                      fullWidth: true,
+                      required: true,
+                      size: "medium",
+                    },
+                  }}
+                />
 
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", sm: "row" },
-                gap: 2,
-                mb: 2,
-              }}
-            >
-              <Select
-                label="Start Time *"
-                variant="filled"
-                fullWidth
-                value={time.start}
-                onChange={(e) =>
-                  handleTimeChange(
-                    index,
-                    "start",
-                    e.target.value as string,
-                    false
-                  )
-                }
-                sx={{ flex: 1 }}
-              >
-                {TIME_OPTIONS.map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
-              </Select>
-
-              <Typography sx={{ display: "flex", alignItems: "center" }}>
-                to
-              </Typography>
-
-              <Select
-                label="End Time *"
-                variant="filled"
-                fullWidth
-                value={time.end}
-                onChange={(e) =>
-                  handleTimeChange(
-                    index,
-                    "end",
-                    e.target.value as string,
-                    false
-                  )
-                }
-                sx={{ flex: 1 }}
-                error={time.hasError}
-              >
-                {TIME_OPTIONS.map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
-              </Select>
-
-              <Tooltip title="Remove">
-                <IconButton
-                  onClick={() => removeTime(index, false)}
-                  color="error"
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    width: "100%",
+                  }}
                 >
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
+                  <AccessTimeIcon color="action" />
+                  <Typography variant="body2" color="text.secondary">
+                    Times in 15-minute intervals
+                  </Typography>
+                </Box>
+              </Box>
 
-            {time.hasError && (
-              <FormHelperText error>{time.errorMessage}</FormHelperText>
-            )}
-          </Paper>
-        ))}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: 2,
+                  mb: 2,
+                  alignItems: "center",
+                }}
+              >
+                <Select
+                  label="Start Time"
+                  variant="outlined"
+                  fullWidth
+                  value={time.start}
+                  onChange={(e) =>
+                    handleTimeChange(
+                      index,
+                      "start",
+                      e.target.value as string,
+                      false
+                    )
+                  }
+                  sx={{ flex: 1 }}
+                >
+                  {TIME_OPTIONS.map((option) => (
+                    <MenuItem key={`open-start-${option}`} value={option}>
+                      {formatTimeDisplay(option)}
+                    </MenuItem>
+                  ))}
+                </Select>
 
-        <Button
-          variant="outlined"
-          onClick={addOpenHouseTime}
-          sx={{ mb: 3 }}
-          onMouseUp={() => setTimeout(() => updateZustandInspections(), 50)}
-        >
-          Add an open house time
-        </Button>
+                <Typography
+                  sx={{ display: { xs: "none", sm: "flex" } }}
+                  color="text.secondary"
+                >
+                  to
+                </Typography>
+
+                <Typography
+                  sx={{ display: { xs: "flex", sm: "none" } }}
+                  color="text.secondary"
+                >
+                  to
+                </Typography>
+
+                <Select
+                  label="End Time"
+                  variant="outlined"
+                  fullWidth
+                  value={time.end}
+                  onChange={(e) =>
+                    handleTimeChange(
+                      index,
+                      "end",
+                      e.target.value as string,
+                      false
+                    )
+                  }
+                  sx={{ flex: 1 }}
+                  error={time.hasError}
+                >
+                  {TIME_OPTIONS.map((option) => (
+                    <MenuItem key={`open-end-${option}`} value={option}>
+                      {formatTimeDisplay(option)}
+                    </MenuItem>
+                  ))}
+                </Select>
+
+                <Tooltip title="Remove">
+                  <IconButton
+                    onClick={() => removeTime(index, false)}
+                    color="error"
+                    size="medium"
+                    sx={{
+                      border: `1px solid ${borderColor}`,
+                      "&:hover": {
+                        backgroundColor: deleteBtnHoverBg,
+                        borderColor: deleteBtnHoverBorder,
+                      },
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+
+              {time.hasError && (
+                <FormHelperText error sx={{ mb: 1 }}>
+                  {time.errorMessage}
+                </FormHelperText>
+              )}
+
+              {time.date && (
+                <Typography
+                  variant="body2"
+                  color="primary.main"
+                  sx={{ fontWeight: 500 }}
+                >
+                  Scheduled: {format(time.date, "EEEE, MMMM d, yyyy")} from{" "}
+                  {formatTimeDisplay(time.start)} to{" "}
+                  {formatTimeDisplay(time.end)}
+                </Typography>
+              )}
+            </Paper>
+          ))}
+
+          <Button
+            variant="outlined"
+            onClick={addOpenHouseTime}
+            startIcon={<AddCircleOutlineIcon />}
+            sx={{
+              mt: 1,
+              borderRadius: 1,
+              textTransform: "none",
+            }}
+            onMouseUp={() => setTimeout(updateZustandInspections, 50)}
+          >
+            Add Open House Time
+          </Button>
+        </Paper>
 
         {/* Private Inspection Section */}
-        <Typography sx={{ mb: 2, mt: 4 }}>
-          In addition to any advertised open house times, you may also set the
-          days and times you are available for prospective buyers or tenants to
-          book a private inspection.
-        </Typography>
+        <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+            <PersonIcon sx={{ mr: 1, color: "secondary.main" }} />
+            <Typography variant="h6">Private Inspections</Typography>
+          </Box>
 
-        <Typography variant="body2" sx={{ mb: 2 }}>
-          If you don't set specific times, property seekers can still request a
-          private inspection at a time that suits them.
-          <br />
-          Only realestate.com.au supports private inspection booking, these
-          times will not be shown on Domain.
-          <br />
-          Realestate.com.au will automatically split your availability into
-          10-minute booking slots with a 5-minute gap between bookings. Avoid
-          setting complex availability, full-day availability, or availability
-          shorter than 1 hour.
-        </Typography>
+          <Typography sx={{ mb: 2 }}>
+            Set times when you're available for one-on-one private inspections
+            with potential buyers.
+          </Typography>
 
-        {privateInspectionTimes.map((time, index) => (
-          <Paper
+          <Box
             sx={{
-              p: 3,
-              mb: 2,
-              border: time.hasError ? "1px solid red" : "none",
+              p: 2,
+              mb: 3,
+              backgroundColor: infoBgColor,
+              borderRadius: 1,
+              border: `1px solid ${borderColor}`,
             }}
-            key={`private-inspection-${time.id || index}`}
           >
-            <Box
+            <Typography variant="body2" color="text.secondary">
+              • If you don't set specific times, buyers can still request
+              inspections at times that suit them
+              <br />
+              • Private inspection booking is only supported on
+              realestate.com.au
+              <br />
+              • The platform automatically creates 10-minute booking slots with
+              5-minute gaps
+              <br />• For best results, set availability of at least 1 hour per
+              session
+            </Typography>
+          </Box>
+
+          {privateInspectionTimes.map((time, index) => (
+            <Paper
+              elevation={0}
               sx={{
-                display: "flex",
-                flexDirection: { xs: "column", sm: "row" },
-                gap: 2,
+                p: 3,
                 mb: 2,
+                border: time.hasError
+                  ? `1px solid ${errorBorderColor}`
+                  : `1px solid ${borderColor}`,
+                borderRadius: 1,
+                backgroundColor: time.date
+                  ? scheduledBgColor
+                  : "background.paper",
+                position: "relative",
               }}
+              key={`private-inspection-${time.id || index}`}
             >
-              <DatePicker
-                label="Date *"
-                value={time.date}
-                onChange={(newDate) => handleDateChange(index, newDate, true)}
-                slotProps={{
-                  textField: {
-                    variant: "filled",
-                    fullWidth: true,
-                    required: true,
-                  },
-                }}
-              />
+              {time.date && (
+                <Chip
+                  size="small"
+                  label="Scheduled"
+                  color="secondary"
+                  sx={{
+                    position: "absolute",
+                    top: 10,
+                    right: 10,
+                    borderRadius: 1,
+                  }}
+                />
+              )}
 
               <Box
                 sx={{
                   display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  width: "100%",
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: 2,
+                  mb: 2,
                 }}
               >
-                <AccessTimeIcon />
-                <Typography variant="body2">
-                  Times are in 15 minute intervals:
-                </Typography>
-              </Box>
-            </Box>
+                <DatePicker
+                  label="Inspection Date *"
+                  value={time.date}
+                  onChange={(newDate) => handleDateChange(index, newDate, true)}
+                  slotProps={{
+                    textField: {
+                      variant: "outlined",
+                      fullWidth: true,
+                      required: true,
+                      size: "medium",
+                    },
+                  }}
+                />
 
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", sm: "row" },
-                gap: 2,
-                mb: 2,
-              }}
-            >
-              <Select
-                label="Start Time *"
-                variant="filled"
-                fullWidth
-                value={time.start}
-                onChange={(e) =>
-                  handleTimeChange(
-                    index,
-                    "start",
-                    e.target.value as string,
-                    true
-                  )
-                }
-                sx={{ flex: 1 }}
-              >
-                {TIME_OPTIONS.map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
-              </Select>
-
-              <Typography sx={{ display: "flex", alignItems: "center" }}>
-                to
-              </Typography>
-
-              <Select
-                label="End Time *"
-                variant="filled"
-                fullWidth
-                value={time.end}
-                onChange={(e) =>
-                  handleTimeChange(index, "end", e.target.value as string, true)
-                }
-                sx={{ flex: 1 }}
-                error={time.hasError}
-              >
-                {TIME_OPTIONS.map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
-              </Select>
-
-              <Tooltip title="Remove">
-                <IconButton
-                  onClick={() => removeTime(index, true)}
-                  color="error"
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    width: "100%",
+                  }}
                 >
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
+                  <AccessTimeIcon color="action" />
+                  <Typography variant="body2" color="text.secondary">
+                    Times in 15-minute intervals
+                  </Typography>
+                </Box>
+              </Box>
 
-            {time.hasError && (
-              <FormHelperText error>{time.errorMessage}</FormHelperText>
-            )}
-          </Paper>
-        ))}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: 2,
+                  mb: 2,
+                  alignItems: "center",
+                }}
+              >
+                <Select
+                  label="Start Time"
+                  variant="outlined"
+                  fullWidth
+                  value={time.start}
+                  onChange={(e) =>
+                    handleTimeChange(
+                      index,
+                      "start",
+                      e.target.value as string,
+                      true
+                    )
+                  }
+                  sx={{ flex: 1 }}
+                >
+                  {TIME_OPTIONS.map((option) => (
+                    <MenuItem key={`private-start-${option}`} value={option}>
+                      {formatTimeDisplay(option)}
+                    </MenuItem>
+                  ))}
+                </Select>
 
-        <Button
-          variant="outlined"
-          onClick={addPrivateInspectionTime}
-          sx={{ mt: 2 }}
-          onMouseUp={() => setTimeout(() => updateZustandInspections(), 50)}
-        >
-          Add a private inspection time
-        </Button>
+                <Typography
+                  sx={{ display: { xs: "none", sm: "flex" } }}
+                  color="text.secondary"
+                >
+                  to
+                </Typography>
 
-        {/* Manual sync button to help with debugging */}
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={updateZustandInspections}
-          sx={{ mt: 4, display: "none" }} // Hidden in production, enable for debugging
-        >
-          Save Inspections
-        </Button>
+                <Typography
+                  sx={{ display: { xs: "flex", sm: "none" } }}
+                  color="text.secondary"
+                >
+                  to
+                </Typography>
+
+                <Select
+                  label="End Time"
+                  variant="outlined"
+                  fullWidth
+                  value={time.end}
+                  onChange={(e) =>
+                    handleTimeChange(
+                      index,
+                      "end",
+                      e.target.value as string,
+                      true
+                    )
+                  }
+                  sx={{ flex: 1 }}
+                  error={time.hasError}
+                >
+                  {TIME_OPTIONS.map((option) => (
+                    <MenuItem key={`private-end-${option}`} value={option}>
+                      {formatTimeDisplay(option)}
+                    </MenuItem>
+                  ))}
+                </Select>
+
+                <Tooltip title="Remove">
+                  <IconButton
+                    onClick={() => removeTime(index, true)}
+                    color="error"
+                    size="medium"
+                    sx={{
+                      border: `1px solid ${borderColor}`,
+                      "&:hover": {
+                        backgroundColor: deleteBtnHoverBg,
+                        borderColor: deleteBtnHoverBorder,
+                      },
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+
+              {time.hasError && (
+                <FormHelperText error sx={{ mb: 1 }}>
+                  {time.errorMessage}
+                </FormHelperText>
+              )}
+
+              {time.date && (
+                <Typography
+                  variant="body2"
+                  color="secondary.main"
+                  sx={{ fontWeight: 500 }}
+                >
+                  Scheduled: {format(time.date, "EEEE, MMMM d, yyyy")} from{" "}
+                  {formatTimeDisplay(time.start)} to{" "}
+                  {formatTimeDisplay(time.end)}
+                </Typography>
+              )}
+            </Paper>
+          ))}
+
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={addPrivateInspectionTime}
+            startIcon={<AddCircleOutlineIcon />}
+            sx={{
+              mt: 1,
+              borderRadius: 1,
+              textTransform: "none",
+            }}
+            onMouseUp={() => setTimeout(updateZustandInspections, 50)}
+          >
+            Add Private Inspection Time
+          </Button>
+        </Paper>
       </Box>
     </LocalizationProvider>
   );
