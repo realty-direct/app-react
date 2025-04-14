@@ -25,6 +25,7 @@ import Inspections from "./Inspections";
 import ListingEnhancements from "./ListingEnhancements";
 import Media from "./Media/Media";
 import Ownership from "./Ownership";
+import Packages from "./Packages";
 import Price from "./Price";
 import Summary from "./Summary";
 
@@ -346,6 +347,7 @@ export default function Edit() {
           <Tab label="Description" disabled={loading} />
           <Tab label="Contact" disabled={loading} />
           <Tab label="Inspections" disabled={loading} />
+          <Tab label="Packages" disabled={loading} />
           <Tab label="Listing Enhancements" disabled={loading} />
           <Tab label="Summary" disabled={loading} />
         </Tabs>
@@ -361,8 +363,9 @@ export default function Edit() {
         {tabValue === 5 && <Description />}
         {tabValue === 6 && <Contact />}
         {tabValue === 7 && <Inspections />}
-        {tabValue === 8 && <ListingEnhancements />}
-        {tabValue === 9 && <Summary />}
+        {tabValue === 8 && <Packages />}
+        {tabValue === 9 && <ListingEnhancements />}
+        {tabValue === 10 && <Summary />}
 
         {/* Just the standard note - removed alerts about unsaved changes */}
         <Alert severity="info" role="alert" icon={undefined} sx={{ mt: 2 }}>

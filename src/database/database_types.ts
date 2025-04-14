@@ -101,6 +101,7 @@ export type Database = {
           price_display: string | null
           property_category: string | null
           property_id: string
+          property_package: string | null
           property_type: string | null
           sale_type: string | null
           user_id: string | null
@@ -128,6 +129,7 @@ export type Database = {
           price_display?: string | null
           property_category?: string | null
           property_id: string
+          property_package?: string | null
           property_type?: string | null
           sale_type?: string | null
           user_id?: string | null
@@ -155,6 +157,7 @@ export type Database = {
           price_display?: string | null
           property_category?: string | null
           property_id?: string
+          property_package?: string | null
           property_type?: string | null
           sale_type?: string | null
           user_id?: string | null
@@ -163,6 +166,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "property_details_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_enhancements: {
+        Row: {
+          created_at: string | null
+          enhancement_type: string
+          id: string
+          price: number
+          property_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          enhancement_type: string
+          id?: string
+          price: number
+          property_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          enhancement_type?: string
+          id?: string
+          price?: number
+          property_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_enhancements_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"

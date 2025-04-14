@@ -98,4 +98,17 @@ export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
       }),
     }));
   },
+
+  updatePropertyPackage: (
+    propertyId: string,
+    packageType: "ESSENTIAL" | "ADVANTAGE" | "PREMIUM" | null
+  ) => {
+    set((state) => ({
+      propertyDetails: state.propertyDetails.map((property) =>
+        property.property_id === propertyId
+          ? { ...property, property_package: packageType }
+          : property
+      ),
+    }));
+  },
 });
