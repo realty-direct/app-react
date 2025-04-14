@@ -8,6 +8,10 @@ import {
   updatePropertyDetailInDB,
 } from "../../database/details";
 import {
+  addPropertyEnhancement,
+  fetchPropertyEnhancements,
+} from "../../database/enhancements";
+import {
   fetchUserPropertiesFeaturesFromDB,
   updatePropertyFeatureInDB,
 } from "../../database/features";
@@ -38,6 +42,9 @@ export default function Edit() {
     propertyFeatures,
     propertyInspections,
     setPropertyInspections,
+    propertyEnhancements,
+    setPropertyEnhancements,
+    getEnhancementsForProperty,
   } = useRealtyStore();
 
   const [tabValue, setTabValue] = useState(0);
@@ -52,6 +59,7 @@ export default function Edit() {
   const lastSavedDetailsRef = useRef<typeof propertyDetail>(null);
   const lastSavedFeaturesRef = useRef<typeof propertyFeature>(null);
   const lastSavedInspectionsRef = useRef<typeof propertyInspections>([]);
+  const lastSavedEnhancementsRef = useRef<typeof propertyEnhancements>([]);
 
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId
@@ -64,6 +72,11 @@ export default function Edit() {
   const currentInspections = propertyInspections.filter(
     (insp) => insp.property_id === propertyId
   );
+
+  const currentEnhancements = getEnhancementsForProperty(propertyId || "");
+  console.log("Debug: Current property ID:", propertyId);
+  console.log("Debug: All enhancements in store:", propertyEnhancements);
+  console.log("Debug: Filtered enhancements:", currentEnhancements);
 
   // Initialize last saved state only once
   useEffect(() => {
@@ -83,11 +96,22 @@ export default function Edit() {
       );
     }
 
+    if (currentEnhancements.length > 0 && !lastSavedEnhancementsRef.current) {
+      lastSavedEnhancementsRef.current = JSON.parse(
+        JSON.stringify(currentEnhancements)
+      );
+    }
+
     // Mark as initialized after the first render cycle
     if (propertyDetail && !isInitialized.current) {
       isInitialized.current = true;
     }
-  }, [propertyDetail, propertyFeature, currentInspections]);
+  }, [
+    propertyDetail,
+    propertyFeature,
+    currentInspections,
+    currentEnhancements,
+  ]);
 
   // Track changes by comparing current state with last saved state
   useEffect(() => {
@@ -111,8 +135,16 @@ export default function Edit() {
           sortObjectKeys(lastSavedInspectionsRef.current || [])
         ) !== JSON.stringify(sortObjectKeys(currentInspections || []));
 
+      const enhancementsChanged =
+        JSON.stringify(
+          sortObjectKeys(lastSavedEnhancementsRef.current || [])
+        ) !== JSON.stringify(sortObjectKeys(currentEnhancements || []));
+
       const hasChanges =
-        detailsChanged || featuresChanged || inspectionsChanged;
+        detailsChanged ||
+        featuresChanged ||
+        inspectionsChanged ||
+        enhancementsChanged;
 
       if (hasChanges !== hasUnsavedChanges) {
         console.log(
@@ -123,7 +155,14 @@ export default function Edit() {
         setHasUnsavedChanges(hasChanges);
       }
     }
-  }, [propertyDetail, propertyFeature, currentInspections, hasUnsavedChanges]);
+  }, [
+    propertyDetail,
+    propertyFeature,
+    currentInspections,
+    currentEnhancements,
+    hasUnsavedChanges,
+    propertyId,
+  ]);
 
   // Helper function to sort object keys for consistent comparison
   const sortObjectKeys = (obj: any) => {
@@ -209,12 +248,51 @@ export default function Edit() {
         }
       }
 
+      // Handle enhancements
+      console.log("Debug: Starting enhancements save process");
+      console.log("Debug: Current enhancements:", currentEnhancements);
+      console.log(
+        "Debug: Last saved enhancements:",
+        lastSavedEnhancementsRef.current
+      );
+
+      // Check if there are changes to enhancements
+      const enhancementsChanged =
+        JSON.stringify(
+          sortObjectKeys(lastSavedEnhancementsRef.current || [])
+        ) !== JSON.stringify(sortObjectKeys(currentEnhancements));
+
+      console.log("Debug: Enhancements changed?", enhancementsChanged);
+
+      if (enhancementsChanged && currentEnhancements.length > 0) {
+        console.log(
+          `Debug: Attempting to save ${currentEnhancements.length} enhancements to database`
+        );
+
+        // Process each enhancement
+        for (const enhancement of currentEnhancements) {
+          console.log("Debug: Processing enhancement:", enhancement);
+
+          // Always save to DB since Supabase will handle the IDs
+          const { id, ...enhancementData } = enhancement; // Remove any client-side ID
+          console.log("Debug: About to save enhancement:", enhancementData);
+
+          try {
+            const result = await addPropertyEnhancement(enhancementData);
+            console.log("Debug: Enhancement save result:", result);
+          } catch (err) {
+            console.error("Debug: Error saving enhancement:", err);
+          }
+        }
+      }
+
       // Fetch the latest data from the DB
       const updatedPropertyDetails = await fetchPropertyDetailInDb(propertyId);
       const updatedPropertyFeatures = await fetchUserPropertiesFeaturesFromDB([
         propertyId,
       ]);
       const updatedInspections = await fetchPropertyInspections(propertyId);
+      const updatedEnhancements = await fetchPropertyEnhancements(propertyId);
 
       // Sync Zustand store with updated DB data
       if (updatedPropertyDetails) {
@@ -244,6 +322,12 @@ export default function Edit() {
           JSON.stringify(updatedInspections)
         );
       }
+
+      // Update enhancements in store
+      setPropertyEnhancements(updatedEnhancements);
+      lastSavedEnhancementsRef.current = JSON.parse(
+        JSON.stringify(updatedEnhancements)
+      );
 
       setHasUnsavedChanges(false);
 

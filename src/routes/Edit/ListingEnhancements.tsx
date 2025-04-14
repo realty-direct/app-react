@@ -282,7 +282,6 @@ export default function ListingEnhancements() {
     setOpenModal(false);
   };
 
-  // Handle toggling an enhancement selection
   const handleToggleEnhancement = (enhancementId: string) => {
     try {
       const isCurrentlySelected = selectedEnhancements.includes(enhancementId);
@@ -306,7 +305,7 @@ export default function ListingEnhancements() {
             enhancement_type: enhancementId,
             price: enhancement.numericPrice,
             status: "pending",
-            id: Date.now().toString(), // temporary ID
+            // No temporary ID - let Supabase handle this
           };
 
           addPropertyEnhancement(newEnhancement);
@@ -330,20 +329,20 @@ export default function ListingEnhancements() {
     }
   };
 
-  // Handle adding from the modal
+  // Also update this function
   const handleAddFromModal = () => {
     if (
       currentEnhancement &&
       !selectedEnhancements.includes(currentEnhancement.id)
     ) {
       try {
-        // Create new enhancement object
+        // Create new enhancement object without ID
         const newEnhancement: PropertyEnhancement = {
           property_id: propertyId,
           enhancement_type: currentEnhancement.id,
           price: currentEnhancement.numericPrice,
           status: "pending",
-          id: Date.now().toString(), // temporary ID
+          // No temporary ID - let Supabase handle this
         };
 
         // Add to store
