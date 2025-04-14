@@ -395,7 +395,7 @@ export default function Edit() {
             sx={{ maxWidth: "150px", minWidth: "120px" }}
             size="large"
             onClick={handleContinue}
-            disabled={loading || tabValue === 9}
+            disabled={loading || tabValue === 10}
             data-feature-save
           >
             {loading && actionType === "save" ? (

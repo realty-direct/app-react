@@ -12,6 +12,10 @@ import { fetchPropertyInspections } from "../database/inspections";
 import { fetchAllPropertiesFromDB } from "../database/property";
 import { supabase } from "../database/supabase";
 import { createPropertyDetailsSlice } from "./slices/details.slice";
+import {
+  PropertyEnhancementsState,
+  createPropertyEnhancementsSlice,
+} from "./slices/enhancements.slice";
 import { createPropertyFeaturesSlice } from "./slices/features.slice";
 import { createPropertyInspectionsSlice } from "./slices/inspections.slice";
 import { createPropertiesSlice } from "./slices/properties.slice";
@@ -31,7 +35,8 @@ export type StoreState = ProfileState &
   PropertyDetailsState &
   SessionState &
   PropertyFeaturesState &
-  PropertyInspectionsState;
+  PropertyInspectionsState &
+  PropertyEnhancementsState;
 
 export const useRealtyStore = create<StoreState>()(
   persist(
@@ -42,6 +47,7 @@ export const useRealtyStore = create<StoreState>()(
       ...createSessionSlice(set, get, api),
       ...createPropertyFeaturesSlice(set, get, api),
       ...createPropertyInspectionsSlice(set, get, api),
+      ...createPropertyEnhancementsSlice(set, get, api),
     }),
     {
       name: "realty-store",
@@ -53,6 +59,7 @@ export const useRealtyStore = create<StoreState>()(
         propertyDetails: state.propertyDetails,
         propertyFeatures: state.propertyFeatures,
         propertyInspections: state.propertyInspections,
+        propertyEnhancements: state.propertyEnhancements,
       }),
     }
   )
