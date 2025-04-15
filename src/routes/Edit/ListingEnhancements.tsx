@@ -31,7 +31,6 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import type { PropertyEnhancement } from "../../store/slices/enhancements.slice";
@@ -297,18 +296,28 @@ export default function ListingEnhancements() {
           removePropertyEnhancement(enhancementToRemove.id);
         }
       } else {
-        // Add the enhancement to the store
-        const enhancement = enhancements.find((e) => e.id === enhancementId);
-        if (enhancement) {
-          const newEnhancement: PropertyEnhancement = {
-            property_id: propertyId,
-            enhancement_type: enhancementId,
-            price: enhancement.numericPrice,
-            status: "pending",
-            // No temporary ID - let Supabase handle this
-          };
+        // Check if this enhancement type already exists for this property
+        const alreadyExists = propertySpecificEnhancements.some(
+          (e) => e.enhancement_type === enhancementId
+        );
 
-          addPropertyEnhancement(newEnhancement);
+        if (!alreadyExists) {
+          // Add the enhancement to the store
+          const enhancement = enhancements.find((e) => e.id === enhancementId);
+          if (enhancement) {
+            const newEnhancement: PropertyEnhancement = {
+              property_id: propertyId,
+              enhancement_type: enhancementId,
+              price: enhancement.numericPrice,
+              status: "pending",
+            };
+
+            addPropertyEnhancement(newEnhancement);
+          }
+        } else {
+          console.warn(
+            `Enhancement ${enhancementId} already exists for property ${propertyId}`
+          );
         }
       }
 
@@ -336,20 +345,32 @@ export default function ListingEnhancements() {
       !selectedEnhancements.includes(currentEnhancement.id)
     ) {
       try {
-        // Create new enhancement object without ID
-        const newEnhancement: PropertyEnhancement = {
-          property_id: propertyId,
-          enhancement_type: currentEnhancement.id,
-          price: currentEnhancement.numericPrice,
-          status: "pending",
-          // No temporary ID - let Supabase handle this
-        };
+        // Check if this enhancement type already exists for this property
+        const alreadyExists = propertySpecificEnhancements.some(
+          (e) => e.enhancement_type === currentEnhancement.id
+        );
 
-        // Add to store
-        addPropertyEnhancement(newEnhancement);
+        if (!alreadyExists) {
+          // Create new enhancement object without ID
+          const newEnhancement: PropertyEnhancement = {
+            property_id: propertyId,
+            enhancement_type: currentEnhancement.id,
+            price: currentEnhancement.numericPrice,
+            status: "pending",
+          };
 
-        setSnackbarMessage(`${currentEnhancement.title} added to selections`);
-        setSnackbarOpen(true);
+          // Add to store
+          addPropertyEnhancement(newEnhancement);
+
+          setSnackbarMessage(`${currentEnhancement.title} added to selections`);
+          setSnackbarOpen(true);
+        } else {
+          console.warn(
+            `Enhancement ${currentEnhancement.id} already exists for property ${propertyId}`
+          );
+          setSnackbarMessage(`${currentEnhancement.title} is already selected`);
+          setSnackbarOpen(true);
+        }
       } catch (error) {
         console.error("Error adding enhancement:", error);
         setSnackbarMessage("Error adding selection");
@@ -405,7 +426,10 @@ export default function ListingEnhancements() {
               const isSelected = selectedEnhancements.includes(enhancement.id);
 
               return (
-                <Grid2 key={enhancement.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                <Grid2
+                  key={`${category}-${enhancement.id}`}
+                  size={{ xs: 12, sm: 6, md: 4 }}
+                >
                   <Card
                     elevation={isSelected ? 3 : 1}
                     sx={{

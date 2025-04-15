@@ -25,13 +25,52 @@ export const createPropertyEnhancementsSlice: StateCreator<
   propertyEnhancements: [],
 
   setPropertyEnhancements: (enhancements: PropertyEnhancement[]) => {
-    set({ propertyEnhancements: enhancements });
+    // Ensure uniqueness by property_id + enhancement_type
+    const uniqueEnhancements: PropertyEnhancement[] = [];
+    const uniqueKeys = new Set<string>();
+
+    for (const enhancement of enhancements) {
+      const key = `${enhancement.property_id}:${enhancement.enhancement_type}`;
+      if (!uniqueKeys.has(key)) {
+        uniqueKeys.add(key);
+        uniqueEnhancements.push(enhancement);
+      }
+    }
+
+    set({ propertyEnhancements: uniqueEnhancements });
   },
 
   addPropertyEnhancement: (enhancement: PropertyEnhancement) => {
-    set((state) => ({
-      propertyEnhancements: [...state.propertyEnhancements, enhancement],
-    }));
+    set((state) => {
+      // Check if enhancement already exists for this property
+      const exists = state.propertyEnhancements.some(
+        (e) =>
+          e.property_id === enhancement.property_id &&
+          e.enhancement_type === enhancement.enhancement_type
+      );
+
+      if (exists) {
+        console.warn(
+          `Enhancement ${enhancement.enhancement_type} already exists for property ${enhancement.property_id}`
+        );
+        return { propertyEnhancements: state.propertyEnhancements };
+      }
+
+      // Add with temporary ID if none exists
+      const enhancementWithId = enhancement.id
+        ? enhancement
+        : {
+            ...enhancement,
+            id: `temp-${Date.now()}-${enhancement.enhancement_type}`,
+          };
+
+      return {
+        propertyEnhancements: [
+          ...state.propertyEnhancements,
+          enhancementWithId,
+        ],
+      };
+    });
   },
 
   removePropertyEnhancement: (enhancementId: string) => {

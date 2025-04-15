@@ -203,6 +203,8 @@ export default function Edit() {
   };
 
   // Save Function - shared between tab change and continue button
+  // In Edit.tsx, update the saveChanges function:
+
   const saveChanges = async () => {
     if (!propertyDetail || !propertyId) return false;
 
@@ -218,6 +220,7 @@ export default function Edit() {
       // First, update the DB with changes from Zustand
       await updatePropertyDetailInDB(propertyId, propertyDetail);
 
+      // Handle property features
       if (propertyFeature.length > 0) {
         await updatePropertyFeatureInDB(propertyId, propertyFeature);
       }
@@ -260,7 +263,7 @@ export default function Edit() {
         }
       }
 
-      // Handle enhancements
+      // Handle enhancements - FIX HERE
       const enhancementsChanged =
         JSON.stringify(
           sortObjectKeys(lastSavedEnhancementsRef.current || [])
@@ -268,22 +271,45 @@ export default function Edit() {
 
       if (enhancementsChanged && currentEnhancements.length > 0) {
         console.log(
-          `Debug: Attempting to save ${currentEnhancements.length} enhancements to database`
+          `Debug: Need to process ${currentEnhancements.length} enhancements`
         );
 
-        // Process each enhancement
-        for (const enhancement of currentEnhancements) {
-          console.log("Debug: Processing enhancement:", enhancement);
+        // Track enhancement types already processed to avoid duplicates
+        const processedEnhancementTypes = new Set();
 
-          // Always save to DB since Supabase will handle the IDs
-          const { id, ...enhancementData } = enhancement; // Remove any client-side ID
-          console.log("Debug: About to save enhancement:", enhancementData);
+        // Only save new enhancements without server IDs (temporary ones)
+        const newEnhancements = currentEnhancements.filter(
+          (enhancement) =>
+            !enhancement.id || enhancement.id.toString().startsWith("temp-")
+        );
+
+        console.log(
+          `Debug: Found ${newEnhancements.length} new enhancements to save`
+        );
+
+        for (const enhancement of newEnhancements) {
+          // Skip if we've already processed this enhancement type for this property
+          const enhancementKey = `${enhancement.property_id}:${enhancement.enhancement_type}`;
+          if (processedEnhancementTypes.has(enhancementKey)) {
+            console.log(
+              `Debug: Skipping duplicate enhancement type: ${enhancement.enhancement_type}`
+            );
+            continue;
+          }
+
+          // Mark this enhancement type as processed
+          processedEnhancementTypes.add(enhancementKey);
+
+          console.log(
+            `Debug: Processing enhancement: ${enhancement.enhancement_type}`
+          );
 
           try {
+            const { id, ...enhancementData } = enhancement;
             const result = await addPropertyEnhancement(enhancementData);
-            console.log("Debug: Enhancement save result:", result);
+            console.log(`Debug: Enhancement save result:`, result);
           } catch (err) {
-            console.error("Debug: Error saving enhancement:", err);
+            console.error(`Debug: Error saving enhancement:`, err);
           }
         }
       }
@@ -325,11 +351,31 @@ export default function Edit() {
         );
       }
 
-      // Update enhancements in store
-      setPropertyEnhancements(updatedEnhancements);
-      lastSavedEnhancementsRef.current = JSON.parse(
-        JSON.stringify(updatedEnhancements)
-      );
+      // Update enhancements in store - maintain uniqueness by using a Set approach
+      if (updatedEnhancements.length > 0) {
+        // Keep enhancements for other properties
+        const otherEnhancements = propertyEnhancements.filter(
+          (enh) => enh.property_id !== propertyId
+        );
+
+        // Create a uniqueness map for updated enhancements
+        const uniqueEnhancements = [];
+        const enhancementTypeMap = new Map();
+
+        for (const enhancement of updatedEnhancements) {
+          const key = `${enhancement.property_id}:${enhancement.enhancement_type}`;
+          if (!enhancementTypeMap.has(key)) {
+            enhancementTypeMap.set(key, enhancement);
+            uniqueEnhancements.push(enhancement);
+          }
+        }
+
+        // Set enhancements in store
+        setPropertyEnhancements([...otherEnhancements, ...uniqueEnhancements]);
+        lastSavedEnhancementsRef.current = JSON.parse(
+          JSON.stringify(uniqueEnhancements)
+        );
+      }
 
       setHasUnsavedChanges(false);
 
