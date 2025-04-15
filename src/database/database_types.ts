@@ -93,16 +93,22 @@ export type Database = {
           images: Json | null
           land_area: string | null
           land_unit: string | null
+          listing_status: string | null
           listing_title: string | null
           main_image: string | null
           ownership_document: string | null
           ownership_verified: boolean | null
+          payment_date: string | null
+          payment_status: string | null
+          phone_confirmed: boolean | null
           price: number | null
           price_display: string | null
           property_category: string | null
           property_id: string
           property_package: string | null
           property_type: string | null
+          publish_date: string | null
+          publish_option: string | null
           sale_type: string | null
           user_id: string | null
           video_url: string | null
@@ -121,16 +127,22 @@ export type Database = {
           images?: Json | null
           land_area?: string | null
           land_unit?: string | null
+          listing_status?: string | null
           listing_title?: string | null
           main_image?: string | null
           ownership_document?: string | null
           ownership_verified?: boolean | null
+          payment_date?: string | null
+          payment_status?: string | null
+          phone_confirmed?: boolean | null
           price?: number | null
           price_display?: string | null
           property_category?: string | null
           property_id: string
           property_package?: string | null
           property_type?: string | null
+          publish_date?: string | null
+          publish_option?: string | null
           sale_type?: string | null
           user_id?: string | null
           video_url?: string | null
@@ -149,16 +161,22 @@ export type Database = {
           images?: Json | null
           land_area?: string | null
           land_unit?: string | null
+          listing_status?: string | null
           listing_title?: string | null
           main_image?: string | null
           ownership_document?: string | null
           ownership_verified?: boolean | null
+          payment_date?: string | null
+          payment_status?: string | null
+          phone_confirmed?: boolean | null
           price?: number | null
           price_display?: string | null
           property_category?: string | null
           property_id?: string
           property_package?: string | null
           property_type?: string | null
+          publish_date?: string | null
+          publish_option?: string | null
           sale_type?: string | null
           user_id?: string | null
           video_url?: string | null

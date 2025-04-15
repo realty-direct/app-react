@@ -1,8 +1,9 @@
-// File: src/routes/Edit/Edit.tsx
+// File: src/routes/Edit/Edit.tsx - Updated with sidebar for Summary tab
 import { Alert, Box, Button, Grid2, Tab, Tabs } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import OrderSummary from "../../components/OrderSummary";
 import {
   fetchPropertyDetailInDb,
   updatePropertyDetailInDB,
@@ -50,6 +51,7 @@ export default function Edit() {
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [actionType, setActionType] = useState<"save" | "navigate" | "">("");
+  const [isFinalizing, setIsFinalizing] = useState(false);
 
   // Track if component is mounted and initialized
   const isInitialized = useRef(false);
@@ -74,9 +76,19 @@ export default function Edit() {
   );
 
   const currentEnhancements = getEnhancementsForProperty(propertyId || "");
-  console.log("Debug: Current property ID:", propertyId);
-  console.log("Debug: All enhancements in store:", propertyEnhancements);
-  console.log("Debug: Filtered enhancements:", currentEnhancements);
+
+  // Calculate package price for the order summary
+  const packagePricing: Record<string, number> = {
+    ESSENTIAL: 599,
+    ADVANTAGE: 1299,
+    PREMIUM: 1999,
+  };
+
+  const packagePrice =
+    propertyDetail?.property_package &&
+    propertyDetail.property_package in packagePricing
+      ? packagePricing[propertyDetail.property_package]
+      : 0;
 
   // Initialize last saved state only once
   useEffect(() => {
@@ -249,20 +261,10 @@ export default function Edit() {
       }
 
       // Handle enhancements
-      console.log("Debug: Starting enhancements save process");
-      console.log("Debug: Current enhancements:", currentEnhancements);
-      console.log(
-        "Debug: Last saved enhancements:",
-        lastSavedEnhancementsRef.current
-      );
-
-      // Check if there are changes to enhancements
       const enhancementsChanged =
         JSON.stringify(
           sortObjectKeys(lastSavedEnhancementsRef.current || [])
         ) !== JSON.stringify(sortObjectKeys(currentEnhancements));
-
-      console.log("Debug: Enhancements changed?", enhancementsChanged);
 
       if (enhancementsChanged && currentEnhancements.length > 0) {
         console.log(
@@ -341,6 +343,43 @@ export default function Edit() {
     }
   };
 
+  // Finalize listing function to be passed to OrderSummary component
+  const handleFinalizeListing = async () => {
+    if (!propertyId || !propertyDetail) return;
+
+    setIsFinalizing(true);
+
+    try {
+      // In a real app, you would make API calls to:
+      // 1. Process payment
+      // 2. Schedule publishing if needed
+      // 3. Update property status from "draft" to "pending" or "active"
+
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Get the current publish option from the store
+      const currentPublishOption =
+        propertyDetail?.publish_option || "immediately";
+
+      // Update property status in store
+      updatePropertyDetail(propertyId, {
+        listing_status:
+          currentPublishOption === "immediately" ? "active" : "scheduled",
+        payment_status: "completed",
+        payment_date: new Date().toISOString().split("T")[0],
+      });
+
+      // Navigate to success page or property dashboard
+      window.location.href = `/property/${propertyId}`;
+    } catch (error) {
+      console.error("Error finalizing listing:", error);
+      // Show error message to user
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
+
   // On tab change, save if there are changes
   const handleTabChange = async (
     _event: React.SyntheticEvent,
@@ -360,7 +399,6 @@ export default function Edit() {
     }
 
     // If no changes, just change the tab without saving
-
     setTabValue(newValue);
   };
 
@@ -395,6 +433,9 @@ export default function Edit() {
 
     setTabValue((prev) => prev - 1);
   };
+
+  // Determine if we should show the sidebar with the order summary
+  const showOrderSummary = tabValue === 10 && propertyDetail;
 
   return (
     <Grid2 container sx={{ position: "relative" }}>
@@ -491,10 +532,29 @@ export default function Edit() {
         </Box>
       </Grid2>
 
-      {/* Sidebar */}
-      <Grid2 size={3} p={3}>
-        Insert side info here
-      </Grid2>
+      {/* Order Summary Sidebar - Only shown on Summary tab */}
+      {showOrderSummary ? (
+        <Grid2 size={3} p={3}>
+          <OrderSummary
+            propertyId={propertyId || ""}
+            packageType={propertyDetail.property_package}
+            packagePrice={packagePrice}
+            enhancements={currentEnhancements}
+            phoneConfirmed={propertyDetail.phone_confirmed || false}
+            publishOption={propertyDetail.publish_option || "immediately"}
+            publishDate={
+              propertyDetail.publish_date
+                ? new Date(propertyDetail.publish_date)
+                : null
+            }
+            handleFinalizeListing={handleFinalizeListing}
+          />
+        </Grid2>
+      ) : (
+        <Grid2 size={3} p={3}>
+          Insert side info here
+        </Grid2>
+      )}
 
       {/* No full-screen loading overlay */}
     </Grid2>
