@@ -1,4 +1,6 @@
-// File: src/routes/Edit/Edit.tsx - Updated with sidebar for Summary tab
+// File: src/routes/Edit/Edit.tsx - Updated to handle optional signboard
+// Only updating the relevant parts related to phoneConfirmed requirement
+
 import { Alert, Box, Button, Grid2, Tab, Tabs } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
@@ -11,6 +13,7 @@ import {
 import {
   addPropertyEnhancement,
   fetchPropertyEnhancements,
+  removePropertyEnhancement,
 } from "../../database/enhancements";
 import {
   fetchUserPropertiesFeaturesFromDB,
@@ -35,6 +38,7 @@ import Price from "./Price";
 import Summary from "./Summary";
 
 export default function Edit() {
+  // Existing declarations - not changing
   const { id: propertyId } = useParams();
   const {
     updatePropertyDetail,
@@ -89,6 +93,23 @@ export default function Edit() {
     propertyDetail.property_package in packagePricing
       ? packagePricing[propertyDetail.property_package]
       : 0;
+
+  // Check if any signboard enhancement is selected
+  const hasSignboardEnhancement = currentEnhancements.some((enhancement) =>
+    ["standard-signboard", "photo-signboard"].includes(
+      enhancement.enhancement_type
+    )
+  );
+
+  // Define property state verification
+  const isPhoneConfirmed = propertyDetail?.phone_confirmed || false;
+  const phoneNumberRequired = hasSignboardEnhancement && !isPhoneConfirmed;
+  const publishOption = propertyDetail?.publish_option || "immediately";
+  const publishDate = propertyDetail?.publish_date
+    ? new Date(propertyDetail.publish_date)
+    : null;
+  const isPublishDateRequired = publishOption === "later" && !publishDate;
+  const isPackageSelected = !!propertyDetail?.property_package;
 
   // Initialize last saved state only once
   useEffect(() => {
@@ -203,8 +224,6 @@ export default function Edit() {
   };
 
   // Save Function - shared between tab change and continue button
-  // In Edit.tsx, update the saveChanges function:
-
   const saveChanges = async () => {
     if (!propertyDetail || !propertyId) return false;
 
@@ -227,7 +246,6 @@ export default function Edit() {
 
       // Handle inspections
       if (currentInspections.length > 0) {
-        // Split inspections into existing and new
         const existingInspections = currentInspections.filter(
           (insp) => insp.id && !insp.id.toString().startsWith("temp-")
         );
@@ -263,32 +281,63 @@ export default function Edit() {
         }
       }
 
-      // Handle enhancements - FIX HERE
+      // Handle enhancements - properly handle removed and new enhancements
       const enhancementsChanged =
         JSON.stringify(
           sortObjectKeys(lastSavedEnhancementsRef.current || [])
         ) !== JSON.stringify(sortObjectKeys(currentEnhancements));
 
-      if (enhancementsChanged && currentEnhancements.length > 0) {
+      if (enhancementsChanged) {
         console.log(
-          `Debug: Need to process ${currentEnhancements.length} enhancements`
+          `Debug: Need to process enhancement changes. Current count: ${currentEnhancements.length}`
         );
 
-        // Track enhancement types already processed to avoid duplicates
-        const processedEnhancementTypes = new Set();
+        const previousEnhancements = lastSavedEnhancementsRef.current || [];
 
-        // Only save new enhancements without server IDs (temporary ones)
+        // Find removed enhancements
+        const removedEnhancements = previousEnhancements.filter((prev) => {
+          if (prev.id && !prev.id.toString().startsWith("temp-")) {
+            return !currentEnhancements.some(
+              (curr) =>
+                curr.id === prev.id ||
+                (curr.property_id === prev.property_id &&
+                  curr.enhancement_type === prev.enhancement_type)
+            );
+          }
+          return false;
+        });
+
+        if (removedEnhancements.length > 0) {
+          console.log(
+            `Debug: Need to remove ${removedEnhancements.length} enhancements from DB`
+          );
+          for (const enhancement of removedEnhancements) {
+            try {
+              if (!enhancement.id) {
+                continue;
+              }
+              await removePropertyEnhancement(enhancement.id);
+              console.log(
+                `Debug: Successfully removed enhancement with ID ${enhancement.id}`
+              );
+            } catch (err) {
+              console.error(
+                `Debug: Error removing enhancement with ID ${enhancement.id}:`,
+                err
+              );
+            }
+          }
+        }
+
+        // Save new enhancements
         const newEnhancements = currentEnhancements.filter(
           (enhancement) =>
             !enhancement.id || enhancement.id.toString().startsWith("temp-")
         );
 
-        console.log(
-          `Debug: Found ${newEnhancements.length} new enhancements to save`
-        );
+        const processedEnhancementTypes = new Set();
 
         for (const enhancement of newEnhancements) {
-          // Skip if we've already processed this enhancement type for this property
           const enhancementKey = `${enhancement.property_id}:${enhancement.enhancement_type}`;
           if (processedEnhancementTypes.has(enhancementKey)) {
             console.log(
@@ -297,9 +346,7 @@ export default function Edit() {
             continue;
           }
 
-          // Mark this enhancement type as processed
           processedEnhancementTypes.add(enhancementKey);
-
           console.log(
             `Debug: Processing enhancement: ${enhancement.enhancement_type}`
           );
@@ -307,9 +354,9 @@ export default function Edit() {
           try {
             const { id, ...enhancementData } = enhancement;
             const result = await addPropertyEnhancement(enhancementData);
-            console.log(`Debug: Enhancement save result:`, result);
+            console.log("Debug: Enhancement save result:", result);
           } catch (err) {
-            console.error(`Debug: Error saving enhancement:`, err);
+            console.error("Debug: Error saving enhancement:", err);
           }
         }
       }
@@ -322,7 +369,7 @@ export default function Edit() {
       const updatedInspections = await fetchPropertyInspections(propertyId);
       const updatedEnhancements = await fetchPropertyEnhancements(propertyId);
 
-      // Sync Zustand store with updated DB data
+      // Sync Zustand store
       if (updatedPropertyDetails) {
         updatePropertyDetail(propertyId, updatedPropertyDetails);
         lastSavedDetailsRef.current = JSON.parse(
@@ -337,31 +384,24 @@ export default function Edit() {
         );
       }
 
-      // Update inspections in store
       if (updatedInspections.length > 0) {
-        // Keep inspections from other properties
         const otherInspections = propertyInspections.filter(
           (insp) => insp.property_id !== propertyId
         );
-
-        // Set all inspections
         setPropertyInspections([...otherInspections, ...updatedInspections]);
         lastSavedInspectionsRef.current = JSON.parse(
           JSON.stringify(updatedInspections)
         );
       }
 
-      // Update enhancements in store - maintain uniqueness by using a Set approach
+      const otherEnhancements = propertyEnhancements.filter(
+        (enh) => enh.property_id !== propertyId
+      );
+
+      const uniqueEnhancements = [];
+      const enhancementTypeMap = new Map();
+
       if (updatedEnhancements.length > 0) {
-        // Keep enhancements for other properties
-        const otherEnhancements = propertyEnhancements.filter(
-          (enh) => enh.property_id !== propertyId
-        );
-
-        // Create a uniqueness map for updated enhancements
-        const uniqueEnhancements = [];
-        const enhancementTypeMap = new Map();
-
         for (const enhancement of updatedEnhancements) {
           const key = `${enhancement.property_id}:${enhancement.enhancement_type}`;
           if (!enhancementTypeMap.has(key)) {
@@ -369,16 +409,14 @@ export default function Edit() {
             uniqueEnhancements.push(enhancement);
           }
         }
-
-        // Set enhancements in store
-        setPropertyEnhancements([...otherEnhancements, ...uniqueEnhancements]);
-        lastSavedEnhancementsRef.current = JSON.parse(
-          JSON.stringify(uniqueEnhancements)
-        );
       }
 
-      setHasUnsavedChanges(false);
+      setPropertyEnhancements([...otherEnhancements, ...uniqueEnhancements]);
+      lastSavedEnhancementsRef.current = JSON.parse(
+        JSON.stringify(uniqueEnhancements)
+      );
 
+      setHasUnsavedChanges(false);
       return true;
     } catch (error) {
       console.error("Error saving property data:", error);
@@ -586,7 +624,6 @@ export default function Edit() {
             packageType={propertyDetail.property_package}
             packagePrice={packagePrice}
             enhancements={currentEnhancements}
-            phoneConfirmed={propertyDetail.phone_confirmed || false}
             publishOption={propertyDetail.publish_option || "immediately"}
             publishDate={
               propertyDetail.publish_date
@@ -601,8 +638,6 @@ export default function Edit() {
           Insert side info here
         </Grid2>
       )}
-
-      {/* No full-screen loading overlay */}
     </Grid2>
   );
 }

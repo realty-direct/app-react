@@ -11,6 +11,8 @@ import {
   ThreeDRotation,
 } from "@mui/icons-material";
 import DroneIcon from "@mui/icons-material/FlightTakeoff";
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
+import SignpostIcon from "@mui/icons-material/SignpostOutlined";
 import {
   Box,
   Button,
@@ -49,10 +51,56 @@ interface Enhancement {
   availability?: string;
   deliveryTime?: string;
   benefits?: string[];
+  // Flag to mark exclusive options in a group (like signboard types)
+  exclusiveGroup?: string;
 }
 
 // Streamlined enhancement data with only the requested services
 const enhancements: Enhancement[] = [
+  // Adding signboard options
+  {
+    id: "standard-signboard",
+    category: "Signboards",
+    title: "Standard Signboard",
+    price: "$120",
+    numericPrice: 120,
+    description:
+      "Professional 600×900mm 'For Sale' sign with your contact details. Made of high-quality corflute with steel frame.",
+    longDescription:
+      "Our standard signboard is a 600×900mm corflute sign mounted on a steel frame. It includes your property address, contact details, and basic branding. These signs are professionally printed for maximum visibility and durability outdoors.",
+    icon: <SignpostIcon fontSize="large" color="primary" />,
+    availability: "Available for all property types",
+    deliveryTime: "Installed within 3-5 business days",
+    benefits: [
+      "Increases property visibility to drive-by traffic",
+      "Includes professional installation",
+      "Weather-resistant for durability",
+      "Helps interested parties contact you directly",
+    ],
+    exclusiveGroup: "signboard",
+  },
+  {
+    id: "photo-signboard",
+    category: "Signboards",
+    title: "Photo Signboard",
+    price: "$220",
+    numericPrice: 220,
+    description:
+      "Premium signboard featuring a high-quality photo of your property, your contact details, and professional design.",
+    longDescription:
+      "Our photo signboards feature a high-resolution image of your property alongside key features and your contact information. These premium signs are larger (900×1200mm) and printed on high-quality materials for maximum visual impact. The photo helps potential buyers recognize your property and increases interest from drive-by traffic.",
+    icon: <PhotoLibraryIcon fontSize="large" color="primary" />,
+    availability: "Available for all property types",
+    deliveryTime: "Installed within 5-7 business days after photography",
+    benefits: [
+      "Visual showcase of your property to passersby",
+      "50% larger than standard signboard for better visibility",
+      "Includes professional installation",
+      "Weather and UV-resistant for long-lasting quality",
+      "Visual representation attracts more potential buyers",
+    ],
+    exclusiveGroup: "signboard",
+  },
   {
     id: "virtual-staging",
     category: "Photography & Media",
@@ -281,9 +329,13 @@ export default function ListingEnhancements() {
     setOpenModal(false);
   };
 
+  // Handle toggle enhancement - ONLY manipulate Zustand store, no DB calls
   const handleToggleEnhancement = (enhancementId: string) => {
     try {
       const isCurrentlySelected = selectedEnhancements.includes(enhancementId);
+      const enhancement = enhancements.find((e) => e.id === enhancementId);
+
+      if (!enhancement) return;
 
       if (isCurrentlySelected) {
         // Find the enhancement in the store to get its ID
@@ -292,43 +344,46 @@ export default function ListingEnhancements() {
         );
 
         if (enhancementToRemove?.id) {
-          // Remove it from the store
+          // Remove from the Zustand store only - no DB call
           removePropertyEnhancement(enhancementToRemove.id);
+
+          setSnackbarMessage(`${enhancement.title} removed from selections`);
+          setSnackbarOpen(true);
         }
       } else {
-        // Check if this enhancement type already exists for this property
-        const alreadyExists = propertySpecificEnhancements.some(
-          (e) => e.enhancement_type === enhancementId
-        );
-
-        if (!alreadyExists) {
-          // Add the enhancement to the store
-          const enhancement = enhancements.find((e) => e.id === enhancementId);
-          if (enhancement) {
-            const newEnhancement: PropertyEnhancement = {
-              property_id: propertyId,
-              enhancement_type: enhancementId,
-              price: enhancement.numericPrice,
-              status: "pending",
-            };
-
-            addPropertyEnhancement(newEnhancement);
-          }
-        } else {
-          console.warn(
-            `Enhancement ${enhancementId} already exists for property ${propertyId}`
+        // For exclusive groups (like signboards), remove any existing selections
+        if (enhancement.exclusiveGroup) {
+          // Find all enhancements in the same exclusive group
+          const sameGroupEnhancements = enhancements.filter(
+            (e) => e.exclusiveGroup === enhancement.exclusiveGroup
           );
-        }
-      }
 
-      // Show snackbar message
-      const enhancement = enhancements.find((e) => e.id === enhancementId);
-      if (enhancement) {
-        setSnackbarMessage(
-          isCurrentlySelected
-            ? `${enhancement.title} removed from selections`
-            : `${enhancement.title} added to selections`
-        );
+          // Find and remove any selected enhancements from this group
+          for (const groupEnhancement of sameGroupEnhancements) {
+            if (selectedEnhancements.includes(groupEnhancement.id)) {
+              const existingEnhancement = propertySpecificEnhancements.find(
+                (e) => e.enhancement_type === groupEnhancement.id
+              );
+
+              if (existingEnhancement?.id) {
+                // Remove from the Zustand store only - no DB call
+                removePropertyEnhancement(existingEnhancement.id);
+              }
+            }
+          }
+        }
+
+        // Add the enhancement to the store - with a temporary ID
+        const newEnhancement: PropertyEnhancement = {
+          id: `temp-${Date.now()}-${enhancementId}`, // Add a temporary ID
+          property_id: propertyId,
+          enhancement_type: enhancementId,
+          price: enhancement.numericPrice,
+          status: "pending",
+        };
+
+        addPropertyEnhancement(newEnhancement);
+        setSnackbarMessage(`${enhancement.title} added to selections`);
         setSnackbarOpen(true);
       }
     } catch (error) {
@@ -338,44 +393,9 @@ export default function ListingEnhancements() {
     }
   };
 
-  // Also update this function
   const handleAddFromModal = () => {
-    if (
-      currentEnhancement &&
-      !selectedEnhancements.includes(currentEnhancement.id)
-    ) {
-      try {
-        // Check if this enhancement type already exists for this property
-        const alreadyExists = propertySpecificEnhancements.some(
-          (e) => e.enhancement_type === currentEnhancement.id
-        );
-
-        if (!alreadyExists) {
-          // Create new enhancement object without ID
-          const newEnhancement: PropertyEnhancement = {
-            property_id: propertyId,
-            enhancement_type: currentEnhancement.id,
-            price: currentEnhancement.numericPrice,
-            status: "pending",
-          };
-
-          // Add to store
-          addPropertyEnhancement(newEnhancement);
-
-          setSnackbarMessage(`${currentEnhancement.title} added to selections`);
-          setSnackbarOpen(true);
-        } else {
-          console.warn(
-            `Enhancement ${currentEnhancement.id} already exists for property ${propertyId}`
-          );
-          setSnackbarMessage(`${currentEnhancement.title} is already selected`);
-          setSnackbarOpen(true);
-        }
-      } catch (error) {
-        console.error("Error adding enhancement:", error);
-        setSnackbarMessage("Error adding selection");
-        setSnackbarOpen(true);
-      }
+    if (currentEnhancement) {
+      handleToggleEnhancement(currentEnhancement.id);
     }
     handleCloseModal();
   };

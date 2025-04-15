@@ -35,7 +35,6 @@ interface OrderSummaryProps {
     enhancement_type: string;
     price: number;
   }>;
-  phoneConfirmed: boolean;
   publishOption: string;
   publishDate: Date | null;
   handleFinalizeListing: () => Promise<void>;
@@ -46,7 +45,6 @@ const OrderSummary = ({
   packageType,
   packagePrice,
   enhancements,
-  phoneConfirmed,
   publishOption,
   publishDate,
   handleFinalizeListing,
@@ -61,6 +59,13 @@ const OrderSummary = ({
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [showOrderSummary, setShowOrderSummary] = useState(true);
+
+  // Check if any signboard enhancement is selected
+  const hasSignboardEnhancement = enhancements.some((enhancement) =>
+    ["standard-signboard", "photo-signboard"].includes(
+      enhancement.enhancement_type
+    )
+  );
 
   // Calculate totals
   const enhancementsTotal = enhancements.reduce(
@@ -142,6 +147,11 @@ const OrderSummary = ({
     setIsFinalizing(true);
     await handleFinalizeListing();
     setIsFinalizing(false);
+  };
+
+  // Navigate to add signboard enhancement
+  const handleAddSignboard = () => {
+    navigate(`/property/${propertyId}/edit`, { state: { tabIndex: 9 } }); // 9 is the Enhancements tab
   };
 
   return (
@@ -402,6 +412,26 @@ const OrderSummary = ({
             Add More Services
           </Button>
 
+          {/* Signboard recommendation if none selected */}
+          {!hasSignboardEnhancement && (
+            <Alert
+              severity="info"
+              sx={{ mt: 2, mb: 2 }}
+              action={
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={handleAddSignboard}
+                >
+                  Add
+                </Button>
+              }
+            >
+              Consider adding a For Sale sign to increase your property's
+              visibility
+            </Alert>
+          )}
+
           {/* Finalize Button */}
           <Button
             variant="contained"
@@ -410,7 +440,6 @@ const OrderSummary = ({
             size="large"
             disabled={
               isFinalizing ||
-              !phoneConfirmed ||
               (publishOption === "later" && !publishDate) ||
               !packageType
             }
@@ -428,12 +457,6 @@ const OrderSummary = ({
           {!packageType && (
             <Alert severity="warning" sx={{ mt: 2 }}>
               Please select a package before proceeding
-            </Alert>
-          )}
-
-          {!phoneConfirmed && (
-            <Alert severity="warning" sx={{ mt: 2 }}>
-              Please confirm your phone number for the sign
             </Alert>
           )}
 

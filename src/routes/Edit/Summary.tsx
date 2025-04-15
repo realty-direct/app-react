@@ -1,4 +1,3 @@
-import CheckIcon from "@mui/icons-material/Check";
 import {
   Alert,
   Box,
@@ -39,7 +38,6 @@ export default function Summary() {
   const publishDate = publishDateStr
     ? parse(publishDateStr, "yyyy-MM-dd", new Date())
     : null;
-  const phoneConfirmed = propertyDetail?.phone_confirmed || false;
 
   // Format currency
   const formatCurrency = (amount: number): string => {
@@ -79,22 +77,6 @@ export default function Summary() {
     });
   };
 
-  // Handle phone confirmation - update store directly
-  const handleConfirmPhone = () => {
-    updatePropertyDetail(propertyId, {
-      phone_confirmed: true,
-    });
-  };
-
-  // Handle phone update - update store and navigate
-  const handleUpdatePhone = () => {
-    updatePropertyDetail(propertyId, {
-      phone_confirmed: false,
-    });
-    // Navigate to the contact details page to update the phone
-    navigate(`/property/${propertyId}/edit`, { state: { tabIndex: 6 } }); // 6 is the Contact tab
-  };
-
   if (!propertyDetail || !property) {
     return <Typography>Property not found</Typography>;
   }
@@ -113,78 +95,6 @@ export default function Summary() {
 
         {/* Main content */}
         <Box>
-          {/* For Sale Sign Information */}
-          <Paper elevation={2} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Your For Sale Sign
-            </Typography>
-
-            <Typography sx={{ mb: 2 }}>
-              Your package includes a <b>customizable 600×900 sign.</b>
-            </Typography>
-
-            <Box
-              sx={{
-                p: 2,
-                bgcolor: "background.default",
-                border: `1px solid ${theme.palette.divider}`,
-                borderRadius: 1,
-                mb: 2,
-              }}
-            >
-              <Typography sx={{ fontWeight: "medium", mb: 1 }}>
-                On the sign, we'll print:
-              </Typography>
-              <Typography variant="h6" sx={{ textAlign: "center", py: 1 }}>
-                {propertyDetail?.contact_phone || "No phone number provided"}
-              </Typography>
-
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  mt: 2,
-                  gap: 2,
-                }}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={phoneConfirmed}
-                  onClick={handleConfirmPhone}
-                >
-                  {phoneConfirmed ? (
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <CheckIcon sx={{ mr: 1 }} />
-                      Confirmed
-                    </Box>
-                  ) : (
-                    "Confirm"
-                  )}
-                </Button>
-
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={handleUpdatePhone}
-                >
-                  Update Number
-                </Button>
-              </Box>
-            </Box>
-
-            {/* Confirmation Status */}
-            {!phoneConfirmed ? (
-              <Alert severity="warning" sx={{ mb: 2 }}>
-                Please confirm your phone number for the sign
-              </Alert>
-            ) : (
-              <Alert severity="success" sx={{ mb: 2 }}>
-                Phone number confirmed
-              </Alert>
-            )}
-          </Paper>
-
           {/* Publish Timing */}
           <Paper elevation={2} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
             <Typography variant="h6" gutterBottom>
