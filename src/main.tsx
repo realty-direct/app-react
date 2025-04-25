@@ -13,7 +13,6 @@ import Confirm from "./routes/Confirm";
 import Conveyancing from "./routes/Conveyancing";
 import Create from "./routes/Create";
 import Edit from "./routes/Edit/Edit";
-import Guide from "./routes/Guide";
 import Home from "./routes/Home";
 import Orders from "./routes/Orders";
 import Property from "./routes/Property";
@@ -35,7 +34,6 @@ const router = createBrowserRouter([
             element: <HomeLayout />,
             children: [
               { path: "", element: <Home /> },
-              { path: "guide", element: <Guide /> },
               { path: "account", element: <AccountManagement /> },
               { path: "conveyancing", element: <Conveyancing /> },
             ],

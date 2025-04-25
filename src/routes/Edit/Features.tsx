@@ -3,7 +3,7 @@ import {
   Checkbox,
   Divider,
   FormControlLabel,
-  Grid2,
+  Grid,
   Typography,
 } from "@mui/material";
 import { useParams } from "react-router";
@@ -89,12 +89,12 @@ export default function FeaturesTab() {
         Select Features for Your Property
       </Typography>
 
-      <Grid2 container spacing={3}>
+      <Grid container spacing={3}>
         {Object.entries(features).map(([category, items]) => {
           const featureType = category as FeatureType;
 
           return (
-            <Grid2 key={category}>
+            <Grid key={category}>
               <Typography variant="h6" gutterBottom>
                 {category
                   .replace("_", " ") // ✅ Format category name properly
@@ -119,10 +119,10 @@ export default function FeaturesTab() {
                   />
                 );
               })}
-            </Grid2>
+            </Grid>
           );
         })}
-      </Grid2>
+      </Grid>
     </Box>
   );
 }

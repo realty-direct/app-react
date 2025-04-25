@@ -10,38 +10,58 @@ export const checkUserSession = async () => {
   return data.user || null;
 };
 
-// ✅ Sign Up User
+// ✅ Sign Up User with phone number (using Supabase Phone Auth)
 export const signUp = async (
   email: string,
   password: string,
   firstName: string,
-  lastName: string
+  lastName: string,
+  phoneNumber: string
 ) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${window.location.origin}/confirm`,
-    },
-  });
-
-  if (error) return { user: null, error };
-
-  // ✅ If user exists, insert profile into `profiles` table
-  if (data?.user) {
-    const { error: profileError } = await supabase.from("profiles").insert([
-      {
-        id: data.user.id,
-        first_name: firstName,
-        last_name: lastName,
-        email: email,
+  try {
+    // Step 1: Create user account with email password
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/confirm`,
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          phone: phoneNumber,
+        },
       },
-    ]);
+    });
 
-    if (profileError) return { user: null, error: profileError };
+    if (error) return { user: null, error };
+
+    // Step 2: Insert profile data into our profiles table
+    if (data?.user) {
+      const { error: profileError } = await supabase.from("profiles").insert([
+        {
+          id: data.user.id,
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          phone_number: phoneNumber,
+          phone_confirmed: false, // Initially false, will be verified
+        },
+      ]);
+
+      if (profileError) {
+        console.error("❌ Error creating profile:", profileError);
+        // We'll continue anyway since the auth account was created
+      }
+    }
+
+    return { user: data?.user, error: null };
+  } catch (error: any) {
+    console.error("❌ Error during signup:", error);
+    return {
+      user: null,
+      error: { message: error.message || "An error occurred during signup" },
+    };
   }
-
-  return { user: data?.user, error: null };
 };
 
 // ✅ Sign In User
@@ -83,6 +103,7 @@ export const resendConfirmationEmail = async (email: string) => {
   return { error };
 };
 
+// ✅ Fetch user profile
 export const fetchUserProfile = async (userId: string) => {
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -91,4 +112,99 @@ export const fetchUserProfile = async (userId: string) => {
     .single();
 
   return { profile, profileError };
+};
+
+// ✅ Verify phone with OTP
+export const startPhoneVerification = async (phoneNumber: string) => {
+  try {
+    const { data, error } = await supabase.auth.signInWithOtp({
+      phone: phoneNumber,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("❌ Error starting phone verification:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to start phone verification",
+    };
+  }
+};
+
+// ✅ Verify phone OTP code
+export const verifyPhoneOtp = async (
+  phoneNumber: string,
+  otp: string,
+  userId: string
+) => {
+  try {
+    // Verify the OTP
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone: phoneNumber,
+      token: otp,
+      type: "sms",
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    // If verification successful, update our profile record
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ phone_confirmed: true })
+      .eq("id", userId);
+
+    if (updateError) {
+      console.error(
+        "❌ Error updating phone verification status:",
+        updateError
+      );
+      // We'll consider it verified anyway since Supabase verified it
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("❌ Error verifying phone OTP:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to verify phone number",
+    };
+  }
+};
+
+// ✅ Update phone number directly (for account page)
+export const updatePhoneNumber = async (
+  userId: string,
+  phoneNumber: string
+) => {
+  try {
+    // First update in the profiles table
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        phone_number: phoneNumber,
+        phone_confirmed: false, // Reset verification status
+      })
+      .eq("id", userId);
+
+    if (error) {
+      throw error;
+    }
+
+    return {
+      success: true,
+      message: "Phone number updated. It will need to be verified.",
+    };
+  } catch (error: any) {
+    console.error("❌ Error updating phone number:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to update phone number",
+    };
+  }
 };

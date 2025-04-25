@@ -1,198 +1,416 @@
-import { Box, Button, Modal, Typography } from "@mui/material";
-import { type JSX, useState } from "react";
+import {
+  AccountCircle,
+  Badge,
+  Email,
+  Info,
+  Lock,
+  Phone,
+} from "@mui/icons-material";
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Divider,
+  Grid,
+  InputAdornment,
+  Modal,
+  Paper,
+  TextField,
+  Typography,
+} from "@mui/material";
+
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { resendConfirmationEmail, signUp } from "../database/auth";
 
-export default function Signup(): JSX.Element {
+export default function Signup() {
   const navigate = useNavigate();
 
+  // Form state
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [error, setError] = useState<string | null>(null);
+  // UI state
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
+  // Error handling
+  const [errors, setErrors] = useState<{
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    password?: string;
+    confirmPassword?: string;
+    general?: string;
+  }>({});
+
+  // Form validation
+  const validateForm = () => {
+    const newErrors: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      phone?: string;
+      password?: string;
+      confirmPassword?: string;
+    } = {};
+
+    // First name validation
+    if (!firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    }
+
+    // Last name validation
+    if (!lastName.trim()) {
+      newErrors.lastName = "Last name is required";
+    }
+
+    // Email validation
+    if (!email) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    // Phone validation - must be in E.164 format for Supabase Auth
+    if (!phone) {
+      newErrors.phone = "Phone number is required";
+    } else {
+      // Convert to E.164 format if needed
+      let phoneFormatted = phone;
+      if (!phone.startsWith("+")) {
+        // Australian default
+        if (phone.startsWith("0")) {
+          phoneFormatted = `+61${phone.substring(1)}`;
+        } else {
+          newErrors.phone =
+            "Phone number must include country code (e.g., +61)";
+        }
+      }
+
+      // Basic format validation
+      if (
+        !newErrors.phone &&
+        !/^\+[0-9\s()-]{10,15}$/.test(phoneFormatted.replace(/\s+/g, ""))
+      ) {
+        newErrors.phone = "Please enter a valid phone number with country code";
+      }
+    }
+
+    // Password validation
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    }
+
+    // Confirm password
+    if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Format phone for submission (E.164)
+  const formatPhone = (phoneNumber: string): string => {
+    // Remove all non-digit characters except the + at the beginning
+    let formatted = phoneNumber.replace(/\s+/g, "");
+
+    // Add Australian country code if needed
+    if (formatted.startsWith("0")) {
+      formatted = `+61${formatted.substring(1)}`;
+    } else if (!formatted.startsWith("+")) {
+      formatted = `+${formatted}`;
+    }
+
+    return formatted;
+  };
+
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
+    setErrors({});
 
     try {
-      const { error } = await signUp(email, password, firstName, lastName);
+      // Format phone to E.164 for Supabase Auth
+      const formattedPhone = formatPhone(phone);
+
+      // Call the signUp function
+      const { error } = await signUp(
+        email,
+        password,
+        firstName,
+        lastName,
+        formattedPhone
+      );
 
       if (error) {
-        setError(error.message);
+        setErrors({ general: error.message });
         return;
       }
 
+      // Show confirmation modal
       setShowModal(true);
-    } catch (err) {
-      setError("An unexpected error occurred during signup.");
+    } catch (err: any) {
+      setErrors({
+        general: err.message || "An unexpected error occurred during signup.",
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle resend confirmation email
   const handleResendEmail = async () => {
     setResendLoading(true);
     try {
       const { error } = await resendConfirmationEmail(email);
       if (error) {
-        setError(error.message);
+        setErrors({ general: error.message });
+      } else {
+        // Update the modal message to indicate email was resent
+        // This would ideally update some state to show a success message
       }
-    } catch (err) {
-      setError("Failed to resend confirmation email. Please try again.");
+    } catch (err: any) {
+      setErrors({
+        general:
+          err.message ||
+          "Failed to resend confirmation email. Please try again.",
+      });
     } finally {
       setResendLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center w-full">
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <img
-            alt="Your Company"
-            src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
-            className="mx-auto h-10 w-auto"
-          />
-          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight">
-            Sign up for an account
-          </h2>
-        </div>
+    <Container maxWidth="md">
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          py: 4,
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            p: { xs: 3, sm: 5 },
+            borderRadius: 2,
+            mx: "auto",
+            width: "100%",
+          }}
+        >
+          {/* Header */}
+          <Box sx={{ textAlign: "center", mb: 4 }}>
+            <img
+              alt="Logo"
+              src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
+              className="mx-auto h-12 w-auto"
+            />
+            <Typography variant="h4" fontWeight="bold" sx={{ mt: 2 }}>
+              Create your account
+            </Typography>
+            <Typography color="text.secondary" sx={{ mt: 1 }}>
+              Join our platform to start selling your properties
+            </Typography>
+          </Box>
 
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          {error && (
-            <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+          {/* General Error */}
+          {errors.general && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {errors.general}
+            </Alert>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-medium">
-                First Name
-              </label>
-              <input
-                id="firstName"
-                type="text"
-                required
-                autoComplete="given-name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                disabled={loading}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="lastName" className="block text-sm font-medium">
-                Last Name
-              </label>
-              <input
-                id="lastName"
-                type="text"
-                required
-                autoComplete="family-name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                disabled={loading}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                disabled={loading}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                disabled={loading}
-              />
-            </div>
-
-            <div className="mt-4 text-center">
-              <p className="text-sm">
-                Already signed up?{" "}
-                <button
-                  type="button"
-                  onClick={() => navigate("/signin")}
-                  className="text-indigo-600 hover:text-indigo-500 font-semibold"
+          {/* Form */}
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              {/* Name fields */}
+              <Grid md={6} sm={6} xs={12}>
+                <TextField
+                  label="First Name"
+                  fullWidth
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  error={!!errors.firstName}
+                  helperText={errors.firstName}
                   disabled={loading}
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <AccountCircle />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid md={6} sm={6} xs={12}>
+                <TextField
+                  label="Last Name"
+                  fullWidth
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  error={!!errors.lastName}
+                  helperText={errors.lastName}
+                  disabled={loading}
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Badge />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              {/* Email field */}
+              <Grid xs={12}>
+                <TextField
+                  label="Email Address"
+                  type="email"
+                  fullWidth
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  error={!!errors.email}
+                  helperText={errors.email}
+                  disabled={loading}
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              {/* Phone field */}
+              <Grid xs={12}>
+                <TextField
+                  label="Phone Number"
+                  fullWidth
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  error={!!errors.phone}
+                  helperText={
+                    errors.phone ||
+                    "Enter in format: +61 4xx xxx xxx or 04xx xxx xxx"
+                  }
+                  disabled={loading}
+                  required
+                  placeholder="e.g., +61 400 123 456"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Phone />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              {/* Password fields */}
+              <Grid md={6} sm={6} xs={12}>
+                <TextField
+                  label="Password"
+                  type="password"
+                  fullWidth
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  error={!!errors.password}
+                  helperText={errors.password}
+                  disabled={loading}
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid md={6} sm={6} xs={12}>
+                <TextField
+                  label="Confirm Password"
+                  type="password"
+                  fullWidth
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword}
+                  disabled={loading}
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              {/* Submit button */}
+              <Grid xs={12}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  disabled={loading}
+                  sx={{ mt: 2, py: 1.5 }}
                 >
-                  Sign in
-                </button>
-              </p>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className={`flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold leading-6 text-white shadow-sm 
-                hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 
-                ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <svg
-                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <title>Signing up spinner</title>
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    Signing up...
-                  </div>
-                ) : (
-                  "Sign up"
-                )}
-              </button>
-            </div>
+                  {loading ? (
+                    <LoadingSpinner buttonMode text="Creating Account..." />
+                  ) : (
+                    "Sign Up"
+                  )}
+                </Button>
+              </Grid>
+            </Grid>
           </form>
-        </div>
-      </div>
 
-      {/* Confirmation Email Modal */}
+          <Divider sx={{ my: 3 }} />
+
+          {/* Footer links */}
+          <Box sx={{ textAlign: "center" }}>
+            <Typography variant="body2">
+              Already have an account?{" "}
+              <Button
+                variant="text"
+                onClick={() => navigate("/signin")}
+                disabled={loading}
+                sx={{ textTransform: "none" }}
+              >
+                Sign in
+              </Button>
+            </Typography>
+          </Box>
+        </Paper>
+      </Box>
+
+      {/* Confirmation Modal */}
       <Modal open={showModal} onClose={() => navigate("/signin")}>
         <Box
           sx={{
@@ -200,51 +418,39 @@ export default function Signup(): JSX.Element {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "white",
+            width: { xs: "90%", sm: 500 },
+            bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
             borderRadius: 2,
           }}
         >
-          <Typography variant="h6" component="h2">
-            Confirmation Email Sent!
-          </Typography>
-          <Typography sx={{ mt: 2 }}>
-            Please check your inbox to confirm your email. If you don't see it,
-            click the button below to resend.
+          <Typography
+            variant="h5"
+            component="h2"
+            sx={{ mb: 2, display: "flex", alignItems: "center" }}
+          >
+            <Info color="info" sx={{ mr: 1 }} />
+            Verification Required
           </Typography>
 
-          <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
+          <Typography sx={{ mb: 3 }}>
+            Please check your email to confirm your account. After confirming
+            your email, you'll be able to sign in and complete phone
+            verification.
+          </Typography>
+
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
             <Button onClick={() => navigate("/signin")}>Go To Sign In</Button>
-            <Button onClick={handleResendEmail} disabled={resendLoading}>
+            <Button
+              variant="contained"
+              onClick={handleResendEmail}
+              disabled={resendLoading}
+            >
               {resendLoading ? (
-                <div className="flex items-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <title>Resending spinner</title>
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Resending...
-                </div>
+                <LoadingSpinner buttonMode text="Resending..." />
               ) : (
-                "Don't see it? Resend"
+                "Resend Verification"
               )}
             </Button>
           </Box>
@@ -255,6 +461,6 @@ export default function Signup(): JSX.Element {
       {loading && (
         <LoadingSpinner fullPage text="Creating your account..." transparent />
       )}
-    </div>
+    </Container>
   );
 }

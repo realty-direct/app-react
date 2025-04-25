@@ -25,7 +25,7 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  Grid2,
+  Grid,
   IconButton,
   Paper,
   Snackbar,
@@ -441,12 +441,12 @@ export default function ListingEnhancements() {
             {category}
           </Typography>
 
-          <Grid2 container spacing={3}>
+          <Grid container spacing={3}>
             {items.map((enhancement) => {
               const isSelected = selectedEnhancements.includes(enhancement.id);
 
               return (
-                <Grid2
+                <Grid
                   key={`${category}-${enhancement.id}`}
                   size={{ xs: 12, sm: 6, md: 4 }}
                 >
@@ -557,10 +557,10 @@ export default function ListingEnhancements() {
                       </Button>
                     </CardActions>
                   </Card>
-                </Grid2>
+                </Grid>
               );
             })}
-          </Grid2>
+          </Grid>
         </Box>
       ))}
 
@@ -660,9 +660,9 @@ export default function ListingEnhancements() {
             </DialogTitle>
 
             <DialogContent dividers>
-              <Grid2 container spacing={3}>
+              <Grid container spacing={3}>
                 {/* Icon and basic info */}
-                <Grid2 size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Box
                     sx={{
                       display: "flex",
@@ -693,10 +693,10 @@ export default function ListingEnhancements() {
                         currentEnhancement.description}
                     </Typography>
                   </Box>
-                </Grid2>
+                </Grid>
 
                 {/* Details and features */}
-                <Grid2 size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   {currentEnhancement.availability && (
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="subtitle2" fontWeight="bold">
@@ -750,8 +750,8 @@ export default function ListingEnhancements() {
                         ))}
                       </Box>
                     )}
-                </Grid2>
-              </Grid2>
+                </Grid>
+              </Grid>
             </DialogContent>
 
             <DialogActions sx={{ p: 2, justifyContent: "space-between" }}>

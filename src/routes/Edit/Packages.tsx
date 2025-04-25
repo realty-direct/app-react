@@ -7,7 +7,7 @@ import {
   CardContent,
   CardHeader,
   Divider,
-  Grid2,
+  Grid,
   Paper,
   Typography,
   useTheme,
@@ -111,9 +111,9 @@ export default function Packages() {
       </Typography>
 
       {/* Package Selection Cards */}
-      <Grid2 container spacing={3} sx={{ mb: 6 }}>
+      <Grid container spacing={3} sx={{ mb: 6 }}>
         {packages.map((pkg) => (
-          <Grid2 key={pkg.id} size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid key={pkg.id} size={{ xs: 12, sm: 6, md: 4 }}>
             <Card
               elevation={selectedPackage === pkg.id ? 8 : 2}
               sx={{
@@ -212,9 +212,9 @@ export default function Packages() {
                 </Button>
               </CardActions>
             </Card>
-          </Grid2>
+          </Grid>
         ))}
-      </Grid2>
+      </Grid>
 
       {/* Package Summary */}
       {selectedPackage && (

@@ -5,7 +5,6 @@ import {
   Description,
   Gavel,
   House,
-  Lightbulb,
   Mail,
   Person,
   ShoppingCart,
@@ -15,7 +14,6 @@ import { useLocation, useParams } from "react-router";
 
 export const HOME_NAVIGATION: NavigationItem[] = [
   { segment: "", title: "Your Properties", icon: <House /> },
-  { segment: "guide", title: "Guide to Selling", icon: <Lightbulb /> },
   {
     segment: "conveyancing",
     title: "Recommended Conveyancer",

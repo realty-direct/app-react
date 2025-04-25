@@ -1,7 +1,7 @@
 // File: src/routes/Edit/Edit.tsx - Updated to handle optional signboard
 // Only updating the relevant parts related to phoneConfirmed requirement
 
-import { Alert, Box, Button, Grid2, Tab, Tabs } from "@mui/material";
+import { Alert, Box, Button, Grid, Tab, Tabs } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -522,9 +522,9 @@ export default function Edit() {
   const showOrderSummary = tabValue === 10 && propertyDetail;
 
   return (
-    <Grid2 container sx={{ position: "relative" }}>
+    <Grid container sx={{ position: "relative" }}>
       {/* Sticky Tabs */}
-      <Grid2
+      <Grid
         size={12}
         sx={{
           position: "sticky",
@@ -560,10 +560,10 @@ export default function Edit() {
           <Tab label="Listing Enhancements" disabled={loading} />
           <Tab label="Summary" disabled={loading} />
         </Tabs>
-      </Grid2>
+      </Grid>
 
       {/* Tab Content */}
-      <Grid2 size={9} p={3}>
+      <Grid size={9} p={3}>
         {tabValue === 0 && <Details />}
         {tabValue === 1 && <Features />}
         {tabValue === 2 && <Price />}
@@ -614,11 +614,11 @@ export default function Edit() {
             )}
           </Button>
         </Box>
-      </Grid2>
+      </Grid>
 
       {/* Order Summary Sidebar - Only shown on Summary tab */}
       {showOrderSummary ? (
-        <Grid2 size={3} p={3}>
+        <Grid size={3} p={3}>
           <OrderSummary
             propertyId={propertyId || ""}
             packageType={propertyDetail.property_package}
@@ -632,12 +632,12 @@ export default function Edit() {
             }
             handleFinalizeListing={handleFinalizeListing}
           />
-        </Grid2>
+        </Grid>
       ) : (
-        <Grid2 size={3} p={3}>
+        <Grid size={3} p={3}>
           Insert side info here
-        </Grid2>
+        </Grid>
       )}
-    </Grid2>
+    </Grid>
   );
 }
