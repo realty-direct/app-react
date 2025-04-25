@@ -5,36 +5,60 @@ import {
   Info,
   Lock,
   Phone,
+  Visibility,
+  VisibilityOff,
 } from "@mui/icons-material";
 import {
   Alert,
   Box,
   Button,
+  Checkbox,
   Container,
   Divider,
+  FormControlLabel,
   Grid,
+  IconButton,
   InputAdornment,
+  Link,
   Modal,
   Paper,
+  Stack,
+  Step,
+  StepLabel,
+  Stepper,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
-
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import CountryCodeSelector from "../components/CountryCodeSelector";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { resendConfirmationEmail, signUp } from "../database/auth";
 
+// Password validation helpers
+const hasMinLength = (password: string) => password.length >= 8;
+const hasUpperCase = (password: string) => /[A-Z]/.test(password);
+const hasLowerCase = (password: string) => /[a-z]/.test(password);
+const hasNumber = (password: string) => /\d/.test(password);
+const hasSpecialChar = (password: string) =>
+  /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
 export default function Signup() {
+  const theme = useTheme();
   const navigate = useNavigate();
 
   // Form state
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("+61"); // Default to Australia
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -46,11 +70,39 @@ export default function Signup() {
     firstName?: string;
     lastName?: string;
     email?: string;
-    phone?: string;
+    phoneNumber?: string;
     password?: string;
     confirmPassword?: string;
+    terms?: string;
     general?: string;
   }>({});
+
+  // Password strength feedback
+  const passwordRequirements = [
+    { validator: hasMinLength, text: "At least 8 characters" },
+    { validator: hasUpperCase, text: "At least one uppercase letter" },
+    { validator: hasLowerCase, text: "At least one lowercase letter" },
+    { validator: hasNumber, text: "At least one number" },
+    { validator: hasSpecialChar, text: "At least one special character" },
+  ];
+
+  const getPasswordStrength = () => {
+    if (!password) return 0;
+
+    const passedChecks = passwordRequirements.filter((req) =>
+      req.validator(password)
+    ).length;
+
+    return (passedChecks / passwordRequirements.length) * 100;
+  };
+
+  const passwordStrength = getPasswordStrength();
+
+  const getStrengthColor = () => {
+    if (passwordStrength < 40) return theme.palette.error.main;
+    if (passwordStrength < 80) return theme.palette.warning.main;
+    return theme.palette.success.main;
+  };
 
   // Form validation
   const validateForm = () => {
@@ -58,9 +110,10 @@ export default function Signup() {
       firstName?: string;
       lastName?: string;
       email?: string;
-      phone?: string;
+      phoneNumber?: string;
       password?: string;
       confirmPassword?: string;
+      terms?: string;
     } = {};
 
     // First name validation
@@ -80,36 +133,21 @@ export default function Signup() {
       newErrors.email = "Please enter a valid email address";
     }
 
-    // Phone validation - must be in E.164 format for Supabase Auth
-    if (!phone) {
-      newErrors.phone = "Phone number is required";
+    // Phone validation
+    if (!phoneNumber) {
+      newErrors.phoneNumber = "Phone number is required";
     } else {
-      // Convert to E.164 format if needed
-      let phoneFormatted = phone;
-      if (!phone.startsWith("+")) {
-        // Australian default
-        if (phone.startsWith("0")) {
-          phoneFormatted = `+61${phone.substring(1)}`;
-        } else {
-          newErrors.phone =
-            "Phone number must include country code (e.g., +61)";
-        }
-      }
-
       // Basic format validation
-      if (
-        !newErrors.phone &&
-        !/^\+[0-9\s()-]{10,15}$/.test(phoneFormatted.replace(/\s+/g, ""))
-      ) {
-        newErrors.phone = "Please enter a valid phone number with country code";
+      if (!/^[0-9\s()-]{6,15}$/.test(phoneNumber.replace(/\s+/g, ""))) {
+        newErrors.phoneNumber = "Please enter a valid phone number";
       }
     }
 
     // Password validation
     if (!password) {
       newErrors.password = "Password is required";
-    } else if (password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
+    } else if (passwordStrength < 80) {
+      newErrors.password = "Password doesn't meet all requirements";
     }
 
     // Confirm password
@@ -117,23 +155,30 @@ export default function Signup() {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
+    // Terms acceptance
+    if (!agreeToTerms) {
+      newErrors.terms = "You must agree to the terms and conditions";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   // Format phone for submission (E.164)
-  const formatPhone = (phoneNumber: string): string => {
-    // Remove all non-digit characters except the + at the beginning
-    let formatted = phoneNumber.replace(/\s+/g, "");
+  const formatPhone = (): string => {
+    // Remove all non-digit characters
+    let formatted = phoneNumber.replace(/\D/g, "");
 
-    // Add Australian country code if needed
-    if (formatted.startsWith("0")) {
-      formatted = `+61${formatted.substring(1)}`;
-    } else if (!formatted.startsWith("+")) {
-      formatted = `+${formatted}`;
+    // Add country code
+    if (countryCode) {
+      const cleanCountryCode = countryCode.startsWith("+")
+        ? countryCode
+        : `+${countryCode}`;
+
+      return `${cleanCountryCode}${formatted}`;
     }
 
-    return formatted;
+    return `+61${formatted}`; // Default to Australia if no country code
   };
 
   // Handle form submission
@@ -149,7 +194,7 @@ export default function Signup() {
 
     try {
       // Format phone to E.164 for Supabase Auth
-      const formattedPhone = formatPhone(phone);
+      const formattedPhone = formatPhone();
 
       // Call the signUp function
       const { error } = await signUp(
@@ -162,6 +207,7 @@ export default function Signup() {
 
       if (error) {
         setErrors({ general: error.message });
+        setLoading(false);
         return;
       }
 
@@ -210,7 +256,7 @@ export default function Signup() {
         }}
       >
         <Paper
-          elevation={3}
+          elevation={4}
           sx={{
             p: { xs: 3, sm: 5 },
             borderRadius: 2,
@@ -223,7 +269,7 @@ export default function Signup() {
             <img
               alt="Logo"
               src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
-              className="mx-auto h-12 w-auto"
+              style={{ height: 48, width: "auto", margin: "0 auto" }}
             />
             <Typography variant="h4" fontWeight="bold" sx={{ mt: 2 }}>
               Create your account
@@ -244,7 +290,7 @@ export default function Signup() {
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
               {/* Name fields */}
-              <Grid md={6} sm={6} xs={12}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   label="First Name"
                   fullWidth
@@ -263,7 +309,7 @@ export default function Signup() {
                   }}
                 />
               </Grid>
-              <Grid md={6} sm={6} xs={12}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   label="Last Name"
                   fullWidth
@@ -284,7 +330,7 @@ export default function Signup() {
               </Grid>
 
               {/* Email field */}
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <TextField
                   label="Email Address"
                   type="email"
@@ -305,36 +351,43 @@ export default function Signup() {
                 />
               </Grid>
 
-              {/* Phone field */}
-              <Grid xs={12}>
-                <TextField
-                  label="Phone Number"
-                  fullWidth
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  error={!!errors.phone}
-                  helperText={
-                    errors.phone ||
-                    "Enter in format: +61 4xx xxx xxx or 04xx xxx xxx"
-                  }
-                  disabled={loading}
-                  required
-                  placeholder="e.g., +61 400 123 456"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Phone />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+              {/* Phone field with country code */}
+              <Grid item xs={12}>
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <CountryCodeSelector
+                    value={countryCode}
+                    onChange={setCountryCode}
+                    disabled={loading}
+                  />
+                  <TextField
+                    label="Phone Number"
+                    fullWidth
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    error={!!errors.phoneNumber}
+                    helperText={
+                      errors.phoneNumber ||
+                      "Without country code (e.g., 400 123 456)"
+                    }
+                    disabled={loading}
+                    required
+                    placeholder="Enter your phone number"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Phone />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
               </Grid>
 
               {/* Password fields */}
-              <Grid md={6} sm={6} xs={12}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   label="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   fullWidth
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -348,13 +401,23 @@ export default function Signup() {
                         <Lock />
                       </InputAdornment>
                     ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
                   }}
                 />
               </Grid>
-              <Grid md={6} sm={6} xs={12}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   label="Confirm Password"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   fullWidth
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -368,23 +431,133 @@ export default function Signup() {
                         <Lock />
                       </InputAdornment>
                     ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
+                          edge="end"
+                        >
+                          {showConfirmPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
                   }}
                 />
               </Grid>
 
+              {/* Password Strength Indicator */}
+              {password && (
+                <Grid item xs={12}>
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" gutterBottom>
+                      Password Strength
+                    </Typography>
+                    <Box
+                      sx={{
+                        width: "100%",
+                        height: 8,
+                        bgcolor: "grey.200",
+                        borderRadius: 5,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: `${passwordStrength}%`,
+                          height: "100%",
+                          bgcolor: getStrengthColor(),
+                          borderRadius: 5,
+                          transition: "width 0.3s ease-in-out",
+                        }}
+                      />
+                    </Box>
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      flexWrap="wrap"
+                      sx={{ mt: 1, gap: 0.5 }}
+                    >
+                      {passwordRequirements.map((req, index) => (
+                        <Typography
+                          key={index}
+                          variant="caption"
+                          sx={{
+                            color: req.validator(password)
+                              ? theme.palette.success.main
+                              : theme.palette.text.secondary,
+                            display: "flex",
+                            alignItems: "center",
+                            mr: 2,
+                          }}
+                        >
+                          {req.validator(password) ? "✓" : "○"} {req.text}
+                        </Typography>
+                      ))}
+                    </Stack>
+                  </Box>
+                </Grid>
+              )}
+
+              {/* Terms and Conditions */}
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={agreeToTerms}
+                      onChange={(e) => setAgreeToTerms(e.target.checked)}
+                      color="primary"
+                      disabled={loading}
+                    />
+                  }
+                  label={
+                    <Typography variant="body2">
+                      I agree to the{" "}
+                      <Link component={RouterLink} to="/terms">
+                        Terms of Service
+                      </Link>{" "}
+                      and{" "}
+                      <Link component={RouterLink} to="/privacy">
+                        Privacy Policy
+                      </Link>
+                    </Typography>
+                  }
+                />
+                {errors.terms && (
+                  <Typography
+                    color="error"
+                    variant="caption"
+                    sx={{ ml: 3, display: "block" }}
+                  >
+                    {errors.terms}
+                  </Typography>
+                )}
+              </Grid>
+
               {/* Submit button */}
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <Button
                   type="submit"
                   variant="contained"
                   fullWidth
                   disabled={loading}
-                  sx={{ mt: 2, py: 1.5 }}
+                  sx={{
+                    mt: 2,
+                    py: 1.5,
+                    bgcolor: theme.palette.primary.main,
+                    "&:hover": {
+                      bgcolor: theme.palette.primary.dark,
+                    },
+                  }}
                 >
                   {loading ? (
                     <LoadingSpinner buttonMode text="Creating Account..." />
                   ) : (
-                    "Sign Up"
+                    "Create Account"
                   )}
                 </Button>
               </Grid>
@@ -398,8 +571,9 @@ export default function Signup() {
             <Typography variant="body2">
               Already have an account?{" "}
               <Button
+                component={RouterLink}
+                to="/signin"
                 variant="text"
-                onClick={() => navigate("/signin")}
                 disabled={loading}
                 sx={{ textTransform: "none" }}
               >
@@ -411,7 +585,11 @@ export default function Signup() {
       </Box>
 
       {/* Confirmation Modal */}
-      <Modal open={showModal} onClose={() => navigate("/signin")}>
+      <Modal
+        open={showModal}
+        onClose={() => navigate("/signin")}
+        aria-labelledby="confirmation-modal-title"
+      >
         <Box
           sx={{
             position: "absolute",
@@ -428,17 +606,44 @@ export default function Signup() {
           <Typography
             variant="h5"
             component="h2"
+            id="confirmation-modal-title"
             sx={{ mb: 2, display: "flex", alignItems: "center" }}
           >
             <Info color="info" sx={{ mr: 1 }} />
             Verification Required
           </Typography>
 
-          <Typography sx={{ mb: 3 }}>
-            Please check your email to confirm your account. After confirming
-            your email, you'll be able to sign in and complete phone
-            verification.
-          </Typography>
+          <Stepper activeStep={0} orientation="vertical" sx={{ mb: 3 }}>
+            <Step>
+              <StepLabel>Email Verification</StepLabel>
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", mt: 1, ml: 3 }}
+              >
+                We've sent a verification email to <strong>{email}</strong>.
+                Please check your inbox and click the verification link.
+              </Typography>
+            </Step>
+            <Step>
+              <StepLabel>Sign In</StepLabel>
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", mt: 1, ml: 3 }}
+              >
+                After verification, you'll be able to sign in to your account.
+              </Typography>
+            </Step>
+            <Step>
+              <StepLabel>Phone Verification</StepLabel>
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", mt: 1, ml: 3 }}
+              >
+                Once signed in, you'll need to verify your phone number to
+                access all features.
+              </Typography>
+            </Step>
+          </Stepper>
 
           <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
             <Button onClick={() => navigate("/signin")}>Go To Sign In</Button>

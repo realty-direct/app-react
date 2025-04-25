@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter } from "react-router";
 
 import App from "../App";
 import "./index.css";
+import GuestRoute from "./layouts/GuestRoute";
 import HomeLayout from "./layouts/HomeLayout";
 import PropertyEditLayout from "./layouts/PropertyEditLayout";
 import PropertyLayout from "./layouts/PropertyLayout";
@@ -21,13 +22,23 @@ import Signup from "./routes/Signup";
 
 const router = createBrowserRouter([
   {
-    element: <App />, // ✅ Use element instead of Component
+    element: <App />,
     children: [
-      { path: "/signin", element: <Signin /> },
-      { path: "/signup", element: <Signup /> },
-      { path: "/confirm", element: <Confirm /> },
+      // Guest-only routes (redirects to home if authenticated)
       {
-        element: <ProtectedRoute />, // ✅ Protect these routes
+        element: <GuestRoute />,
+        children: [
+          { path: "/signin", element: <Signin /> },
+          { path: "/signup", element: <Signup /> },
+        ],
+      },
+
+      // Public route (accessible to everyone)
+      { path: "/confirm", element: <Confirm /> },
+
+      // Protected routes (requires authentication)
+      {
+        element: <ProtectedRoute />,
         children: [
           {
             path: "/",

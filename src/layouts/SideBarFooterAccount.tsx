@@ -46,11 +46,12 @@ export default function SidebarFooterAccountPopover() {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut(); // ✅ Logs user out from Supabase
-      clearSession(); // ✅ Clears user session from Zustand
-      navigate("/signin"); // ✅ Redirects to login page
+      await supabase.auth.signOut(); // Logs user out from Supabase
+      clearSession(); // Clears user session from Zustand
+      navigate("/signin"); // Redirects to login page after session is cleared
+      setAnchorEl(null); // Close the menu
     } catch (error) {
-      console.error("❌ Logout failed:");
+      console.error("❌ Logout failed:", error);
     }
   };
 
