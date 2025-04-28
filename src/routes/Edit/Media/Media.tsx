@@ -55,7 +55,6 @@ export default function Media() {
   // Loading states with more specific types
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [videoUrlSaving, setVideoUrlSaving] = useState(false);
   const [loadingType, setLoadingType] = useState<"images" | "floorPlans" | "">(
     ""
   );
@@ -64,17 +63,12 @@ export default function Media() {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const newURL = event.target.value;
-    setVideoUrlSaving(true);
 
     try {
       // Update Zustand store
       updatePropertyDetail(propertyId, { video_url: newURL });
     } catch (error) {
       console.error("Error updating video URL:", error);
-    } finally {
-      setTimeout(() => {
-        setVideoUrlSaving(false);
-      }, 500); // Small delay to show feedback
     }
   };
 
@@ -339,9 +333,7 @@ export default function Media() {
           value={propertyDetail.video_url || ""}
           onChange={handleVideoURLChange}
           sx={{ mb: 3 }}
-          disabled={videoUrlSaving}
         />
-        {videoUrlSaving && <CircularProgress size={20} sx={{ mb: 3 }} />}
       </Box>
 
       <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
