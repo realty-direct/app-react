@@ -1,7 +1,5 @@
 // src/layouts/GuestRoute.tsx
-import { useEffect, useState } from "react";
-import { Navigate, Outlet, useLocation } from "react-router";
-import LoadingSpinner from "../components/LoadingSpinner";
+import { Navigate, Outlet } from "react-router";
 import useRealtyStore from "../store/store";
 
 /**
@@ -10,20 +8,6 @@ import useRealtyStore from "../store/store";
  */
 export default function GuestRoute() {
   const { session } = useRealtyStore();
-  const location = useLocation();
-
-  // Minimal loading state to prevent flicker
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Immediately set loading to false after component mounts
-    setIsLoading(false);
-  }, []);
-
-  // Very brief loading state - only on initial render
-  if (isLoading) {
-    return <LoadingSpinner text="Loading..." fullPage />;
-  }
 
   // If we have a session, redirect to home page
   if (session) {

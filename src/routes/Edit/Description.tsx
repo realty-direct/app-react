@@ -6,14 +6,14 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import useRealtyStore from "../../store/store";
 
 export default function Description() {
   const { id } = useParams<{ id: string }>();
   const propertyId = id ?? "";
-  
+
   const { propertyDetails, updatePropertyDetail } = useRealtyStore();
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId
@@ -23,41 +23,29 @@ export default function Description() {
   const TITLE_LIMIT = 80;
   const DESCRIPTION_LIMIT = 5000;
 
-  // State to track form values
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  // UI state only for the copywriting service option
   const [useCopywritingService, setUseCopywritingService] = useState(false);
-
-  // Initialize form with data from store when component mounts or propertyDetail changes
-  useEffect(() => {
-    if (propertyDetail) {
-      setTitle(propertyDetail.listing_title || "");
-      setDescription(propertyDetail.description || "");
-    }
-  }, [propertyDetail]);
 
   // Update property details in the store when form values change
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
-    if (newTitle.length <= TITLE_LIMIT) {
-      setTitle(newTitle);
-      if (propertyDetail && propertyId) {
-        updatePropertyDetail(propertyId, {
-          listing_title: newTitle,
-        });
-      }
+    if (newTitle.length <= TITLE_LIMIT && propertyDetail && propertyId) {
+      updatePropertyDetail(propertyId, {
+        listing_title: newTitle,
+      });
     }
   };
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDescription = e.target.value;
-    if (newDescription.length <= DESCRIPTION_LIMIT) {
-      setDescription(newDescription);
-      if (propertyDetail && propertyId) {
-        updatePropertyDetail(propertyId, {
-          description: newDescription,
-        });
-      }
+    if (
+      newDescription.length <= DESCRIPTION_LIMIT &&
+      propertyDetail &&
+      propertyId
+    ) {
+      updatePropertyDetail(propertyId, {
+        description: newDescription,
+      });
     }
   };
 
@@ -85,9 +73,9 @@ export default function Description() {
         label="Enter Listing Title"
         variant="filled"
         fullWidth
-        value={title}
+        value={propertyDetail.listing_title || ""}
         onChange={handleTitleChange}
-        helperText={`${title.length} / ${TITLE_LIMIT} characters`}
+        helperText={`${propertyDetail.listing_title?.length || 0} / ${TITLE_LIMIT} characters`}
         sx={{ mb: 3 }}
       />
 
@@ -106,9 +94,9 @@ export default function Description() {
         fullWidth
         multiline
         rows={6}
-        value={description}
+        value={propertyDetail.description || ""}
         onChange={handleDescriptionChange}
-        helperText={`${description.length} / ${DESCRIPTION_LIMIT} characters`}
+        helperText={`${propertyDetail.description?.length || 0} / ${DESCRIPTION_LIMIT} characters`}
         sx={{ mb: 3 }}
       />
 
@@ -123,7 +111,7 @@ export default function Description() {
       {/* Professional Copywriting Service */}
       <FormControlLabel
         control={
-          <Radio 
+          <Radio
             checked={useCopywritingService}
             onChange={(e) => setUseCopywritingService(e.target.checked)}
           />

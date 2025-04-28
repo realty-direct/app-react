@@ -15,10 +15,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { type JSX, useEffect, useState } from "react";
+import { type JSX, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { deleteProperty, fetchAllPropertiesFromDB } from "../database/property";
+import { deleteProperty } from "../database/property";
 import useRealtyStore from "../store/store";
 
 export default function Home(): JSX.Element {
@@ -31,8 +31,7 @@ export default function Home(): JSX.Element {
     deletePropertyDetail,
   } = useRealtyStore();
 
-  // Add loading states
-  const [isLoading, setIsLoading] = useState(false);
+  // Local UI states
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -40,32 +39,14 @@ export default function Home(): JSX.Element {
     null
   );
 
-  // Fetch properties on component mount
-  useEffect(() => {
-    const fetchProperties = async () => {
-      if (!profile?.id) return;
-
-      setIsLoading(true);
-      try {
-        const updatedProperties = await fetchAllPropertiesFromDB(profile.id);
-        setProperties(updatedProperties);
-      } catch (error) {
-        console.error("❌ Error fetching properties:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProperties();
-  }, [profile?.id, setProperties]);
+  // Filter properties based on search query
+  const filteredProperties = properties.filter((property) =>
+    property.address.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
-
-  const filteredProperties = properties.filter((property) =>
-    property.address.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   // Open delete confirmation dialog
   const handleOpenDeleteDialog = (id: string) => {
@@ -81,19 +62,16 @@ export default function Home(): JSX.Element {
 
   // Delete the property after confirmation
   const handleDeleteConfirmed = async () => {
-    if (!selectedPropertyId) return;
+    if (!selectedPropertyId || !profile?.id) return;
 
     setIsDeleting(true);
     try {
       await deleteProperty(selectedPropertyId);
 
-      if (profile?.id) {
-        const updatedProperties = await fetchAllPropertiesFromDB(profile.id);
-        setProperties(updatedProperties);
-      }
-
+      // Update local store after successful deletion
+      setProperties(properties.filter((p) => p.id !== selectedPropertyId));
       deletePropertyDetail(selectedPropertyId);
-      handleCloseDeleteDialog(); // Close the dialog after successful deletion
+      handleCloseDeleteDialog();
     } catch (error) {
       console.error("❌ Error deleting property:", error);
     } finally {
@@ -105,6 +83,10 @@ export default function Home(): JSX.Element {
     navigate("/create");
   };
 
+  // Show loading state if we have a profile but no properties loaded yet
+  // This would indicate the initial load state
+  const isInitialLoading = profile?.id && properties.length === 0;
+
   return (
     <Box
       component="main"
@@ -112,7 +94,7 @@ export default function Home(): JSX.Element {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        minWidth: "100%",
+        width: "100%",
         padding: 4,
       }}
     >
@@ -148,15 +130,17 @@ export default function Home(): JSX.Element {
         variant="outlined"
         value={searchQuery}
         onChange={handleSearchChange}
-        sx={{ mb: 4, minWidth: "100%" }}
+        sx={{ mb: 4, width: "100%" }}
       />
 
       {/* Loading State for Properties */}
-      {isLoading ? (
+      {isInitialLoading ? (
         <LoadingSpinner text="Loading your properties..." />
       ) : filteredProperties.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
-          No properties found.
+          {searchQuery
+            ? "No properties found matching your search."
+            : "No properties found. Add your first property to get started."}
         </Typography>
       ) : (
         <Box sx={{ width: "100%" }}>
@@ -180,11 +164,17 @@ export default function Home(): JSX.Element {
                     display: "flex",
                     flexDirection: { xs: "column", sm: "row" },
                     width: "100%",
-                    maxWidth: 800,
+                    maxWidth: { xs: "100%", sm: 800 },
                     mx: "auto",
                     mb: 2,
                     boxShadow: 3,
                     borderRadius: 2,
+                    transition:
+                      "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: 6,
+                    },
                   }}
                 >
                   {mainImage ? (
@@ -197,7 +187,7 @@ export default function Home(): JSX.Element {
                         backgroundColor: "grey.200",
                       }}
                       image={mainImage}
-                      alt={property.address}
+                      alt={`Image of ${property.address}`}
                     />
                   ) : (
                     <Box
@@ -236,6 +226,22 @@ export default function Home(): JSX.Element {
                         {details?.property_category?.toUpperCase() ||
                           "UNKNOWN TYPE"}
                       </Typography>
+                      {details?.description && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            mt: 1,
+                            display: "-webkit-box",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                          }}
+                        >
+                          {details.description}
+                        </Typography>
+                      )}
                     </CardContent>
 
                     <CardActions
@@ -261,7 +267,7 @@ export default function Home(): JSX.Element {
         </Box>
       )}
 
-      {/* Delete Confirmation Dialog - Improved with inline loading state */}
+      {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialogOpen}
         onClose={isDeleting ? undefined : handleCloseDeleteDialog}
@@ -300,8 +306,6 @@ export default function Home(): JSX.Element {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Remove full-page loading overlay for delete operation */}
     </Box>
   );
 }

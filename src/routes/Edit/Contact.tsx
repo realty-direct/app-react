@@ -5,64 +5,49 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import useRealtyStore from "../../store/store";
 
 export default function Contact() {
   const { id } = useParams<{ id: string }>();
   const propertyId = id ?? "";
-  
+
   const { propertyDetails, updatePropertyDetail } = useRealtyStore();
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId
   );
 
-  // State for form fields
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  // Use property details directly from store for initial values
+  const name = propertyDetail?.contact_name || "";
+  const email = propertyDetail?.contact_email || "";
+  const phone = propertyDetail?.contact_phone || "";
   const [useFullEnquirySystem, setUseFullEnquirySystem] = useState(false);
 
   // Validation function for email
   const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
-  // Initialize form with data from store when component mounts or propertyDetail changes
-  useEffect(() => {
-    if (propertyDetail) {
-      setName(propertyDetail.contact_name || "");
-      setEmail(propertyDetail.contact_email || "");
-      setPhone(propertyDetail.contact_phone || "");
-    }
-  }, [propertyDetail]);
-
-  // Update property details in the store when form values change
+  // Direct update handlers - no local state needed for form fields
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newName = e.target.value;
-    setName(newName);
     if (propertyDetail && propertyId) {
       updatePropertyDetail(propertyId, {
-        contact_name: newName,
+        contact_name: e.target.value,
       });
     }
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newEmail = e.target.value;
-    setEmail(newEmail);
     if (propertyDetail && propertyId) {
       updatePropertyDetail(propertyId, {
-        contact_email: newEmail,
+        contact_email: e.target.value,
       });
     }
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPhone = e.target.value;
-    setPhone(newPhone);
     if (propertyDetail && propertyId) {
       updatePropertyDetail(propertyId, {
-        contact_phone: newPhone,
+        contact_phone: e.target.value,
       });
     }
   };
@@ -89,7 +74,7 @@ export default function Contact() {
         label="Name to display to property seekers when they enquire *"
         variant="filled"
         fullWidth
-        value={name}
+        value={propertyDetail.contact_name || ""}
         onChange={handleNameChange}
         required
         sx={{ mb: 3 }}
@@ -100,12 +85,18 @@ export default function Contact() {
         label="Email address *"
         variant="filled"
         fullWidth
-        value={email}
+        value={propertyDetail.contact_email || ""}
         onChange={handleEmailChange}
         required
-        error={email.length > 0 && !isValidEmail(email)}
+        error={
+          propertyDetail.contact_email !== "" &&
+          !isValidEmail(propertyDetail.contact_email || "")
+        }
         helperText={
-          email.length > 0 && !isValidEmail(email) ? "Please enter a valid email address" : ""
+          propertyDetail.contact_email !== "" &&
+          !isValidEmail(propertyDetail.contact_email || "")
+            ? "Please enter a valid email address"
+            : ""
         }
         sx={{ mb: 3 }}
       />
@@ -115,7 +106,7 @@ export default function Contact() {
         label="Phone number *"
         variant="filled"
         fullWidth
-        value={phone}
+        value={propertyDetail.contact_phone || ""}
         onChange={handlePhoneChange}
         required
         sx={{ mb: 3 }}
@@ -124,7 +115,7 @@ export default function Contact() {
       {/* Full Enquiry System Upgrade */}
       <FormControlLabel
         control={
-          <Radio 
+          <Radio
             checked={useFullEnquirySystem}
             onChange={(e) => setUseFullEnquirySystem(e.target.checked)}
           />

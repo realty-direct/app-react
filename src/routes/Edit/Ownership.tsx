@@ -19,7 +19,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import {
@@ -37,13 +37,13 @@ export default function Ownership() {
   const { id } = useParams<{ id: string }>();
   const propertyId = id ?? "";
 
-  const { 
-    propertyDetails, 
-    updatePropertyDetail, 
-    updateOwnershipDocument, 
-    updateIdentificationDocument 
+  const {
+    propertyDetails,
+    updatePropertyDetail,
+    updateOwnershipDocument,
+    updateIdentificationDocument,
   } = useRealtyStore();
-  
+
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId
   );
@@ -61,7 +61,7 @@ export default function Ownership() {
       // Extract the filename from the URL path
       const urlParts = url.split("/");
       const filenameWithId = urlParts[urlParts.length - 1];
-      
+
       // Extract just the filename portion after the UUID
       const parts = filenameWithId.split("-");
       if (parts.length > 1) {
@@ -74,14 +74,6 @@ export default function Ownership() {
       return "Document";
     }
   };
-
-  // Fetch property details if they're not already loaded
-  useEffect(() => {
-    if (!propertyDetail && propertyId) {
-      // This would be handled by the parent component typically
-      console.error("No property details found for ID:", propertyId);
-    }
-  }, [propertyDetail, propertyId]);
 
   // Check file size and type before upload
   const validateFile = (file: File): boolean => {
@@ -162,7 +154,10 @@ export default function Ownership() {
   };
 
   // Handle file deletion
-  const handleDeleteFile = async (fileUrl: string | null, type: "rates" | "id") => {
+  const handleDeleteFile = async (
+    fileUrl: string | null,
+    type: "rates" | "id"
+  ) => {
     if (!propertyId || !fileUrl) return;
 
     setIsDeleting(true);
@@ -246,12 +241,13 @@ export default function Ownership() {
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <InsertDriveFileIcon sx={{ mr: 1 }} />
               <Typography sx={{ flexGrow: 1 }}>
-                <Link 
+                <Link
                   href={propertyDetail.ownership_document}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {getFilenameFromUrl(propertyDetail.ownership_document) || "Rates notice document"}
+                  {getFilenameFromUrl(propertyDetail.ownership_document) ||
+                    "Rates notice document"}
                 </Link>
               </Typography>
               <Button
@@ -341,12 +337,13 @@ export default function Ownership() {
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <InsertDriveFileIcon sx={{ mr: 1 }} />
               <Typography sx={{ flexGrow: 1 }}>
-                <Link 
+                <Link
                   href={propertyDetail.identification_document}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {getFilenameFromUrl(propertyDetail.identification_document) || "Identification document"}
+                  {getFilenameFromUrl(propertyDetail.identification_document) ||
+                    "Identification document"}
                 </Link>
               </Typography>
               <Button
@@ -356,10 +353,7 @@ export default function Ownership() {
                 size="small"
                 disabled={isDeleting}
                 onClick={() =>
-                  handleDeleteFile(
-                    propertyDetail.identification_document,
-                    "id"
-                  )
+                  handleDeleteFile(propertyDetail.identification_document, "id")
                 }
               >
                 {isDeleting && uploadType === "id" ? (

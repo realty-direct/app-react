@@ -1,4 +1,4 @@
-import { Box, Button, Modal, Typography } from "@mui/material"; // ✅ Import MUI components
+import { Box, Button, Modal, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { checkUserSession } from "../database/auth";
@@ -7,19 +7,25 @@ export default function Confirm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false); // ✅ Controls the modal
+  const [showModal, setShowModal] = useState(false);
 
+  // This useEffect is necessary because we're performing an async operation
+  // with side effects (checking user session and updating state)
   useEffect(() => {
     const verifyUser = async () => {
-      setLoading(true);
-      const user = await checkUserSession();
+      try {
+        const user = await checkUserSession();
 
-      if (user) {
-        setShowModal(true); // ✅ Show modal on success
-      } else {
-        setError("Your email is not confirmed. Please check your inbox.");
+        if (user) {
+          setShowModal(true);
+        } else {
+          setError("Your email is not confirmed. Please check your inbox.");
+        }
+      } catch (err) {
+        setError("Failed to verify your account. Please try again later.");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     verifyUser();
@@ -33,7 +39,7 @@ export default function Confirm() {
         {error && <p className="text-red-500">{error}</p>}
       </div>
 
-      {/* ✅ MUI Confirmation Modal */}
+      {/* MUI Confirmation Modal */}
       <Modal open={showModal} onClose={() => setShowModal(false)}>
         <Box
           sx={{
