@@ -59,19 +59,6 @@ export default function Media() {
     ""
   );
 
-  const handleVideoURLChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const newURL = event.target.value;
-
-    try {
-      // Update Zustand store
-      updatePropertyDetail(propertyId, { video_url: newURL });
-    } catch (error) {
-      console.error("Error updating video URL:", error);
-    }
-  };
-
   const handleUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
     type: "images" | "floorPlans"
@@ -331,7 +318,9 @@ export default function Media() {
           variant="filled"
           fullWidth
           value={propertyDetail.video_url || ""}
-          onChange={handleVideoURLChange}
+          onChange={(e) =>
+            updatePropertyDetail(propertyId, { video_url: e.target.value })
+          }
           sx={{ mb: 3 }}
         />
       </Box>
