@@ -15,6 +15,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { format, parse } from "date-fns";
 import { useNavigate, useParams } from "react-router-dom";
 import useRealtyStore from "../../store/store";
+import { formatCurrency } from "../../utils/formatters";
 
 export default function Summary() {
   const theme = useTheme();
@@ -38,14 +39,6 @@ export default function Summary() {
   const publishDate = publishDateStr
     ? parse(publishDateStr, "yyyy-MM-dd", new Date())
     : null;
-
-  // Format currency
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat("en-AU", {
-      style: "currency",
-      currency: "AUD",
-    }).format(amount);
-  };
 
   // Handle publish option change - update store directly
   const handlePublishOptionChange = (

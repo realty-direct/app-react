@@ -23,54 +23,12 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { format } from "date-fns";
 import { useParams } from "react-router-dom";
 import useRealtyStore from "../../store/store";
-
-// Format time for display (convert 24h to 12h format)
-const formatTimeDisplay = (time24h: string) => {
-  const [hours, minutes] = time24h.split(":");
-  const hoursNum = parseInt(hours, 10);
-  const period = hoursNum >= 12 ? "PM" : "AM";
-  const hours12 = hoursNum % 12 || 12;
-  return `${hours12}:${minutes} ${period}`;
-};
-
-// Convert database time format (HH:MM:SS) to UI format (HH:MM)
-const formatDbTime = (timeStr: string): string => {
-  return timeStr ? timeStr.substring(0, 5) : "09:00"; // HH:MM format
-};
-
-// Generate times in 15-minute intervals
-const generateTimeOptions = () => {
-  const options = [];
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute = 0; minute < 60; minute += 15) {
-      const hourStr = hour.toString().padStart(2, "0");
-      const minuteStr = minute.toString().padStart(2, "0");
-      options.push(`${hourStr}:${minuteStr}`);
-    }
-  }
-  return options;
-};
-
-// Find the next time option after the given time
-const getNextTimeOption = (time: string): string => {
-  const timeOptions = generateTimeOptions();
-  const index = timeOptions.indexOf(time);
-  if (index === -1 || index === timeOptions.length - 1) {
-    // If time not found or is last option, return 15 minutes later
-    const [hours, minutes] = time.split(":").map(Number);
-    let newMinutes = minutes + 15;
-    let newHours = hours;
-
-    if (newMinutes >= 60) {
-      newMinutes = 0;
-      newHours = (newHours + 1) % 24;
-    }
-
-    return `${newHours.toString().padStart(2, "0")}:${newMinutes.toString().padStart(2, "0")}`;
-  }
-
-  return timeOptions[index + 1];
-};
+import {
+  formatDbTime,
+  formatTimeDisplay,
+  generateTimeOptions,
+  getNextTimeOption,
+} from "../../utils/formatters";
 
 const TIME_OPTIONS = generateTimeOptions();
 

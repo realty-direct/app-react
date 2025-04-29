@@ -11,6 +11,7 @@ import {
 import { useParams } from "react-router";
 import useRealtyStore from "../../store/store";
 import type { PropertyDetail } from "../../store/types";
+import { formatCurrency } from "../../utils/formatters";
 
 export default function Price() {
   const { id: propertyId } = useParams<{ id: string }>();
@@ -24,12 +25,6 @@ export default function Price() {
 
   if (!propertyDetail)
     return <Typography>No details found for this property.</Typography>;
-
-  // Function to format a number as currency (UI display only)
-  const formatCurrency = (value: number | string) => {
-    const num = Number(value);
-    return num ? `$${num.toLocaleString()}` : "";
-  };
 
   // Function to update Zustand & remove formatting for storage
   const handleUpdate = (key: keyof PropertyDetail, value: string) => {

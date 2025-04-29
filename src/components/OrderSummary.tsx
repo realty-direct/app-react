@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatCurrency } from "../../utils/formatters";
 import LoadingSpinner from "./LoadingSpinner";
 
 interface PromoCode {
@@ -83,14 +84,6 @@ const OrderSummary = ({
 
   const discount = calculateDiscount();
   const total = subtotal - discount;
-
-  // Format currency
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat("en-AU", {
-      style: "currency",
-      currency: "AUD",
-    }).format(amount);
-  };
 
   // Mock promo code validation
   const validatePromoCode = async (code: string): Promise<PromoCode | null> => {
