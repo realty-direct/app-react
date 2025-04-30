@@ -19,6 +19,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -34,6 +35,7 @@ import {
 import useRealtyStore from "../../store/store";
 
 export default function Ownership() {
+  const theme = useTheme();
   const { id } = useParams<{ id: string }>();
   const propertyId = id ?? "";
 
@@ -226,7 +228,7 @@ export default function Ownership() {
       </Typography>
 
       {/* Rates Notice Section */}
-      <Card sx={{ mb: 4, border: "1px solid #e0e0e0" }}>
+      <Card sx={{ mb: 4, border: `1px solid ${theme.palette.divider}` }}>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 2 }}>
             Rates Notice
@@ -271,9 +273,8 @@ export default function Ownership() {
               sx={{
                 p: 3,
                 textAlign: "center",
-                border: "1px dashed #bdbdbd",
+                border: `1px dashed ${theme.palette.divider}`,
                 borderRadius: 2,
-                backgroundColor: "#f5f5f5",
               }}
             >
               <input
@@ -322,7 +323,7 @@ export default function Ownership() {
       </Card>
 
       {/* Photo ID Section */}
-      <Card sx={{ mb: 4, border: "1px solid #e0e0e0" }}>
+      <Card sx={{ mb: 4, border: `1px solid ${theme.palette.divider}` }}>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 2 }}>
             Photo Identification
@@ -367,9 +368,8 @@ export default function Ownership() {
               sx={{
                 p: 3,
                 textAlign: "center",
-                border: "1px dashed #bdbdbd",
+                border: `1px dashed ${theme.palette.divider}`,
                 borderRadius: 2,
-                backgroundColor: "#f5f5f5",
               }}
             >
               <input
@@ -409,7 +409,15 @@ export default function Ownership() {
       </Card>
 
       {/* Information about verification */}
-      <Card sx={{ border: "1px solid #e0e0e0", bgcolor: "#f9f9f9" }}>
+      <Card
+        sx={{
+          border: `1px solid ${theme.palette.divider}`,
+          bgcolor:
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.05)"
+              : "rgba(0, 0, 0, 0.02)",
+        }}
+      >
         <CardContent>
           <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 2 }}>
             What happens next?
