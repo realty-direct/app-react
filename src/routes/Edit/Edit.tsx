@@ -1,20 +1,12 @@
 // File: src/routes/Edit/Edit.tsx
 // Using Snapshot Comparison Pattern for robust change detection
 
-import {
-  Alert,
-  Box,
-  Button,
-  Grid,
-  Snackbar,
-  Tab,
-  Tabs,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Grid, Snackbar, Tab, Tabs } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import OrderSummary from "../../components/OrderSummary";
+import SectionHelp from "../../components/SectionHelp";
 import { updatePropertyDetailInDB } from "../../database/details";
 import {
   addPropertyEnhancement,
@@ -569,45 +561,7 @@ export default function Edit() {
         </Grid>
       ) : (
         <Grid size={3} p={3}>
-          {/* Info sidebar content */}
-          <Box
-            sx={{
-              backgroundColor: "background.paper",
-              p: 3,
-              borderRadius: 2,
-              boxShadow: 1,
-            }}
-          >
-            <Typography variant="h6" gutterBottom>
-              Section Help
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Complete each section to create your property listing. The more
-              detailed information you provide, the better your listing will
-              perform.
-            </Typography>
-
-            {tabValue === 0 && (
-              <Typography variant="body2" sx={{ mt: 2 }}>
-                Start by entering the basic details about your property
-                including size and type.
-              </Typography>
-            )}
-
-            {tabValue === 3 && (
-              <Typography variant="body2" sx={{ mt: 2 }}>
-                Upload high-quality images to make your listing stand out. The
-                first image will be your main display image.
-              </Typography>
-            )}
-
-            {tabValue === 8 && (
-              <Typography variant="body2" sx={{ mt: 2 }}>
-                Choose a package that fits your needs and budget. Each package
-                offers different features.
-              </Typography>
-            )}
-          </Box>
+          <SectionHelp sectionIndex={tabValue} />
         </Grid>
       )}
 
