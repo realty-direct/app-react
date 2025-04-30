@@ -146,7 +146,6 @@ export default function Inspections() {
           sx={{
             p: 3,
             mb: 4,
-            backgroundColor: theme.palette.background.paper,
             border: `1px solid ${theme.palette.divider}`,
           }}
         >
@@ -245,7 +244,6 @@ export default function Inspections() {
                     mb: 2,
                     border: `1px solid ${theme.palette.divider}`,
                     borderRadius: 1,
-                    backgroundColor: theme.palette.background.default,
                     position: "relative",
                   }}
                   key={`open-house-${inspection.id}`}
@@ -439,7 +437,6 @@ export default function Inspections() {
             sx={{
               p: 2,
               mb: 3,
-              backgroundColor: theme.palette.background.default,
               borderRadius: 1,
               border: `1px solid ${theme.palette.divider}`,
             }}
@@ -469,7 +466,6 @@ export default function Inspections() {
                     mb: 2,
                     border: `1px solid ${theme.palette.divider}`,
                     borderRadius: 1,
-                    backgroundColor: theme.palette.background.default,
                     position: "relative",
                   }}
                   key={`private-inspection-${inspection.id}`}
