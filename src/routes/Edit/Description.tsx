@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   FormControlLabel,
   Paper,
@@ -56,57 +57,70 @@ export default function Description() {
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
       {/* Header */}
-      <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
-        Description
+      <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
+        Property Description
       </Typography>
 
-      {/* Listing Title */}
-      <Typography sx={{ mb: 1 }}>
-        <b>Listing title (80 character limit)</b>
-      </Typography>
-      <Typography sx={{ mb: 2 }}>
-        Your title needs to jump out at people and make them want to read more.
-        Keep it short and descriptive, and focus on your property's strongest
-        feature.
-      </Typography>
-      <TextField
-        label="Enter Listing Title"
-        variant="filled"
-        fullWidth
-        value={propertyDetail.listing_title || ""}
-        onChange={handleTitleChange}
-        helperText={`${propertyDetail.listing_title?.length || 0} / ${TITLE_LIMIT} characters`}
-        sx={{ mb: 3 }}
-      />
+      <Paper
+        elevation={0}
+        sx={{ p: 3, mb: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
+      >
+        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
+          Listing Title{" "}
+          <Box component="span" sx={{ color: "error.main" }}>
+            *
+          </Box>
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
+          Your title needs to jump out at people and make them want to read
+          more. Keep it short and descriptive, and focus on your property's
+          strongest feature.
+        </Typography>
+        <TextField
+          label="Enter Listing Title"
+          variant="outlined"
+          fullWidth
+          value={propertyDetail.listing_title || ""}
+          onChange={handleTitleChange}
+          helperText={`${propertyDetail.listing_title?.length || 0} / ${TITLE_LIMIT} characters`}
+          sx={{ mb: 3 }}
+        />
+      </Paper>
 
-      {/* Description Field */}
-      <Typography sx={{ mb: 1 }}>
-        <b>Description (5000 character limit)</b>
-      </Typography>
-      <Typography sx={{ mb: 2 }}>
-        Try to include an opening statement, dot points of key features, a
-        longer description of what living in the property is like, any nearby
-        features, and a closing statement with a strong call to action.
-      </Typography>
-      <TextField
-        label="Enter Property Description"
-        variant="filled"
-        fullWidth
-        multiline
-        rows={6}
-        value={propertyDetail.description || ""}
-        onChange={handleDescriptionChange}
-        helperText={`${propertyDetail.description?.length || 0} / ${DESCRIPTION_LIMIT} characters`}
-        sx={{ mb: 3 }}
-      />
+      <Paper
+        elevation={0}
+        sx={{ p: 3, mb: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
+      >
+        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
+          Description{" "}
+          <Box component="span" sx={{ color: "error.main" }}>
+            *
+          </Box>
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
+          Try to include an opening statement, dot points of key features, a
+          longer description of what living in the property is like, any nearby
+          features, and a closing statement.
+        </Typography>
+        <TextField
+          label="Enter Property Description"
+          variant="filled"
+          fullWidth
+          multiline
+          rows={6}
+          value={propertyDetail.description || ""}
+          onChange={handleDescriptionChange}
+          helperText={`${propertyDetail.description?.length || 0} / ${DESCRIPTION_LIMIT} characters`}
+          sx={{ mb: 3 }}
+        />
+      </Paper>
 
-      {/* Important Notice */}
-      <Paper sx={{ p: 2, mb: 3 }}>
+      <Alert severity="info" sx={{ mb: 3 }}>
         <Typography variant="body2">
           <b>Important:</b> Don't put your contact details here as this is
           against realestate.com.au's acceptable use policy.
         </Typography>
-      </Paper>
+      </Alert>
 
       {/* Professional Copywriting Service */}
       <FormControlLabel

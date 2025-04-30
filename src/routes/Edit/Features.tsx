@@ -4,6 +4,7 @@ import {
   Divider,
   FormControlLabel,
   Grid,
+  Paper,
   Typography,
 } from "@mui/material";
 import { useParams } from "react-router";
@@ -84,8 +85,9 @@ export default function FeaturesTab() {
   };
 
   return (
-    <Box p={3}>
-      <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+    <Box sx={{ p: { xs: 2, sm: 6 } }}>
+      {/* Header */}
+      <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
         Select Features for Your Property
       </Typography>
 
@@ -94,31 +96,48 @@ export default function FeaturesTab() {
           const featureType = category as FeatureType;
 
           return (
-            <Grid key={category}>
-              <Typography variant="h6" gutterBottom>
-                {category
-                  .replace("_", " ") // ✅ Format category name properly
-                  .replace(/\b\w/g, (char) => char.toUpperCase())}
-              </Typography>
-              <Divider sx={{ mb: 1 }} />
-              {items.map((item) => {
-                const isChecked = propertyFeatures.some(
-                  (f) => f.property_id === propertyId && f.feature_name === item
-                );
+            <Grid item xs={12} md={6} key={category}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  border: 1,
+                  borderColor: "divider",
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ textTransform: "capitalize" }}
+                >
+                  {category.replace("_", " ")}
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                  {items.map((item) => {
+                    const isChecked = propertyFeatures.some(
+                      (f) =>
+                        f.property_id === propertyId && f.feature_name === item
+                    );
 
-                return (
-                  <FormControlLabel
-                    key={item}
-                    control={
-                      <Checkbox
-                        checked={isChecked}
-                        onChange={() => handleFeatureToggle(item, featureType)}
+                    return (
+                      <FormControlLabel
+                        key={item}
+                        control={
+                          <Checkbox
+                            checked={isChecked}
+                            onChange={() =>
+                              handleFeatureToggle(item, featureType)
+                            }
+                          />
+                        }
+                        label={item}
                       />
-                    }
-                    label={item}
-                  />
-                );
-              })}
+                    );
+                  })}
+                </Box>
+              </Paper>
             </Grid>
           );
         })}

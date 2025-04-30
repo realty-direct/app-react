@@ -1,121 +1,160 @@
+import { AttachMoney, CalendarMonth } from "@mui/icons-material";
 import {
-  Alert,
   Box,
+  FormControl,
   FormControlLabel,
+  InputAdornment,
   Paper,
   Radio,
   RadioGroup,
   TextField,
   Typography,
 } from "@mui/material";
-import { useParams } from "react-router";
+import { DatePicker } from "@mui/x-date-pickers";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
 import useRealtyStore from "../../store/store";
-import type { PropertyDetail } from "../../store/types";
-import { formatCurrency } from "../../utils/formatters";
 
 export default function Price() {
-  const { id: propertyId } = useParams<{ id: string }>();
-  const { propertyDetails, updatePropertyDetail: updatePropertyDetailInStore } =
-    useRealtyStore();
-
-  // Get the correct property details
+  const { id } = useParams<{ id: string }>();
+  const propertyId = id ?? "";
+  const { propertyDetails, updatePropertyDetail } = useRealtyStore();
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId
   );
 
+  const [showPrice, setShowPrice] = useState(
+    propertyDetail?.show_price ?? true
+  );
+
   if (!propertyDetail)
-    return <Typography>No details found for this property.</Typography>;
-
-  // Function to update Zustand & remove formatting for storage
-  const handleUpdate = (key: keyof PropertyDetail, value: string) => {
-    if (!propertyId) return;
-
-    let formattedValue: string | number = value;
-
-    // Convert price to a number for storage
-    if (key === "price") {
-      formattedValue = Number(value.replace(/\D/g, "")) || 0;
-    }
-
-    updatePropertyDetailInStore(propertyId, { [key]: formattedValue });
-  };
+    return <Typography>Loading property details...</Typography>;
 
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
-      {/* Header */}
-      <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
-          Price
+      <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
+        Set Your Property Price
+      </Typography>
+
+      <Paper
+        elevation={0}
+        sx={{ p: 3, mb: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
+      >
+        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
+          Price Details
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
+          Enter the price you want to list your property for. You can choose to
+          display or hide this price from buyers.
         </Typography>
 
-        <Alert sx={{ mb: 2 }}>
-          A price is required by realestate.com.au as they use it for sorting
-          and search filtering.
-        </Alert>
-
-        {/* Price Input Field with $ Formatting */}
         <TextField
-          label="Enter a price"
-          variant="filled"
+          label="Property Price"
+          variant="outlined"
           fullWidth
-          value={formatCurrency(propertyDetail.price || "")} // Convert raw number to "$123,000"
-          onChange={(e) => handleUpdate("price", e.target.value)}
+          type="number"
+          value={propertyDetail.price || ""}
+          onChange={(e) =>
+            updatePropertyDetail(propertyId, { price: e.target.value })
+          }
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <AttachMoney />
+              </InputAdornment>
+            ),
+          }}
           sx={{ mb: 3 }}
         />
+
+        <FormControl component="fieldset">
+          <RadioGroup
+            value={showPrice}
+            onChange={(e) => {
+              setShowPrice(e.target.value === "true");
+              updatePropertyDetail(propertyId, {
+                show_price: e.target.value === "true",
+              });
+            }}
+          >
+            <FormControlLabel
+              value={true}
+              control={<Radio />}
+              label="Display price to buyers"
+            />
+            <FormControlLabel
+              value={false}
+              control={<Radio />}
+              label="Hide price from buyers (Contact Agent)"
+            />
+          </RadioGroup>
+        </FormControl>
       </Paper>
 
-      {/* Price Display Options */}
-      <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
-        <Typography sx={{ mb: 1 }}>
-          How would you like to display the price?
+      <Paper
+        elevation={0}
+        sx={{ p: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
+      >
+        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
+          Publishing Options
         </Typography>
-        <RadioGroup
-          value={propertyDetail.price_display || "same"}
-          onChange={(e) => handleUpdate("price_display", e.target.value)}
-          sx={{ gap: 1 }}
-        >
-          <FormControlLabel
-            value="same"
-            control={<Radio />}
-            label="Same as above price"
-          />
-          <FormControlLabel
-            value="hide"
-            control={<Radio />}
-            label="Hide the price"
-          />
-          <FormControlLabel
-            value="range"
-            control={<Radio />}
-            label="Price range"
-          />
-          <FormControlLabel
-            value="custom"
-            control={<Radio />}
-            label="Custom price"
-          />
-        </RadioGroup>
-      </Paper>
+        <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
+          Choose when you want your listing to go live on real estate websites.
+        </Typography>
 
-      {/* Sale Type Options */}
-      <Paper elevation={2} sx={{ p: 2 }}>
-        <Typography sx={{ mt: 3, mb: 1 }}>Sale Type</Typography>
-        <RadioGroup
-          value={propertyDetail.sale_type || "standard"}
-          onChange={(e) => handleUpdate("sale_type", e.target.value)}
-          sx={{ gap: 1 }}
-        >
-          <FormControlLabel
-            value="standard"
-            control={<Radio />}
-            label="Standard Sale"
-          />
-          <FormControlLabel
-            value="auction"
-            control={<Radio />}
-            label="Auction"
-          />
-        </RadioGroup>
+        <FormControl component="fieldset" fullWidth>
+          <RadioGroup
+            value={propertyDetail.publish_option || "immediately"}
+            onChange={(e) =>
+              updatePropertyDetail(propertyId, {
+                publish_option: e.target.value,
+              })
+            }
+          >
+            <FormControlLabel
+              value="immediately"
+              control={<Radio />}
+              label="Publish immediately after payment"
+            />
+            <FormControlLabel
+              value="later"
+              control={<Radio />}
+              label="Schedule for later"
+            />
+          </RadioGroup>
+
+          {propertyDetail.publish_option === "later" && (
+            <Box sx={{ mt: 2, ml: 4 }}>
+              <DatePicker
+                label="Select publish date"
+                value={
+                  propertyDetail.publish_date
+                    ? new Date(propertyDetail.publish_date)
+                    : null
+                }
+                onChange={(date) =>
+                  updatePropertyDetail(propertyId, {
+                    publish_date: date?.toISOString().split("T")[0],
+                  })
+                }
+                minDate={new Date()}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    variant: "outlined",
+                    InputProps: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CalendarMonth />
+                        </InputAdornment>
+                      ),
+                    },
+                  },
+                }}
+              />
+            </Box>
+          )}
+        </FormControl>
       </Paper>
     </Box>
   );

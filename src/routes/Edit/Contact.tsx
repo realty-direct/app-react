@@ -1,6 +1,9 @@
+import { Email, Person, Phone, SupportAgent } from "@mui/icons-material";
 import {
   Box,
   FormControlLabel,
+  InputAdornment,
+  Paper,
   Radio,
   TextField,
   Typography,
@@ -59,69 +62,111 @@ export default function Contact() {
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
       {/* Header */}
-      <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+      <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
         Contact Details for This Listing
       </Typography>
 
-      <Typography sx={{ mb: 3 }}>
-        When someone wants to make an enquiry on your listing, they will need a
-        way to get in contact with you. We've prefilled this based on your
-        account details, but you can adjust this now or later if needed.
-      </Typography>
+      <Paper
+        elevation={0}
+        sx={{ p: 3, mb: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
+      >
+        <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
+          When someone wants to make an enquiry on your listing, they will need
+          a way to get in contact with you. We've prefilled this based on your
+          account details, but you can adjust this now or later if needed.
+        </Typography>
 
-      {/* Name Field */}
-      <TextField
-        label="Name to display to property seekers when they enquire *"
-        variant="filled"
-        fullWidth
-        value={propertyDetail.contact_name || ""}
-        onChange={handleNameChange}
-        required
-        sx={{ mb: 3 }}
-      />
-
-      {/* Email Field with Validation */}
-      <TextField
-        label="Email address *"
-        variant="filled"
-        fullWidth
-        value={propertyDetail.contact_email || ""}
-        onChange={handleEmailChange}
-        required
-        error={
-          propertyDetail.contact_email !== "" &&
-          !isValidEmail(propertyDetail.contact_email || "")
-        }
-        helperText={
-          propertyDetail.contact_email !== "" &&
-          !isValidEmail(propertyDetail.contact_email || "")
-            ? "Please enter a valid email address"
-            : ""
-        }
-        sx={{ mb: 3 }}
-      />
-
-      {/* Phone Number Field */}
-      <TextField
-        label="Phone number *"
-        variant="filled"
-        fullWidth
-        value={propertyDetail.contact_phone || ""}
-        onChange={handlePhoneChange}
-        required
-        sx={{ mb: 3 }}
-      />
-
-      {/* Full Enquiry System Upgrade */}
-      <FormControlLabel
-        control={
-          <Radio
-            checked={useFullEnquirySystem}
-            onChange={(e) => setUseFullEnquirySystem(e.target.checked)}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <TextField
+            label="Name to display to property seekers when they enquire"
+            variant="outlined"
+            fullWidth
+            value={propertyDetail.contact_name || ""}
+            onChange={handleNameChange}
+            required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Person color="action" />
+                </InputAdornment>
+              ),
+            }}
           />
-        }
-        label="Add Full Enquiry System Upgrade: Call Connect plus all SMS to your cart ($120.00)"
-      />
+
+          <TextField
+            label="Email address"
+            variant="outlined"
+            fullWidth
+            value={propertyDetail.contact_email || ""}
+            onChange={handleEmailChange}
+            required
+            error={
+              propertyDetail.contact_email !== "" &&
+              !isValidEmail(propertyDetail.contact_email || "")
+            }
+            helperText={
+              propertyDetail.contact_email !== "" &&
+              !isValidEmail(propertyDetail.contact_email || "")
+                ? "Please enter a valid email address"
+                : ""
+            }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Email color="action" />
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <TextField
+            label="Phone number"
+            variant="outlined"
+            fullWidth
+            value={propertyDetail.contact_phone || ""}
+            onChange={handlePhoneChange}
+            required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Phone color="action" />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
+      </Paper>
+
+      <Paper
+        elevation={0}
+        sx={{ p: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+          <SupportAgent color="primary" />
+          <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
+            Full Enquiry System Upgrade
+          </Typography>
+        </Box>
+
+        <FormControlLabel
+          control={
+            <Radio
+              checked={useFullEnquirySystem}
+              onChange={(e) => setUseFullEnquirySystem(e.target.checked)}
+            />
+          }
+          label={
+            <Box>
+              <Typography variant="body1">
+                Add Full Enquiry System Upgrade ($120.00)
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Includes Call Connect and SMS notifications for all enquiries
+              </Typography>
+            </Box>
+          }
+        />
+      </Paper>
     </Box>
   );
 }

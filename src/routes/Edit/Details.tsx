@@ -1,6 +1,8 @@
 import {
   Box,
+  FormControlLabel,
   MenuItem,
+  Paper,
   Radio,
   RadioGroup,
   Select,
@@ -38,18 +40,25 @@ export default function DetailsTab() {
 
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
-      {/* Header */}
-      <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+      <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
         Tell us more about your property
       </Typography>
 
-      {/* Inputs Section */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, my: 4 }}>
-        {/* Property Category */}
+      <Paper
+        elevation={0}
+        sx={{ p: 3, mb: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
+      >
+        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
+          Property Category
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
+          Select the category that best describes your property
+        </Typography>
+
         <TextField
           select
           label="Property Category"
-          variant="filled"
+          variant="outlined"
           fullWidth
           value={propertyDetail.property_category || ""}
           onChange={(e) => handleChange("property_category", e.target.value)}
@@ -59,17 +68,26 @@ export default function DetailsTab() {
           <MenuItem value="industrial">Industrial</MenuItem>
           <MenuItem value="rural">Rural</MenuItem>
         </TextField>
+      </Paper>
 
-        {/* Land Area and House Area */}
+      <Paper
+        elevation={0}
+        sx={{ p: 3, mb: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
+      >
+        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
+          Property Dimensions
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
+          Enter the land and house area measurements
+        </Typography>
+
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-          {/* Land Area */}
           <Box sx={{ flex: 1, display: "flex", gap: 0 }}>
             <TextField
               label="Land Area"
-              type="text"
-              variant="filled"
+              variant="outlined"
               fullWidth
-              value={propertyDetail.land_area?.split(" ")[0] || ""} // ✅ Show only the number
+              value={propertyDetail.land_area?.split(" ")[0] || ""}
               onChange={(e) =>
                 handleChange("land_area", formatNumberInput(e.target.value))
               }
@@ -81,13 +99,8 @@ export default function DetailsTab() {
                 setLandUnit(e.target.value);
                 handleChange("land_unit", e.target.value);
               }}
-              variant="filled"
-              sx={{
-                width: "auto",
-                flexShrink: 0,
-                borderLeft: 1,
-              }}
-              hiddenLabel
+              variant="outlined"
+              sx={{ width: "auto", flexShrink: 0, ml: -1 }}
             >
               <MenuItem value="m²">m²</MenuItem>
               <MenuItem value="acres">Acres</MenuItem>
@@ -96,14 +109,12 @@ export default function DetailsTab() {
             </Select>
           </Box>
 
-          {/* House Area */}
           <Box sx={{ flex: 1, display: "flex", gap: 0 }}>
             <TextField
               label="House Area"
-              type="text"
-              variant="filled"
+              variant="outlined"
               fullWidth
-              value={propertyDetail.house_area?.split(" ")[0] || ""} // ✅ Show only the number
+              value={propertyDetail.house_area?.split(" ")[0] || ""}
               onChange={(e) =>
                 handleChange("house_area", formatNumberInput(e.target.value))
               }
@@ -115,13 +126,8 @@ export default function DetailsTab() {
                 setHouseUnit(e.target.value);
                 handleChange("house_unit", e.target.value);
               }}
-              variant="filled"
-              sx={{
-                width: "auto",
-                flexShrink: 0,
-                borderLeft: 1,
-              }}
-              hiddenLabel
+              variant="outlined"
+              sx={{ width: "auto", flexShrink: 0, ml: -1 }}
             >
               <MenuItem value="m²">m²</MenuItem>
               <MenuItem value="acres">Acres</MenuItem>
@@ -130,25 +136,33 @@ export default function DetailsTab() {
             </Select>
           </Box>
         </Box>
-      </Box>
+      </Paper>
 
-      {/* Radio Group */}
-      <Typography sx={{ mb: 1 }}>Property Type</Typography>
-      <RadioGroup
-        row
-        sx={{ gap: 2 }}
-        value={propertyDetail.property_type || ""}
-        onChange={(e) => handleChange("property_type", e.target.value)}
+      <Paper
+        elevation={0}
+        sx={{ p: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Radio value="new" />
-          <Typography>New</Typography>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Radio value="established" />
-          <Typography>Established</Typography>
-        </Box>
-      </RadioGroup>
+        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
+          Property Type
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
+          Select whether this is a new or established property
+        </Typography>
+
+        <RadioGroup
+          row
+          sx={{ gap: 2 }}
+          value={propertyDetail.property_type || ""}
+          onChange={(e) => handleChange("property_type", e.target.value)}
+        >
+          <FormControlLabel value="new" control={<Radio />} label="New" />
+          <FormControlLabel
+            value="established"
+            control={<Radio />}
+            label="Established"
+          />
+        </RadioGroup>
+      </Paper>
     </Box>
   );
 }
