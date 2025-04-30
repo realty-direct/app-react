@@ -29,7 +29,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@mui/icons-material": "^6.1.5",
+    "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
     "@mui/x-date-pickers": "^7.28.3",
     "@supabase/supabase-js": "^2.48.1",

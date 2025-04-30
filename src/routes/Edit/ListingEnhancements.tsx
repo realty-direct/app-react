@@ -447,8 +447,8 @@ export default function ListingEnhancements() {
 
               return (
                 <Grid
-                  key={`${category}-${enhancement.id}`}
                   size={{ xs: 12, sm: 6, md: 4 }}
+                  key={`${category}-${enhancement.id}`}
                 >
                   <Card
                     elevation={isSelected ? 3 : 1}
@@ -461,6 +461,9 @@ export default function ListingEnhancements() {
                         ? `2px solid ${theme.palette.success.main}`
                         : "2px solid transparent",
                       position: "relative",
+                      backgroundColor: isSelected
+                        ? "action.selected"
+                        : "background.paper",
                       "&:hover": {
                         transform: "translateY(-4px)",
                         boxShadow: theme.shadows[4],
@@ -662,7 +665,7 @@ export default function ListingEnhancements() {
             <DialogContent dividers>
               <Grid container spacing={3}>
                 {/* Icon and basic info */}
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid item xs={12} md={6}>
                   <Box
                     sx={{
                       display: "flex",
@@ -696,7 +699,7 @@ export default function ListingEnhancements() {
                 </Grid>
 
                 {/* Details and features */}
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid item xs={12} md={6}>
                   {currentEnhancement.availability && (
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="subtitle2" fontWeight="bold">
