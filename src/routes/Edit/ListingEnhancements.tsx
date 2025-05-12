@@ -1,18 +1,23 @@
+// src/routes/Edit/ListingEnhancements.tsx
 import {
   Apartment,
+  Book,
   CheckCircleOutlined,
   Close,
   ContentPaste,
+  Flight,
   Gavel,
   InfoOutlined,
+  Landscape,
   Language,
+  MovieCreation,
   PhotoCamera,
+  PhotoLibrary,
+  SignpostOutlined,
+  Straighten,
   Style,
   ThreeDRotation,
 } from "@mui/icons-material";
-import DroneIcon from "@mui/icons-material/FlightTakeoff";
-import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
-import SignpostIcon from "@mui/icons-material/SignpostOutlined";
 import {
   Box,
   Button,
@@ -53,22 +58,294 @@ interface Enhancement {
   benefits?: string[];
   // Flag to mark exclusive options in a group (like signboard types)
   exclusiveGroup?: string;
+  // Added fields for new pricing structure
+  wholesaleCost?: number;
+  margin?: string;
 }
 
-// Streamlined enhancement data with only the requested services
+// Streamlined enhancement data with the updated services and pricing
 const enhancements: Enhancement[] = [
-  // Adding signboard options
+  // Photography Services
+  {
+    id: "photography-12",
+    category: "Photography Services",
+    title: "Professional Photography (12 images)",
+    price: "$350",
+    numericPrice: 350,
+    wholesaleCost: 250,
+    margin: "28.6%",
+    description:
+      "High-quality professional photography to showcase your property in the best light. Package includes 12 professionally edited images.",
+    longDescription:
+      "Our professional photographers use high-end equipment and advanced techniques to capture your property in the best possible light. After the shoot, our editing team meticulously retouches each image to ensure perfect colors, lighting, and perspective. This package includes 12 professionally edited photos delivered within 48 hours of the shoot.",
+    icon: <PhotoCamera fontSize="large" color="primary" />,
+    availability: "Subject to availability in your area",
+    deliveryTime: "Photos delivered within 48 hours after shoot",
+    benefits: [
+      "Properties with professional photos receive up to 61% more views online",
+      "Professional photography can help sell your property 32% faster",
+      "Bright, clear images encourage potential buyers to book inspections",
+      "Includes carefully selected angles to showcase your property's best features",
+    ],
+  },
+  {
+    id: "photography-20",
+    category: "Photography Services",
+    title: "Professional Photography (20 images)",
+    price: "$470",
+    numericPrice: 470,
+    wholesaleCost: 335,
+    margin: "28.6%",
+    description:
+      "Extended photography package with 20 high-quality professional images to showcase every aspect of your property.",
+    longDescription:
+      "Our premium photography package includes 20 professionally captured and edited images of your property. This comprehensive package ensures every room and feature is showcased in the best possible light. Perfect for larger properties or when you want to highlight numerous special features. Our photographers use professional-grade equipment and advanced editing techniques to ensure your property stands out from the competition.",
+    icon: <PhotoCamera fontSize="large" color="primary" />,
+    availability: "Subject to availability in your area",
+    deliveryTime: "Photos delivered within 48 hours after shoot",
+    benefits: [
+      "8 additional images compared to the standard package",
+      "More comprehensive coverage of your property's features",
+      "Ideal for larger homes or properties with extensive outdoor areas",
+      "Allows potential buyers to see more details before booking an inspection",
+    ],
+  },
+  {
+    id: "drone-photography",
+    category: "Photography Services",
+    title: "Drone/Aerial Photography",
+    price: "$450",
+    numericPrice: 450,
+    wholesaleCost: 340,
+    margin: "24.4%",
+    description:
+      "Showcase your property's location, land size, and surroundings with breathtaking aerial photography. Subject to availability.",
+    longDescription:
+      "Our certified drone operators capture stunning aerial images that highlight your property's position, orientation, and surrounding environment. These unique perspectives are particularly valuable for large properties, those with acreage, or homes with special features like pools or impressive landscaping. Includes 5-8 high-resolution aerial images.",
+    icon: <Flight fontSize="large" color="primary" />,
+    availability: "Subject to weather conditions and airspace restrictions",
+    deliveryTime: "Images delivered within 3 business days",
+    benefits: [
+      "Shows the full extent of your property and land",
+      "Highlights proximity to amenities and natural features",
+      "Provides unique perspectives unavailable with standard photography",
+      "Includes 5-8 high-resolution aerial images",
+    ],
+  },
+  {
+    id: "twilight-photography",
+    category: "Photography Services",
+    title: "Twilight Photography",
+    price: "$480",
+    numericPrice: 480,
+    wholesaleCost: 345,
+    margin: "28.2%",
+    description:
+      "Dramatic twilight photos that showcase your property in the magical evening light, creating an emotional connection with buyers.",
+    longDescription:
+      "Twilight photography captures your property in the golden hour and blue hour lighting, creating dramatic and emotional images that stand out in listings. These photos highlight architectural features, lighting design, and create a warm, inviting atmosphere. Our photographers use specialized techniques to balance interior and exterior lighting for the most flattering results.",
+    icon: <Landscape fontSize="large" color="primary" />,
+    availability: "Weather dependent and subject to seasonal sunset times",
+    deliveryTime: "Images delivered within 48 hours after shoot",
+    benefits: [
+      "Creates an emotional connection with potential buyers",
+      "Makes your listing stand out from standard daytime photos",
+      "Highlights architectural features and landscape lighting",
+      "Among the most effective types of real estate photography for engagement",
+    ],
+  },
+  {
+    id: "floor-plan-2d",
+    category: "Photography Services",
+    title: "2D Floor Plan",
+    price: "$295",
+    numericPrice: 295,
+    wholesaleCost: 205,
+    margin: "30.5%",
+    description:
+      "Professional 2D floor plan to help buyers understand the layout and flow of your property. Essential for serious buyers.",
+    longDescription:
+      "Our professional 2D floor plans provide a clear visual representation of your property's layout. These accurate floor plans include room dimensions, door positions, and key architectural features. Buyers consistently rate floor plans as one of the most important elements when browsing properties online, helping them understand the flow and functionality of the space before inspection.",
+    icon: <Straighten fontSize="large" color="primary" />,
+    availability: "Available for all property types",
+    deliveryTime: "Delivered within 3-5 business days",
+    benefits: [
+      "Helps buyers understand property layout before inspection",
+      "Includes accurate measurements of all rooms",
+      "Consistent with survey requirements",
+      "Reduces irrelevant inquiries from buyers seeking different layouts",
+    ],
+  },
+  {
+    id: "virtual-tour",
+    category: "Photography Services",
+    title: "360° Virtual Tour",
+    price: "$480",
+    numericPrice: 480,
+    wholesaleCost: 340,
+    margin: "29.2%",
+    description:
+      "Create an immersive experience for buyers with a 3D virtual tour of your property. Allows buyers to 'walk through' your home online.",
+    longDescription:
+      "Using state-of-the-art Matterport technology, we create immersive, interactive 3D tours that allow potential buyers to walk through your property virtually at any time. These tours provide a realistic sense of space and flow that photos alone cannot achieve, making your listing stand out from the competition. Includes dollhouse view and floor plan generation.",
+    icon: <ThreeDRotation fontSize="large" color="primary" />,
+    availability: "Subject to availability in your area",
+    deliveryTime: "Tour live within 48 hours after scan",
+    benefits: [
+      "Available 24/7 for potential buyers to explore at their convenience",
+      "Reduces unnecessary physical inspections",
+      "Allows interstate and international buyers to view your property",
+      "Includes dollhouse view and floor plan generation",
+    ],
+  },
+  {
+    id: "walkthrough-video",
+    category: "Photography Services",
+    title: "Walkthrough Video",
+    price: "$560",
+    numericPrice: 560,
+    wholesaleCost: 415,
+    margin: "25.9%",
+    description:
+      "Professional guided video walkthrough of your property, showcasing the flow and highlighting key features with expert narration.",
+    longDescription:
+      "Our walkthrough videos provide a guided tour of your property with professional narration highlighting key features and benefits. Using stabilized camera equipment and professional editing, these videos create a natural viewing experience similar to an in-person inspection. The final product includes background music, text overlays for key features, and professional color grading.",
+    icon: <MovieCreation fontSize="large" color="primary" />,
+    availability: "Subject to availability in your area",
+    deliveryTime: "Video delivered within 5 business days",
+    benefits: [
+      "Showcases the natural flow between rooms and spaces",
+      "Professional narration highlights key selling points",
+      "Increases engagement on listings by up to 40%",
+      "Easy sharing on social media to expand your reach",
+    ],
+  },
+  {
+    id: "hd-video",
+    category: "Photography Services",
+    title: "HD Video",
+    price: "$840",
+    numericPrice: 840,
+    wholesaleCost: 630,
+    margin: "25.0%",
+    description:
+      "Premium cinematic video production showcasing your property with professional cinematography, editing, and soundtrack.",
+    longDescription:
+      "Our premium HD video package transforms your property listing into a cinematic experience with professional camera work, drone footage, advanced editing techniques, and carefully selected music. This Hollywood-style approach creates an emotional connection with viewers and showcases lifestyle benefits beyond just the physical features. Includes script development, professional narrator, and multiple revision options.",
+    icon: <MovieCreation fontSize="large" color="primary" />,
+    availability: "Limited availability - book early",
+    deliveryTime: "7-10 business days for delivery",
+    benefits: [
+      "Cinematic quality filming and editing",
+      "Combines ground and aerial footage seamlessly",
+      "Creates emotional connection through storytelling",
+      "Can be used across multiple marketing channels",
+      "Includes social media optimized versions",
+    ],
+  },
+  {
+    id: "virtual-staging",
+    category: "Photography Services",
+    title: "Virtual Staging",
+    price: "$150 per image",
+    numericPrice: 150,
+    wholesaleCost: 115,
+    margin: "23.3%",
+    description:
+      "Make empty rooms more appealing with virtual furniture and decor, helping buyers visualize the potential.",
+    longDescription:
+      "Our virtual staging service digitally furnishes your empty rooms with stylish, appropriate furniture and decor. This helps potential buyers visualize the potential of each space without the expense of physical staging. Our designers carefully select furnishings that complement your property's style and highlight its best features. We can create multiple style options for the same room if needed.",
+    icon: <Style fontSize="large" color="primary" />,
+    availability: "Available for any property",
+    deliveryTime: "Delivered within 2 business days",
+    benefits: [
+      "Costs a fraction of physical staging",
+      "Helps buyers visualize the potential of empty spaces",
+      "Can be applied to multiple different styles for the same room",
+      "Before and after images included",
+    ],
+  },
+  {
+    id: "site-plan",
+    category: "Photography Services",
+    title: "Site Plan",
+    price: "$80",
+    numericPrice: 80,
+    wholesaleCost: 55,
+    margin: "31.3%",
+    description:
+      "Professional site plan showing property boundaries, key features, and orientation. Essential for larger blocks and development potential.",
+    longDescription:
+      "Our site plans provide a clear aerial view of your property showing lot boundaries, building footprint, orientation, and key external features like driveways, pools, and gardens. These plans help buyers understand the full context of your property and are particularly valuable for larger blocks or properties with development potential. Created from a combination of aerial imagery and property documentation.",
+    icon: <Straighten fontSize="large" color="primary" />,
+    availability: "Available for all property types",
+    deliveryTime: "Delivered within 3 business days",
+    benefits: [
+      "Shows property boundaries and orientation",
+      "Highlights external features like pools and gardens",
+      "Useful for understanding development potential",
+      "Complements floor plans for complete property understanding",
+    ],
+  },
+
+  // Marketing Materials
+  {
+    id: "social-media-reels",
+    category: "Marketing Materials",
+    title: "Social Media Reels (2)",
+    price: "$280",
+    numericPrice: 280,
+    wholesaleCost: 210,
+    margin: "25.0%",
+    description:
+      "Two professionally created social media reels optimized for Instagram and Facebook to maximize your property's online reach.",
+    longDescription:
+      "Our social media reels package includes two professionally edited short-form videos designed specifically for social media platforms. These attention-grabbing 15-30 second videos highlight your property's best features with trendy transitions, text overlays, and appropriate music. Formatted for optimal performance on Instagram, Facebook, and TikTok, these reels significantly expand your property's online visibility.",
+    icon: <PhotoLibrary fontSize="large" color="primary" />,
+    availability: "Available for all properties with photography",
+    deliveryTime: "Delivered within 3 business days after photography",
+    benefits: [
+      "Increases reach through social media sharing",
+      "Optimized for mobile viewing experience",
+      "Format performs better in social algorithms than static images",
+      "Includes license-free music and professional text overlays",
+    ],
+  },
+  {
+    id: "print-package",
+    category: "Marketing Materials",
+    title: "Print Package (50 booklets & 100 flyers)",
+    price: "$220",
+    numericPrice: 220,
+    wholesaleCost: 170,
+    margin: "22.7%",
+    description:
+      "Comprehensive print materials including high-quality property booklets and flyers for inspections and letterbox drops.",
+    longDescription:
+      "Our print package includes 50 high-quality property booklets (4-8 pages) showcasing professional photos, floor plans, and property details, plus 100 single-page flyers ideal for letterbox drops and inspection handouts. All materials are printed on premium stock with professional design and layout. Includes property features, neighborhood highlights, and agent contact details.",
+    icon: <Book fontSize="large" color="primary" />,
+    availability: "Requires professional photography",
+    deliveryTime: "5-7 business days after photography",
+    benefits: [
+      "Professional take-home materials for open houses",
+      "Increases memorability after property viewings",
+      "Letterbox drop flyers to target local buyers",
+      "QR codes linking to online listing for extended information",
+    ],
+  },
   {
     id: "standard-signboard",
-    category: "Signboards",
+    category: "Marketing Materials",
     title: "Standard Signboard",
-    price: "$120",
-    numericPrice: 120,
+    price: "$190",
+    numericPrice: 190,
+    wholesaleCost: 140,
+    margin: "26.3%",
     description:
       "Professional 600×900mm 'For Sale' sign with your contact details. Made of high-quality corflute with steel frame.",
     longDescription:
-      "Our standard signboard is a 600×900mm corflute sign mounted on a steel frame. It includes your property address, contact details, and basic branding. These signs are professionally printed for maximum visibility and durability outdoors.",
-    icon: <SignpostIcon fontSize="large" color="primary" />,
+      "Our standard signboard is a 600×900mm corflute sign mounted on a steel frame. It includes your property address, contact details, and basic branding. These signs are professionally printed for maximum visibility and durability outdoors. Installation included at your property.",
+    icon: <SignpostOutlined fontSize="large" color="primary" />,
     availability: "Available for all property types",
     deliveryTime: "Installed within 3-5 business days",
     benefits: [
@@ -81,15 +358,17 @@ const enhancements: Enhancement[] = [
   },
   {
     id: "photo-signboard",
-    category: "Signboards",
+    category: "Marketing Materials",
     title: "Photo Signboard",
-    price: "$220",
-    numericPrice: 220,
+    price: "$310",
+    numericPrice: 310,
+    wholesaleCost: 240,
+    margin: "22.6%",
     description:
       "Premium signboard featuring a high-quality photo of your property, your contact details, and professional design.",
     longDescription:
       "Our photo signboards feature a high-resolution image of your property alongside key features and your contact information. These premium signs are larger (900×1200mm) and printed on high-quality materials for maximum visual impact. The photo helps potential buyers recognize your property and increases interest from drive-by traffic.",
-    icon: <PhotoLibraryIcon fontSize="large" color="primary" />,
+    icon: <PhotoLibrary fontSize="large" color="primary" />,
     availability: "Available for all property types",
     deliveryTime: "Installed within 5-7 business days after photography",
     benefits: [
@@ -102,103 +381,51 @@ const enhancements: Enhancement[] = [
     exclusiveGroup: "signboard",
   },
   {
-    id: "virtual-staging",
-    category: "Photography & Media",
-    title: "Virtual Staging",
-    price: "$40 per image",
-    numericPrice: 40,
-    description:
-      "Make empty rooms more appealing with virtual furniture and decor, helping buyers visualize the potential.",
-    longDescription:
-      "Our virtual staging service digitally furnishes your empty rooms with stylish, appropriate furniture and decor. This helps potential buyers visualize the potential of each space without the expense of physical staging. Our designers carefully select furnishings that complement your property's style and highlight its best features.",
-    icon: <Style fontSize="large" color="primary" />,
-    availability: "Available for any property",
-    deliveryTime: "Delivered within 2 business days",
-    benefits: [
-      "Costs a fraction of physical staging",
-      "Helps buyers visualize the potential of empty spaces",
-      "Can be applied to multiple different styles for the same room",
-      "Before and after images included",
-    ],
-  },
-  {
-    id: "photography",
-    category: "Photography & Media",
-    title: "Professional Photography",
-    price: "$350",
-    numericPrice: 350,
-    description:
-      "High-quality professional photography to showcase your property in the best light. Subject to availability.",
-    longDescription:
-      "Our professional photographers use high-end equipment and advanced techniques to capture your property in the best possible light. After the shoot, our editing team meticulously retouches each image to ensure perfect colors, lighting, and perspective. This package includes up to 15 professionally edited photos delivered within 48 hours of the shoot.",
-    icon: <PhotoCamera fontSize="large" color="primary" />,
-    availability: "Subject to availability in your area",
-    deliveryTime: "Photos delivered within 48 hours after shoot",
-    benefits: [
-      "Properties with professional photos receive up to 61% more views online",
-      "Professional photography can help sell your property 32% faster",
-      "Bright, clear images encourage potential buyers to book inspections",
-      "Includes twilight shots for exterior where appropriate",
-    ],
-  },
-  {
-    id: "drone-photography",
-    category: "Photography & Media",
-    title: "Drone/Aerial Photography",
-    price: "$280",
-    numericPrice: 280,
-    description:
-      "Showcase your property's location, land size, and surroundings with breathtaking aerial photography. Subject to availability.",
-    longDescription:
-      "Our certified drone operators capture stunning aerial images that highlight your property's position, orientation, and surrounding environment. These unique perspectives are particularly valuable for large properties, those with acreage, or homes with special features like pools or impressive landscaping.",
-    icon: <DroneIcon fontSize="large" color="primary" />,
-    availability: "Subject to weather conditions and airspace restrictions",
-    deliveryTime: "Images delivered within 3 business days",
-    benefits: [
-      "Shows the full extent of your property and land",
-      "Highlights proximity to amenities and natural features",
-      "Provides unique perspectives unavailable with standard photography",
-      "Includes 5-10 high-resolution aerial images",
-    ],
-  },
-  {
-    id: "3d-tour",
-    category: "Photography & Media",
-    title: "3D Virtual Tour",
-    price: "$560",
-    numericPrice: 560,
-    description:
-      "Create an immersive experience for buyers with a 3D virtual tour of your property. Subject to availability.",
-    longDescription:
-      "Using state-of-the-art Matterport technology, we create immersive, interactive 3D tours that allow potential buyers to walk through your property virtually at any time. These tours provide a realistic sense of space and flow that photos alone cannot achieve, making your listing stand out from the competition.",
-    icon: <ThreeDRotation fontSize="large" color="primary" />,
-    availability: "Subject to availability in your area",
-    deliveryTime: "Tour live within 48 hours after scan",
-    benefits: [
-      "Available 24/7 for potential buyers to explore at their convenience",
-      "Reduces unnecessary physical inspections",
-      "Allows interstate and international buyers to view your property",
-      "Includes dollhouse view and floor plan generation",
-    ],
-  },
-  {
-    id: "premium-copy",
-    category: "Content & Marketing",
-    title: "Premium Copywriting (Story-based)",
+    id: "premium-description",
+    category: "Marketing Materials",
+    title: "Premium Property Description",
     price: "$180",
     numericPrice: 180,
+    wholesaleCost: 10,
+    margin: "94.4%",
     description:
-      "Take your property listing to the next level with premium storytelling that creates an emotional connection with potential buyers.",
+      "Professional, compelling property description that highlights key features and creates emotional connection with potential buyers.",
     longDescription:
-      "Our premium copywriting service goes beyond describing features to tell the compelling story of your home. Through narrative techniques and evocative language, we help buyers imagine the lifestyle your property offers. This premium service includes an in-depth interview about your property's history and unique aspects.",
+      "Our premium property descriptions are crafted by professional copywriters who specialize in real estate marketing. Going beyond basic features, they tell the story of your property and the lifestyle it offers. Using evocative language and strategic keyword placement, these descriptions help your listing stand out in search results while creating an emotional connection with potential buyers.",
     icon: <ContentPaste fontSize="large" color="primary" />,
-    availability: "Available immediately",
-    deliveryTime: "Draft delivered within 3 business days",
+    availability: "Available for all property types",
+    deliveryTime: "Delivered within 2 business days",
     benefits: [
-      "Creates an emotional narrative around your property",
-      "Includes research into the neighborhood and local amenities",
-      "Positions your property within its historical and community context",
-      "Includes revisions based on your feedback",
+      "Creates emotional connection with potential buyers",
+      "Optimized for search engine visibility",
+      "Highlights unique selling points and lifestyle benefits",
+      "Written by specialists in real estate copywriting",
+      "Includes up to two rounds of revisions",
+    ],
+  },
+
+  // Additional Exposure Options
+  {
+    id: "social-media-boost",
+    category: "Additional Exposure",
+    title: "Additional Social Media Boost",
+    price: "$270",
+    numericPrice: 270,
+    wholesaleCost: 199,
+    margin: "26.3%",
+    description:
+      "Targeted social media campaign promoting your property to potential buyers based on location, interests, and buying signals.",
+    longDescription:
+      "Our social media boost package creates and manages targeted advertising campaigns for your property across Facebook, Instagram, and Google. Using advanced audience targeting, we reach potential buyers based on location, demographics, interests, and recent property-seeking behavior. Includes custom ad creation, campaign management, and performance reporting.",
+    icon: <Language fontSize="large" color="primary" />,
+    availability: "Available for all property types",
+    deliveryTime: "Campaign live within 2 business days",
+    benefits: [
+      "Targets likely buyers based on behavior and interests",
+      "Reaches potential buyers who aren't actively searching listings",
+      "Campaign runs for 14 days with performance optimization",
+      "Includes performance report with reach and engagement metrics",
+      "Average of 10,000+ targeted impressions",
     ],
   },
   {
@@ -207,6 +434,8 @@ const enhancements: Enhancement[] = [
     title: "Listing on Allhomes.com.au",
     price: "$645",
     numericPrice: 645,
+    wholesaleCost: 520,
+    margin: "19.4%",
     description:
       "Get additional exposure on Allhomes, a leading property platform in the ACT region.",
     longDescription:
@@ -227,6 +456,8 @@ const enhancements: Enhancement[] = [
     title: "Listing on Juwai (China)",
     price: "$160",
     numericPrice: 160,
+    wholesaleCost: 120,
+    margin: "25.0%",
     description:
       "Reach international buyers! Juwai is China's leading real estate platform, showcasing properties to a global audience.",
     longDescription:
@@ -241,12 +472,16 @@ const enhancements: Enhancement[] = [
       "30-day premium placement",
     ],
   },
+
+  // Legal Services
   {
-    id: "contract-no-strata",
+    id: "contract-preparation",
     category: "Legal Services",
     title: "Sale Contract Preparation",
     price: "$534",
     numericPrice: 534,
+    wholesaleCost: 450,
+    margin: "15.7%",
     description:
       "Professional preparation of your property sale contract by qualified conveyancers. Required before advertising in many states.",
     longDescription:
@@ -267,6 +502,8 @@ const enhancements: Enhancement[] = [
     title: "Full Conveyancing Service",
     price: "$880",
     numericPrice: 880,
+    wholesaleCost: 770,
+    margin: "12.5%",
     description:
       "Complete end-to-end conveyancing service for your property sale, handling all legal aspects from contract to settlement.",
     longDescription:
@@ -312,6 +549,12 @@ export default function ListingEnhancements() {
     useState<Enhancement | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  // Get unique categories for tab filtering
+  const categories = Array.from(
+    new Set(enhancements.map((enhancement) => enhancement.category))
+  );
 
   // Calculate total price of selected enhancements
   const totalPrice = propertySpecificEnhancements.reduce((sum, enhancement) => {
@@ -400,8 +643,15 @@ export default function ListingEnhancements() {
     handleCloseModal();
   };
 
+  // Filter enhancements by active category
+  const filteredEnhancements = activeCategory
+    ? enhancements.filter(
+        (enhancement) => enhancement.category === activeCategory
+      )
+    : enhancements;
+
   // Group enhancements by category
-  const enhancementsByCategory = enhancements.reduce(
+  const enhancementsByCategory = filteredEnhancements.reduce(
     (acc, enhancement) => {
       if (!acc[enhancement.category]) {
         acc[enhancement.category] = [];
@@ -414,7 +664,7 @@ export default function ListingEnhancements() {
 
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
-      <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold" }}>
         Listing Enhancements
       </Typography>
 
@@ -426,6 +676,27 @@ export default function ListingEnhancements() {
         </Typography>
       </Paper>
 
+      {/* Category Filter Tabs */}
+      <Box sx={{ mb: 4, display: "flex", flexWrap: "wrap", gap: 1 }}>
+        <Button
+          variant={activeCategory === null ? "contained" : "outlined"}
+          onClick={() => setActiveCategory(null)}
+          sx={{ mb: 1 }}
+        >
+          All Categories
+        </Button>
+        {categories.map((category) => (
+          <Button
+            key={category}
+            variant={activeCategory === category ? "contained" : "outlined"}
+            onClick={() => setActiveCategory(category)}
+            sx={{ mb: 1 }}
+          >
+            {category}
+          </Button>
+        ))}
+      </Box>
+
       {/* Render each category */}
       {Object.entries(enhancementsByCategory).map(([category, items]) => (
         <Box key={category} sx={{ mt: 4, mb: 6 }}>
@@ -436,6 +707,9 @@ export default function ListingEnhancements() {
               pb: 1,
               mb: 3,
               color: "primary.main",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
             {category}
@@ -447,7 +721,10 @@ export default function ListingEnhancements() {
 
               return (
                 <Grid
-                  size={{ xs: 12, sm: 6, md: 4 }}
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
                   key={`${category}-${enhancement.id}`}
                 >
                   <Card
@@ -487,7 +764,7 @@ export default function ListingEnhancements() {
 
                     <Box
                       sx={{
-                        height: 120,
+                        height: 100,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -547,7 +824,7 @@ export default function ListingEnhancements() {
                         onClick={() => handleOpenModal(enhancement)}
                         startIcon={<InfoOutlined />}
                       >
-                        Read More
+                        Details
                       </Button>
 
                       <Button
@@ -604,7 +881,18 @@ export default function ListingEnhancements() {
                     </Box>
                     <Typography>{enhancement.title}</Typography>
                   </Box>
-                  <Typography fontWeight="bold">{enhancement.price}</Typography>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Typography fontWeight="bold" sx={{ mr: 2 }}>
+                      {enhancement.price}
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleToggleEnhancement(enhancement.id)}
+                    >
+                      <Close fontSize="small" />
+                    </IconButton>
+                  </Box>
                 </Box>
               ) : null;
             })}
@@ -690,6 +978,20 @@ export default function ListingEnhancements() {
                     >
                       {currentEnhancement.price}
                     </Typography>
+
+                    {currentEnhancement.wholesaleCost && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          display: "block",
+                          mb: 1,
+                          fontStyle: "italic",
+                        }}
+                      >
+                        Margin: {currentEnhancement.margin}
+                      </Typography>
+                    )}
 
                     <Typography variant="body2" paragraph>
                       {currentEnhancement.longDescription ||
