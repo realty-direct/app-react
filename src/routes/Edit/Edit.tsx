@@ -443,11 +443,11 @@ export default function Edit() {
   return (
     <Grid
       container
-      sx={{ 
-        position: "relative", 
-        maxWidth: "100vw", 
-        overflowX: "hidden",
-        height: "100%"
+      sx={{
+        position: "relative",
+        maxWidth: "100vw",
+        // overflowX: "hidden",
+        height: "100%",
       }}
       size={12}
     >
@@ -463,7 +463,7 @@ export default function Edit() {
           boxShadow: (theme) => `0 2px 4px ${theme.palette.divider}`,
           transition: "box-shadow 0.3s ease",
           width: "100%",
-          display: "flex", 
+          display: "flex",
           flexDirection: "column",
         }}
       >
