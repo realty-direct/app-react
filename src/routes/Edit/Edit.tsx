@@ -4,6 +4,7 @@
 import { Alert, Box, Button, Grid, Snackbar, Tab, Tabs } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
+import EnhancementsSummary from "../../components/EnhancementSummary";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import OrderSummary from "../../components/OrderSummary";
 import SectionHelp from "../../components/SectionHelp";
@@ -440,7 +441,7 @@ export default function Edit() {
   // No auto-save functionality - data is only saved when user explicitly navigates or clicks save
 
   return (
-    <Grid container sx={{ position: "relative" }}>
+    <Grid container sx={{ position: "relative", maxWidth: "100vw", overflowX: "hidden" }} size={12}>
       {/* Sticky Tabs */}
       <Grid
         size={12}
@@ -453,6 +454,7 @@ export default function Edit() {
           borderColor: "divider",
           boxShadow: (theme) => `0 2px 4px ${theme.palette.divider}`,
           transition: "box-shadow 0.3s ease",
+          width: "100%",
         }}
       >
         <Tabs
@@ -460,10 +462,12 @@ export default function Edit() {
           onChange={handleTabChange}
           aria-label="Property editing tabs"
           variant="scrollable"
-          scrollButtons
+          scrollButtons="auto"
+          allowScrollButtonsMobile
           sx={{
             borderBottom: 1,
             borderColor: "divider",
+            maxWidth: "100%",
           }}
         >
           <Tab label="Details" disabled={loading} />
@@ -481,7 +485,7 @@ export default function Edit() {
       </Grid>
 
       {/* Tab Content */}
-      <Grid size={9} p={3}>
+      <Grid size={{ xs: 12, md: 9, lg: 9 }} p={3} sx={{ maxWidth: "100%" }}>
         {tabValue === 0 && <Details />}
         {tabValue === 1 && <Features />}
         {tabValue === 2 && <Price />}
@@ -497,10 +501,12 @@ export default function Edit() {
         {/* Standard note and navigation buttons */}
         <Box
           sx={{
-            mt: 2,
+            mt: 3,
+            mb: 2,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            width: "100%",
           }}
         >
           <Box sx={{ color: "text.secondary", fontStyle: "italic" }}>
@@ -542,28 +548,33 @@ export default function Edit() {
         </Box>
       </Grid>
 
-      {/* Order Summary Sidebar - Only shown on Summary tab */}
-      {showOrderSummary ? (
-        <Grid size={3} p={3}>
-          <OrderSummary
-            propertyId={propertyId || ""}
-            packageType={propertyDetail.property_package}
-            packagePrice={packagePrice}
-            enhancements={currentEnhancements}
-            publishOption={propertyDetail.publish_option || "immediately"}
-            publishDate={
-              propertyDetail.publish_date
-                ? new Date(propertyDetail.publish_date)
-                : null
-            }
-            handleFinalizeListing={handleFinalizeListing}
-          />
-        </Grid>
-      ) : (
-        <Grid size={3} p={3}>
-          <SectionHelp sectionIndex={tabValue} />
-        </Grid>
-      )}
+      {/* Right Sidebar Content */}
+      <Grid size={{ xs: 12, md: 3, lg: 3 }} p={3} sx={{ maxWidth: "100%" }}>
+        <Box sx={{ maxWidth: "100%", overflowX: "hidden" }}>
+          {showOrderSummary ? (
+            <OrderSummary
+              propertyId={propertyId || ""}
+              packageType={propertyDetail.property_package}
+              packagePrice={packagePrice}
+              enhancements={currentEnhancements}
+              publishOption={propertyDetail.publish_option || "immediately"}
+              publishDate={
+                propertyDetail.publish_date
+                  ? new Date(propertyDetail.publish_date)
+                  : null
+              }
+              handleFinalizeListing={handleFinalizeListing}
+            />
+          ) : tabValue === 9 ? (
+            <EnhancementsSummary
+              propertyId={propertyId || ""}
+              isInSidebar={true}
+            />
+          ) : (
+            <SectionHelp sectionIndex={tabValue} />
+          )}
+        </Box>
+      </Grid>
 
       {/* Notification Snackbar */}
       <Snackbar
