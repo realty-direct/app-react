@@ -441,10 +441,18 @@ export default function Edit() {
   // No auto-save functionality - data is only saved when user explicitly navigates or clicks save
 
   return (
-    <Grid container sx={{ position: "relative", maxWidth: "100vw", overflowX: "hidden" }} size={12}>
+    <Grid
+      container
+      sx={{ 
+        position: "relative", 
+        maxWidth: "100vw", 
+        overflowX: "hidden",
+        height: "100%"
+      }}
+      size={12}
+    >
       {/* Sticky Tabs */}
-      <Grid
-        size={12}
+      <Box
         sx={{
           position: "sticky",
           top: 0,
@@ -455,6 +463,8 @@ export default function Edit() {
           boxShadow: (theme) => `0 2px 4px ${theme.palette.divider}`,
           transition: "box-shadow 0.3s ease",
           width: "100%",
+          display: "flex", 
+          flexDirection: "column",
         }}
       >
         <Tabs
@@ -468,6 +478,8 @@ export default function Edit() {
             borderBottom: 1,
             borderColor: "divider",
             maxWidth: "100%",
+            minHeight: "48px",
+            flex: 1,
           }}
         >
           <Tab label="Details" disabled={loading} />
@@ -482,7 +494,7 @@ export default function Edit() {
           <Tab label="Listing Enhancements" disabled={loading} />
           <Tab label="Summary" disabled={loading} />
         </Tabs>
-      </Grid>
+      </Box>
 
       {/* Tab Content */}
       <Grid size={{ xs: 12, md: 9, lg: 9 }} p={3} sx={{ maxWidth: "100%" }}>

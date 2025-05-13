@@ -721,16 +721,16 @@ export default function ListingEnhancements() {
 
               return (
                 <Grid
-                  item
-                  xs={12}
-                  sm={6}
-                  md={4}
+                  size={{ xs: 12, sm: 4, md: 4 }}
                   key={`${category}-${enhancement.id}`}
                 >
                   <Card
                     elevation={isSelected ? 3 : 1}
                     sx={{
                       height: "100%",
+                      maxWidth: 345,
+                      width: "100%",
+                      margin: "0 auto",
                       display: "flex",
                       flexDirection: "column",
                       transition: "all 0.3s ease",
