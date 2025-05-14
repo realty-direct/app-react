@@ -365,20 +365,19 @@ export const deletePropertyImageFromDB = async (
     // For floor plans, use our specialized direct method
     if (imageUrl.includes("property-floorplans")) {
       const success = await directFloorPlanDelete(imageUrl);
-
       if (!success) {
         console.error("❌ Failed to delete floor plan:", imageUrl);
         return false;
       }
-
       return true;
     }
 
-    // For regular photographs, use standard deletion method
-    let bucketName = "property_photographs";
-    let pathPart;
+    // Determine bucket name and extract path
+    let bucketName: string;
+    let pathPart: string | undefined;
 
     if (imageUrl.includes("property_photographs")) {
+      bucketName = "property_photographs";
       pathPart = imageUrl.split(
         "/storage/v1/object/public/property_photographs/"
       )[1];
@@ -392,6 +391,9 @@ export const deletePropertyImageFromDB = async (
       pathPart = imageUrl.split(
         "/storage/v1/object/public/property-identification/"
       )[1];
+    } else {
+      console.error("❌ Unknown bucket type for URL:", imageUrl);
+      return false;
     }
 
     if (!pathPart) {
@@ -399,13 +401,13 @@ export const deletePropertyImageFromDB = async (
       return false;
     }
 
-    // Simple direct approach for photos - this seems to be working
+    // Simple direct approach for all file types
     const { error } = await supabase.storage
       .from(bucketName)
       .remove([pathPart]);
 
     if (error) {
-      console.error("❌ Failed to delete file:", error);
+      console.error(`❌ Failed to delete file from ${bucketName}:`, error);
       return false;
     }
 

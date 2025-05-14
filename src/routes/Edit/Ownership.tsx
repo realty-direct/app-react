@@ -2,12 +2,14 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import {
   Alert,
   Box,
   Button,
   Card,
   CardContent,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -17,6 +19,7 @@ import {
   Link,
   Paper,
   Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -173,7 +176,7 @@ export default function Ownership() {
         if (type === "rates") {
           const updatedDetail = await updatePropertyOwnershipDocumentInDB(
             propertyId,
-            ""
+            null // Changed from "" to null
           );
           if (updatedDetail) {
             updateOwnershipDocument(propertyId, null);
@@ -181,7 +184,7 @@ export default function Ownership() {
         } else {
           const updatedDetail = await updatePropertyIdentificationDocumentInDB(
             propertyId,
-            ""
+            null // Changed from "" to null
           );
           if (updatedDetail) {
             updateIdentificationDocument(propertyId, null);
@@ -251,22 +254,49 @@ export default function Ownership() {
                   {getFilenameFromUrl(propertyDetail.ownership_document) ||
                     "Rates notice document"}
                 </Link>
+                {propertyDetail.ownership_verified && (
+                  <Tooltip title="This document has been verified by our team">
+                    <Chip
+                      icon={<VerifiedIcon />}
+                      label="Verified"
+                      size="small"
+                      color="success"
+                      sx={{ ml: 2 }}
+                    />
+                  </Tooltip>
+                )}
               </Typography>
-              <Button
-                startIcon={<DeleteIcon />}
-                color="error"
-                variant="outlined"
-                size="small"
-                disabled={isDeleting}
-                onClick={() =>
-                  handleDeleteFile(propertyDetail.ownership_document, "rates")
-                }
-              >
-                {isDeleting && uploadType === "rates" ? (
-                  <CircularProgress size={16} sx={{ mr: 1 }} />
-                ) : null}
-                Delete
-              </Button>
+              {!propertyDetail.ownership_verified ? (
+                <Button
+                  startIcon={<DeleteIcon />}
+                  color="error"
+                  variant="outlined"
+                  size="small"
+                  disabled={isDeleting}
+                  onClick={() =>
+                    handleDeleteFile(propertyDetail.ownership_document, "rates")
+                  }
+                >
+                  {isDeleting && uploadType === "rates" ? (
+                    <CircularProgress size={16} sx={{ mr: 1 }} />
+                  ) : null}
+                  Delete
+                </Button>
+              ) : (
+                <Tooltip title="Verified documents cannot be deleted. Please contact support if you need to update this document.">
+                  <span>
+                    <Button
+                      startIcon={<DeleteIcon />}
+                      color="error"
+                      variant="outlined"
+                      size="small"
+                      disabled={true}
+                    >
+                      Delete
+                    </Button>
+                  </span>
+                </Tooltip>
+              )}
             </Box>
           ) : (
             <Paper
@@ -346,22 +376,49 @@ export default function Ownership() {
                   {getFilenameFromUrl(propertyDetail.identification_document) ||
                     "Identification document"}
                 </Link>
+                {propertyDetail.ownership_verified && (
+                  <Tooltip title="This document has been verified by our team">
+                    <Chip
+                      icon={<VerifiedIcon />}
+                      label="Verified"
+                      size="small"
+                      color="success"
+                      sx={{ ml: 2 }}
+                    />
+                  </Tooltip>
+                )}
               </Typography>
-              <Button
-                startIcon={<DeleteIcon />}
-                color="error"
-                variant="outlined"
-                size="small"
-                disabled={isDeleting}
-                onClick={() =>
-                  handleDeleteFile(propertyDetail.identification_document, "id")
-                }
-              >
-                {isDeleting && uploadType === "id" ? (
-                  <CircularProgress size={16} sx={{ mr: 1 }} />
-                ) : null}
-                Delete
-              </Button>
+              {!propertyDetail.ownership_verified ? (
+                <Button
+                  startIcon={<DeleteIcon />}
+                  color="error"
+                  variant="outlined"
+                  size="small"
+                  disabled={isDeleting}
+                  onClick={() =>
+                    handleDeleteFile(propertyDetail.identification_document, "id")
+                  }
+                >
+                  {isDeleting && uploadType === "id" ? (
+                    <CircularProgress size={16} sx={{ mr: 1 }} />
+                  ) : null}
+                  Delete
+                </Button>
+              ) : (
+                <Tooltip title="Verified documents cannot be deleted. Please contact support if you need to update this document.">
+                  <span>
+                    <Button
+                      startIcon={<DeleteIcon />}
+                      color="error"
+                      variant="outlined"
+                      size="small"
+                      disabled={true}
+                    >
+                      Delete
+                    </Button>
+                  </span>
+                </Tooltip>
+              )}
             </Box>
           ) : (
             <Paper
@@ -461,11 +518,11 @@ export default function Ownership() {
           </Typography>
           <Typography sx={{ mb: 2 }}>
             Please contact our support team at{" "}
-            <Link href="mailto:support@realtydashboard.com">
-              support@realtydashboard.com
+            <Link href="mailto:admin@realtydirect.com.au">
+              admin@realtydirect.com.au
             </Link>{" "}
-            or call us at <strong>1-800-PROPERTY</strong> to discuss alternative
-            options.
+            or call us at <strong>+61 406 371 630</strong> to discuss
+            alternative options.
           </Typography>
           <Typography>
             Our team will work with you to find a suitable alternative for

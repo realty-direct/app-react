@@ -79,7 +79,7 @@ export const updatePropertyFloorPlansInDB = async (
 
 export const updatePropertyOwnershipDocumentInDB = async (
   propertyId: string,
-  documentUrl: string
+  documentUrl: string | null // Allow null
 ): Promise<PropertyDetail | null> => {
   return await updatePropertyDetailInDB(propertyId, {
     ownership_document: documentUrl,
@@ -88,7 +88,7 @@ export const updatePropertyOwnershipDocumentInDB = async (
 
 export const updatePropertyIdentificationDocumentInDB = async (
   propertyId: string,
-  documentUrl: string
+  documentUrl: string | null // Allow null
 ): Promise<PropertyDetail | null> => {
   return await updatePropertyDetailInDB(propertyId, {
     identification_document: documentUrl,
@@ -100,7 +100,7 @@ export const updateOwnershipVerificationStatus = async (
   isVerified: boolean
 ): Promise<PropertyDetail | null> => {
   return await updatePropertyDetailInDB(propertyId, {
-    ownership_verified: isVerified
+    ownership_verified: isVerified,
   });
 };
 

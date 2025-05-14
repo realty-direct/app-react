@@ -432,11 +432,11 @@ export default function Media() {
           </Typography>
           <Typography sx={{ mb: 2 }}>
             Please contact our support team at{" "}
-            <Link href="mailto:support@realtydashboard.com">
-              support@realtydashboard.com
+            <Link href="mailto:admin@realtydirect.com.au">
+              admin@realtydirect.com.au
             </Link>{" "}
-            or call us at <strong>1-800-PROPERTY</strong> to discuss alternative
-            options.
+            or call us at <strong>+61 406 371 630</strong> to discuss
+            alternative options.
           </Typography>
           <Typography>
             Our team will work with you to find a suitable alternative for
