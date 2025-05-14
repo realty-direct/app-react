@@ -1,7 +1,6 @@
 import {
   ArrowBack,
   Dashboard,
-  Delete,
   Description,
   Gavel,
   House,
@@ -58,11 +57,6 @@ export function useNavigationConfig() {
           segment: `property/${id}/enquiries`,
           title: "Enquiries",
           icon: <Mail />,
-        },
-        {
-          segment: `property/${id}/delete`,
-          title: "Delete Property",
-          icon: <Delete />,
         },
       ]
     : [];

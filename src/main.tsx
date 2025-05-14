@@ -14,6 +14,8 @@ import Confirm from "./routes/Confirm";
 import Conveyancing from "./routes/Conveyancing";
 import Create from "./routes/Create";
 import Edit from "./routes/Edit/Edit";
+import Enquiries from "./routes/Enquiries";
+import Forms from "./routes/Forms";
 import Home from "./routes/Home";
 import Orders from "./routes/Orders";
 import Property from "./routes/Property";
@@ -60,6 +62,8 @@ const router = createBrowserRouter([
             children: [
               { path: "", element: <Property /> },
               { path: "orders", element: <Orders /> },
+              { path: "forms", element: <Forms /> },
+              { path: "enquiries", element: <Enquiries /> },
             ],
           },
           {
