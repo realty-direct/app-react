@@ -109,6 +109,12 @@ export default function Ownership() {
     const files = event.target.files;
     if (!files || files.length === 0 || !propertyId) return;
 
+    // Prevent upload if documents are already verified
+    if (propertyDetail.ownership_verified) {
+      setErrorMessage("Your documents have already been verified. Please contact support if you need to update them.");
+      return;
+    }
+
     const file = files[0]; // Only use the first file
 
     if (!validateFile(file)) {
@@ -164,6 +170,12 @@ export default function Ownership() {
     type: "rates" | "id"
   ) => {
     if (!propertyId || !fileUrl) return;
+    
+    // Prevent deletion if documents are verified
+    if (propertyDetail.ownership_verified) {
+      setErrorMessage("Verified documents cannot be deleted. Please contact support if you need to make changes.");
+      return;
+    }
 
     setIsDeleting(true);
     setUploadType(type);
@@ -207,6 +219,9 @@ export default function Ownership() {
 
   if (!propertyDetail)
     return <Typography>No property details found.</Typography>;
+    
+  // Add verification status information
+  const isVerified = propertyDetail.ownership_verified || false;
 
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
@@ -223,12 +238,23 @@ export default function Ownership() {
       )}
 
       {/* Description */}
-      <Typography sx={{ mb: 4 }}>
-        Ownership verification is required before we can send your property ad
-        live. To ensure there are no delays, provide this now if you can. If you
-        don't have this on hand, feel free to continue for now and supply this
-        later.
-      </Typography>
+      {isVerified ? (
+        <Alert severity="success" sx={{ mb: 4 }}>
+          <Typography variant="body1" sx={{ fontWeight: "medium" }}>
+            Your ownership documents have been verified!
+          </Typography>
+          <Typography variant="body2">
+            Your property is now eligible for publishing. Verified documents cannot be changed without contacting support.
+          </Typography>
+        </Alert>
+      ) : (
+        <Typography sx={{ mb: 4 }}>
+          Ownership verification is required before we can send your property ad
+          live. To ensure there are no delays, provide this now if you can. If you
+          don't have this on hand, feel free to continue for now and supply this
+          later.
+        </Typography>
+      )}
 
       {/* Rates Notice Section */}
       <Card sx={{ mb: 4, border: `1px solid ${theme.palette.divider}` }}>
@@ -319,7 +345,7 @@ export default function Ownership() {
                 <Button
                   variant="contained"
                   component="span"
-                  disabled={isUploading}
+                  disabled={isUploading || isVerified}
                   startIcon={<CloudUploadIcon />}
                 >
                   {isUploading && uploadType === "rates" ? (
@@ -344,9 +370,18 @@ export default function Ownership() {
                 variant="text"
                 onClick={() => setContactDialogOpen(true)}
                 startIcon={<ContactMailIcon />}
+                disabled={isVerified}
               >
                 I don't have a rates notice
               </Button>
+              {isVerified && (
+                <Typography 
+                  variant="body2" 
+                  sx={{ mt: 2, color: "text.secondary", fontStyle: "italic" }}
+                >
+                  Your documents have been verified. Upload options are disabled.
+                </Typography>
+              )}
             </Paper>
           )}
         </CardContent>
@@ -441,7 +476,7 @@ export default function Ownership() {
                 <Button
                   variant="contained"
                   component="span"
-                  disabled={isUploading}
+                  disabled={isUploading || isVerified}
                   startIcon={<CloudUploadIcon />}
                 >
                   {isUploading && uploadType === "id" ? (
@@ -460,6 +495,14 @@ export default function Ownership() {
               >
                 Accepted formats: PDF, JPEG, PNG (Max 10MB)
               </Typography>
+              {isVerified && (
+                <Typography 
+                  variant="body2" 
+                  sx={{ mt: 2, color: "text.secondary", fontStyle: "italic" }}
+                >
+                  Your documents have been verified. Upload options are disabled.
+                </Typography>
+              )}
             </Paper>
           )}
         </CardContent>

@@ -216,12 +216,12 @@ export default function EnhancementsSummary({
       <Card
         elevation={2}
         sx={{
-          position: isInSidebar ? "sticky" : "relative",
-          top: isInSidebar ? 90 : undefined,
+          position: "relative",
           borderRadius: 2,
-          mb: 0,
+          mb: 4,
           minWidth: isInSidebar ? 260 : "100%",
           width: "100%",
+          height: "auto",
         }}
       >
         {/* Header */}
@@ -238,7 +238,7 @@ export default function EnhancementsSummary({
         </Box>
 
         {/* Empty state content */}
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: 3, pb: 4 }}>
           <Typography variant="body2" color="text.secondary">
             No enhancements selected yet. Choose from the options to add
             professional services to your listing.
@@ -252,7 +252,7 @@ export default function EnhancementsSummary({
     <Card
       elevation={3}
       sx={{
-        position: isInSidebar ? "relative" : "relative",
+        position: "relative",
         borderRadius: 2,
         overflow: "visible",
         mb: 3,

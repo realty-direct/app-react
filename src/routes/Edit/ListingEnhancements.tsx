@@ -123,7 +123,7 @@ const enhancements: Enhancement[] = [
     longDescription:
       "Our certified drone operators capture stunning aerial images that highlight your property's position, orientation, and surrounding environment. These unique perspectives are particularly valuable for large properties, those with acreage, or homes with special features like pools or impressive landscaping. Includes 5-8 high-resolution aerial images.",
     icon: <Flight fontSize="large" color="primary" />,
-    availability: "Subject to weather conditions and airspace restrictions",
+    availability: "Subject to availability in your area",
     deliveryTime: "Images delivered within 3 business days",
     benefits: [
       "Shows the full extent of your property and land",
@@ -145,7 +145,7 @@ const enhancements: Enhancement[] = [
     longDescription:
       "Twilight photography captures your property in the golden hour and blue hour lighting, creating dramatic and emotional images that stand out in listings. These photos highlight architectural features, lighting design, and create a warm, inviting atmosphere. Our photographers use specialized techniques to balance interior and exterior lighting for the most flattering results.",
     icon: <Landscape fontSize="large" color="primary" />,
-    availability: "Weather dependent and subject to seasonal sunset times",
+    availability: "Subject to availability in your area",
     deliveryTime: "Images delivered within 48 hours after shoot",
     benefits: [
       "Creates an emotional connection with potential buyers",
@@ -233,7 +233,7 @@ const enhancements: Enhancement[] = [
     longDescription:
       "Our premium HD video package transforms your property listing into a cinematic experience with professional camera work, drone footage, advanced editing techniques, and carefully selected music. This Hollywood-style approach creates an emotional connection with viewers and showcases lifestyle benefits beyond just the physical features. Includes script development, professional narrator, and multiple revision options.",
     icon: <MovieCreation fontSize="large" color="primary" />,
-    availability: "Limited availability - book early",
+    availability: "Subject to availability in your area",
     deliveryTime: "7-10 business days for delivery",
     benefits: [
       "Cinematic quality filming and editing",
@@ -324,7 +324,7 @@ const enhancements: Enhancement[] = [
     longDescription:
       "Our print package includes 50 high-quality property booklets (4-8 pages) showcasing professional photos, floor plans, and property details, plus 100 single-page flyers ideal for letterbox drops and inspection handouts. All materials are printed on premium stock with professional design and layout. Includes property features, neighborhood highlights, and agent contact details.",
     icon: <Book fontSize="large" color="primary" />,
-    availability: "Requires professional photography",
+    availability: "Available for all property types",
     deliveryTime: "5-7 business days after photography",
     benefits: [
       "Professional take-home materials for open houses",
@@ -663,7 +663,7 @@ export default function ListingEnhancements() {
   );
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 6 } }}>
+    <Box sx={{ p: { xs: 2, sm: 6 }, mb: 6 }}>
       <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold" }}>
         Listing Enhancements
       </Typography>

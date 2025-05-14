@@ -518,16 +518,15 @@ export default function Edit() {
         sx={{
           position: "sticky",
           top: 64, // Height of the tabs section
-          maxHeight: "calc(100vh - 64px)",
-          overflowY: "auto",
+          height: "fit-content",
+          overflowY: "visible",
           p: 2,
           display: "flex",
           flexDirection: "column",
           gap: 1,
           transition: "transform 0.2s ease-out",
-          scrollBehavior: "smooth",
           marginBottom: "0",
-          paddingBottom: "24px", // Add padding at the bottom
+          paddingBottom: "24px", 
           alignSelf: "flex-start", // Ensure it doesn't stretch beyond content
           "&::-webkit-scrollbar": {
             width: "8px",
@@ -576,7 +575,14 @@ export default function Edit() {
         )}
 
         {/* Navigation Buttons */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 2 }}>
+        <Box sx={{ 
+          display: "flex", 
+          flexDirection: "column", 
+          gap: 1.5, 
+          mt: 3,
+          position: "relative",
+          zIndex: 5
+        }}>
           <Button
             variant="outlined"
             onClick={handleBack}
