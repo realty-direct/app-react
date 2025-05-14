@@ -447,7 +447,8 @@ export default function Edit() {
         position: "relative",
         maxWidth: "100vw",
         // overflowX: "hidden",
-        height: "100%",
+        minHeight: "100%",
+        paddingBottom: "30px",
       }}
       size={12}
     >
@@ -517,7 +518,7 @@ export default function Edit() {
         sx={{
           position: "sticky",
           top: 64, // Height of the tabs section
-          height: "calc(100vh - 64px)",
+          maxHeight: "calc(100vh - 64px)",
           overflowY: "auto",
           p: 2,
           display: "flex",
@@ -525,6 +526,9 @@ export default function Edit() {
           gap: 1,
           transition: "transform 0.2s ease-out",
           scrollBehavior: "smooth",
+          marginBottom: "0",
+          paddingBottom: "24px", // Add padding at the bottom
+          alignSelf: "flex-start", // Ensure it doesn't stretch beyond content
           "&::-webkit-scrollbar": {
             width: "8px",
           },
