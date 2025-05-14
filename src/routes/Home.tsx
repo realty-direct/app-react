@@ -15,7 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { type JSX, useState } from "react";
+import { type JSX, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { deleteProperty } from "../database/property";
@@ -38,11 +38,23 @@ export default function Home(): JSX.Element {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(
     null
   );
+  const [propertiesLoaded, setPropertiesLoaded] = useState(false);
 
   // Filter properties based on search query
   const filteredProperties = properties.filter((property) =>
     property.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Set properties as loaded after a short delay when the component mounts or profile changes
+  useEffect(() => {
+    if (profile?.id) {
+      const timer = setTimeout(() => {
+        setPropertiesLoaded(true);
+      }, 1500); // Give time for properties to load
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [profile?.id]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
@@ -83,9 +95,9 @@ export default function Home(): JSX.Element {
     navigate("/create");
   };
 
-  // Show loading state if we have a profile but no properties loaded yet
-  // This would indicate the initial load state
-  const isInitialLoading = profile?.id && properties.length === 0;
+  // Show loading state if we have a profile but properties are still loading
+  // Once propertiesLoaded is true, we'll show the empty state instead of loading
+  const isInitialLoading = profile?.id && properties.length === 0 && !propertiesLoaded;
 
   return (
     <Box

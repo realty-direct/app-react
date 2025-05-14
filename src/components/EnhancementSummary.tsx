@@ -263,32 +263,22 @@ export default function EnhancementsSummary({
         overflowX: "hidden",
       }}
     >
-      {/* Header with expand/collapse */}
+      {/* Header */}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "center",
           alignItems: "center",
           p: 2,
-          //   borderBottom: `1px solid ${theme.palette.divider}`,
           backgroundColor: theme.palette.primary.main,
           color: "white",
           borderRadius: "8px 8px 0 0",
         }}
       >
         <Typography variant="h6">Selected Enhancements</Typography>
-        {(!isInSidebar || isMobile) && (
-          <IconButton
-            onClick={() => setShowSummary(!showSummary)}
-            sx={{ color: "white" }}
-          >
-            {showSummary ? <ExpandLess /> : <ExpandMore />}
-          </IconButton>
-        )}
       </Box>
 
-      {/* Collapsible content */}
-      <Collapse in={isInSidebar || showSummary}>
+      {/* Content */}
         <Box sx={{ p: 3 }}>
           {/* List selected enhancements */}
           <Box sx={{ mb: 2 }}>
@@ -388,7 +378,6 @@ export default function EnhancementsSummary({
             your final listing package when you proceed to checkout.
           </Typography>
         </Box>
-      </Collapse>
     </Card>
   );
 }

@@ -68,9 +68,36 @@ const OrderSummary = ({
     )
   );
 
-  // Calculate totals
+  // Enhancement data lookup object to match the data in EnhancementSummary.tsx
+  const enhancementsData: Record<string, { title: string; numericPrice: number }> = {
+    "photography-12": { title: "Professional Photography (12 images)", numericPrice: 350 },
+    "photography-20": { title: "Professional Photography (20 images)", numericPrice: 470 },
+    "drone-photography": { title: "Drone/Aerial Photography", numericPrice: 450 },
+    "twilight-photography": { title: "Twilight Photography", numericPrice: 480 },
+    "floor-plan-2d": { title: "2D Floor Plan", numericPrice: 295 },
+    "virtual-tour": { title: "360° Virtual Tour", numericPrice: 480 },
+    "walkthrough-video": { title: "Walkthrough Video", numericPrice: 560 },
+    "hd-video": { title: "HD Video", numericPrice: 840 },
+    "virtual-staging": { title: "Virtual Staging", numericPrice: 150 },
+    "site-plan": { title: "Site Plan", numericPrice: 80 },
+    "social-media-reels": { title: "Social Media Reels (2)", numericPrice: 280 },
+    "print-package": { title: "Print Package (50 booklets & 100 flyers)", numericPrice: 220 },
+    "standard-signboard": { title: "Standard Signboard", numericPrice: 190 },
+    "photo-signboard": { title: "Photo Signboard", numericPrice: 310 },
+    "premium-description": { title: "Premium Property Description", numericPrice: 180 },
+    "social-media-boost": { title: "Additional Social Media Boost", numericPrice: 270 },
+    "allhomes-listing": { title: "Listing on Allhomes.com.au", numericPrice: 645 },
+    "juwai-listing": { title: "Listing on Juwai (China)", numericPrice: 160 },
+    "contract-preparation": { title: "Sale Contract Preparation", numericPrice: 534 },
+    "conveyancing": { title: "Full Conveyancing Service", numericPrice: 880 },
+  };
+
+  // Calculate totals based on the lookup values
   const enhancementsTotal = enhancements.reduce(
-    (total, enhancement) => total + enhancement.price,
+    (total, enhancement) => {
+      const enhancementData = enhancementsData[enhancement.enhancement_type];
+      return total + (enhancementData ? enhancementData.numericPrice : 0);
+    },
     0
   );
 
@@ -151,10 +178,10 @@ const OrderSummary = ({
     <Card
       elevation={3}
       sx={{
-        position: "sticky",
-        top: 90, // Below the tabs
+        position: "relative",
         borderRadius: 2,
-        overflow: "visible",
+        overflow: "hidden",
+        maxHeight: "100%",
       }}
     >
       {/* Card Header with expand/collapse toggle for mobile */}
@@ -182,12 +209,12 @@ const OrderSummary = ({
         </IconButton>
       </Box>
 
-      {/* Collapsible content on mobile */}
-      <Collapse
-        in={showOrderSummary}
-        sx={{ display: { xs: "block", md: "block" } }}
-      >
-        <Box sx={{ p: 3 }}>
+      {/* Content */}
+        <Box 
+          sx={{ 
+            p: 3
+          }}
+        >
           {/* Package section */}
           <Typography fontWeight="medium" sx={{ mb: 1 }}>
             Selected Package
@@ -235,15 +262,14 @@ const OrderSummary = ({
                   }}
                 >
                   <Typography variant="body2">
-                    {enhancement.enhancement_type
+                    {enhancementsData[enhancement.enhancement_type]?.title || 
+                     enhancement.enhancement_type
                       .split("-")
-                      .map(
-                        (word) => word.charAt(0).toUpperCase() + word.slice(1)
-                      )
+                      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                       .join(" ")}
                   </Typography>
                   <Typography variant="body2" fontWeight="medium">
-                    {formatCurrency(enhancement.price)}
+                    {formatCurrency(enhancementsData[enhancement.enhancement_type]?.numericPrice || 0)}
                   </Typography>
                 </Box>
               ))}
@@ -297,6 +323,9 @@ const OrderSummary = ({
                   sx={{
                     borderColor: "success.contrastText",
                     color: "success.contrastText",
+                    padding: "4px 12px",
+                    minWidth: "80px",
+                    fontWeight: 500,
                     "&:hover": {
                       borderColor: "success.contrastText",
                       backgroundColor: "rgba(255,255,255,0.1)",
@@ -325,7 +354,11 @@ const OrderSummary = ({
                           size="small"
                           disabled={isApplyingPromo || !promoCode.trim()}
                           onClick={handleApplyPromoCode}
-                          sx={{ minWidth: 80 }}
+                          sx={{ 
+                            minWidth: 80,
+                            py: 0.7,
+                            fontWeight: 500
+                          }}
                         >
                           {isApplyingPromo ? (
                             <LoadingSpinner inline size={20} />
@@ -389,41 +422,7 @@ const OrderSummary = ({
             Includes GST
           </Typography>
 
-          {/* Add more services button */}
-          <Button
-            startIcon={<AddCircleOutlineIcon />}
-            color="primary"
-            variant="outlined"
-            fullWidth
-            sx={{ mt: 3, mb: 2 }}
-            onClick={() =>
-              navigate(`/property/${propertyId}/edit`, {
-                state: { tabIndex: 9 },
-              })
-            }
-          >
-            Add More Services
-          </Button>
 
-          {/* Signboard recommendation if none selected */}
-          {!hasSignboardEnhancement && (
-            <Alert
-              severity="info"
-              sx={{ mt: 2, mb: 2 }}
-              action={
-                <Button
-                  color="inherit"
-                  size="small"
-                  onClick={handleAddSignboard}
-                >
-                  Add
-                </Button>
-              }
-            >
-              Consider adding a For Sale sign to increase your property's
-              visibility
-            </Alert>
-          )}
 
           {/* Finalize Button */}
           <Button
@@ -437,7 +436,16 @@ const OrderSummary = ({
               !packageType
             }
             onClick={handleFinalize}
-            sx={{ mt: 2, py: 1.5 }}
+            sx={{ 
+              mt: 2, 
+              py: 1.5, 
+              fontSize: "1rem",
+              fontWeight: "bold",
+              boxShadow: (theme) => `0 4px 12px ${theme.palette.primary.main}40`,
+              '&:hover': {
+                boxShadow: (theme) => `0 6px 14px ${theme.palette.primary.main}60`,
+              }
+            }}
           >
             {isFinalizing ? (
               <LoadingSpinner buttonMode text="Processing..." />
@@ -459,7 +467,6 @@ const OrderSummary = ({
             </Alert>
           )}
         </Box>
-      </Collapse>
     </Card>
   );
 };
