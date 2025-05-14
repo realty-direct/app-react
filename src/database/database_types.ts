@@ -86,6 +86,9 @@ export type Database = {
       }
       property_details: {
         Row: {
+          bathrooms: number | null
+          bedrooms: number | null
+          car_spaces: number | null
           contact_email: string | null
           contact_name: string | null
           contact_phone: string | null
@@ -120,6 +123,9 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          bathrooms?: number | null
+          bedrooms?: number | null
+          car_spaces?: number | null
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
@@ -154,6 +160,9 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          bathrooms?: number | null
+          bedrooms?: number | null
+          car_spaces?: number | null
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null

@@ -1,12 +1,12 @@
-import { Box, Button, Paper, Typography, Stack, Tooltip } from "@mui/material";
+import { Box, Button, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import { Outlet, useNavigate, useParams } from "react-router";
 
-import { 
-  BrokenImageOutlined, 
-  KingBed, 
-  Bathtub, 
-  DirectionsCar, 
-  SquareFoot 
+import {
+  Bathtub,
+  BrokenImageOutlined,
+  DirectionsCar,
+  KingBed,
+  SquareFoot,
 } from "@mui/icons-material";
 import useRealtyStore from "../store/store";
 
@@ -34,22 +34,24 @@ const Property = () => {
   };
 
   // Property attribute components with icons
-  const PropertyAttribute = ({ 
-    icon, 
-    value, 
-    label 
-  }: { 
-    icon: React.ReactNode, 
-    value?: string | number | null, 
-    label: string 
+  const PropertyAttribute = ({
+    icon,
+    value,
+    label,
+  }: {
+    icon: React.ReactNode;
+    value?: string | number | null;
+    label: string;
   }) => (
     <Tooltip title={value ? `${value} ${label}` : `Add ${label}`}>
-      <Box sx={{ 
-        display: "flex", 
-        alignItems: "center", 
-        gap: 0.5, 
-        opacity: value ? 1 : 0.6 
-      }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
+          opacity: value ? 1 : 0.6,
+        }}
+      >
         {icon}
         <Typography variant="body2" fontWeight="medium">
           {value || "-"}
@@ -93,39 +95,39 @@ const Property = () => {
           <Typography variant="h5" sx={{ fontWeight: "bold", mb: 1 }}>
             {property.address}
           </Typography>
-          
+
           {/* Property attributes with icons */}
-          <Stack 
-            direction="row" 
-            spacing={2} 
-            sx={{ 
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
               mb: 2,
-              flexWrap: 'wrap',
-              gap: 1
+              flexWrap: "wrap",
+              gap: 1,
             }}
           >
-            <PropertyAttribute 
-              icon={<KingBed sx={{ color: "primary.main" }} />} 
-              value={details?.bedrooms} 
+            <PropertyAttribute
+              icon={<KingBed sx={{ color: "primary.main" }} />}
+              value={details?.bedrooms}
               label="bedrooms"
             />
-            <PropertyAttribute 
-              icon={<Bathtub sx={{ color: "primary.main" }} />} 
-              value={details?.bathrooms} 
+            <PropertyAttribute
+              icon={<Bathtub sx={{ color: "primary.main" }} />}
+              value={details?.bathrooms}
               label="bathrooms"
             />
-            <PropertyAttribute 
-              icon={<DirectionsCar sx={{ color: "primary.main" }} />} 
-              value={details?.car_spaces} 
+            <PropertyAttribute
+              icon={<DirectionsCar sx={{ color: "primary.main" }} />}
+              value={details?.car_spaces}
               label="car spaces"
             />
-            <PropertyAttribute 
-              icon={<SquareFoot sx={{ color: "primary.main" }} />} 
-              value={details?.land_area} 
+            <PropertyAttribute
+              icon={<SquareFoot sx={{ color: "primary.main" }} />}
+              value={details?.land_area}
               label={details?.land_unit || "m²"}
             />
           </Stack>
-          
+
           <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
             {details?.description}
           </Typography>

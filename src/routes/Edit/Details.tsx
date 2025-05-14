@@ -8,11 +8,14 @@ import {
   Select,
   TextField,
   Typography,
+  Grid,
+  InputAdornment,
 } from "@mui/material";
 import { useState } from "react";
 import { useParams } from "react-router"; // ✅ Import useParams
 import useRealtyStore from "../../store/store"; // ✅ Import Zustand store
 import type { PropertyDetail } from "../../store/types";
+import { KingBed, Bathtub, DirectionsCar } from "@mui/icons-material";
 
 export default function DetailsTab() {
   const { id: propertyId } = useParams<{ id: string }>();
@@ -30,13 +33,18 @@ export default function DetailsTab() {
   if (!propertyDetail)
     return <Typography>No details found for this property.</Typography>;
 
-  const handleChange = (key: keyof PropertyDetail, value: string) => {
+  const handleChange = (key: keyof PropertyDetail, value: string | number) => {
     if (!propertyId) return;
     updatePropertyDetailInStore(propertyId, { [key]: value }); // ✅ Only updates Zustand, no network request
   };
 
   const formatNumberInput = (value: string) =>
     value.replace(/[^\d.]/g, "").replace(/^(\d*\.\d*)\./g, "$1"); // ✅ Allows only one decimal
+
+  const handleIntegerInput = (value: string) => {
+    // Only allow integers (no decimals)
+    return value.replace(/[^\d]/g, "");
+  };
 
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
@@ -68,6 +76,78 @@ export default function DetailsTab() {
           <MenuItem value="industrial">Industrial</MenuItem>
           <MenuItem value="rural">Rural</MenuItem>
         </TextField>
+      </Paper>
+
+      <Paper
+        elevation={0}
+        sx={{ p: 3, mb: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
+      >
+        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
+          Property Features
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
+          Enter the number of bedrooms, bathrooms, and car spaces
+        </Typography>
+
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="Bedrooms"
+              variant="outlined"
+              fullWidth
+              type="text"
+              value={propertyDetail.bedrooms || ""}
+              onChange={(e) => 
+                handleChange("bedrooms", handleIntegerInput(e.target.value))
+              }
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <KingBed color="primary" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="Bathrooms"
+              variant="outlined"
+              fullWidth
+              type="text"
+              value={propertyDetail.bathrooms || ""}
+              onChange={(e) => 
+                handleChange("bathrooms", handleIntegerInput(e.target.value))
+              }
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Bathtub color="primary" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="Car Spaces"
+              variant="outlined"
+              fullWidth
+              type="text"
+              value={propertyDetail.car_spaces || ""}
+              onChange={(e) => 
+                handleChange("car_spaces", handleIntegerInput(e.target.value))
+              }
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <DirectionsCar color="primary" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+        </Grid>
       </Paper>
 
       <Paper
