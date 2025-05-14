@@ -53,18 +53,30 @@ export const SortableImage = ({
         {/* "Main Image" Label */}
         {isMain && showMainImageLabel && (
           <Typography
-            sx={{
+            sx={(theme) => ({
               position: "absolute",
               top: 4,
               left: 4,
-              backgroundColor: "primary.main",
-              color: "white",
+              // Use a darker blue in dark mode for better contrast
+              backgroundColor: theme.palette.mode === 'dark' 
+                ? '#1565c0' // A darker, more vibrant blue for dark mode
+                : theme.palette.primary.main,
+              color: "#ffffff",
               fontSize: 12,
-              padding: "2px 6px",
+              padding: "4px 10px",
               borderRadius: 4,
               fontWeight: "bold",
               zIndex: 2,
-            }}
+              boxShadow: theme.palette.mode === 'dark' 
+                ? '0 2px 4px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.15)' 
+                : '0 1px 3px rgba(0,0,0,0.3)',
+              textShadow: '0px 1px 2px rgba(0,0,0,0.5)',
+              letterSpacing: "0.5px",
+              // Improve contrast in both modes
+              border: theme.palette.mode === 'dark'
+                ? '1px solid rgba(255,255,255,0.25)'
+                : 'none',
+            })}
           >
             Main Image
           </Typography>

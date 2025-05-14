@@ -1,4 +1,4 @@
-import { AttachMoney, CalendarMonth } from "@mui/icons-material";
+import { AttachMoney } from "@mui/icons-material";
 import {
   Box,
   FormControl,
@@ -10,8 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useRealtyStore from "../../store/store";
 
@@ -26,6 +25,43 @@ export default function Price() {
   const [showPrice, setShowPrice] = useState(
     propertyDetail?.show_price ?? true
   );
+  
+  // State to handle the formatted price display
+  const [formattedPrice, setFormattedPrice] = useState("");
+
+  // Format the price with thousand separators when property details load or change
+  useEffect(() => {
+    if (propertyDetail?.price) {
+      setFormattedPrice(formatNumberWithCommas(propertyDetail.price));
+    } else {
+      setFormattedPrice("");
+    }
+  }, [propertyDetail?.price]);
+
+  // Function to format number with commas for thousand separators
+  const formatNumberWithCommas = (value: number | string) => {
+    // Remove any existing commas or non-numeric characters
+    const numericValue = String(value).replace(/[^\d]/g, "");
+    
+    if (!numericValue) return "";
+    
+    // Format with commas for thousand separators
+    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  // Handle price input change with formatting
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    
+    // Strip commas to get the raw number for database
+    const rawValue = inputValue.replace(/,/g, "");
+    
+    // Update the formatted display value
+    setFormattedPrice(formatNumberWithCommas(rawValue));
+    
+    // Store the raw numeric value in the database
+    updatePropertyDetail(propertyId, { price: rawValue });
+  };
 
   if (!propertyDetail)
     return <Typography>Loading property details...</Typography>;
@@ -38,7 +74,7 @@ export default function Price() {
 
       <Paper
         elevation={0}
-        sx={{ p: 3, mb: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
+        sx={{ p: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
       >
         <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
           Price Details
@@ -52,11 +88,9 @@ export default function Price() {
           label="Property Price"
           variant="outlined"
           fullWidth
-          type="number"
-          value={propertyDetail.price || ""}
-          onChange={(e) =>
-            updatePropertyDetail(propertyId, { price: e.target.value })
-          }
+          type="text"
+          value={formattedPrice}
+          onChange={handlePriceChange}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -88,72 +122,6 @@ export default function Price() {
               label="Hide price from buyers (Contact Agent)"
             />
           </RadioGroup>
-        </FormControl>
-      </Paper>
-
-      <Paper
-        elevation={0}
-        sx={{ p: 3, borderRadius: 2, border: 1, borderColor: "divider" }}
-      >
-        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
-          Publishing Options
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
-          Choose when you want your listing to go live on real estate websites.
-        </Typography>
-
-        <FormControl component="fieldset" fullWidth>
-          <RadioGroup
-            value={propertyDetail.publish_option || "immediately"}
-            onChange={(e) =>
-              updatePropertyDetail(propertyId, {
-                publish_option: e.target.value,
-              })
-            }
-          >
-            <FormControlLabel
-              value="immediately"
-              control={<Radio />}
-              label="Publish immediately after payment"
-            />
-            <FormControlLabel
-              value="later"
-              control={<Radio />}
-              label="Schedule for later"
-            />
-          </RadioGroup>
-
-          {propertyDetail.publish_option === "later" && (
-            <Box sx={{ mt: 2, ml: 4 }}>
-              <DatePicker
-                label="Select publish date"
-                value={
-                  propertyDetail.publish_date
-                    ? new Date(propertyDetail.publish_date)
-                    : null
-                }
-                onChange={(date) =>
-                  updatePropertyDetail(propertyId, {
-                    publish_date: date?.toISOString().split("T")[0],
-                  })
-                }
-                minDate={new Date()}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    variant: "outlined",
-                    InputProps: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <CalendarMonth />
-                        </InputAdornment>
-                      ),
-                    },
-                  },
-                }}
-              />
-            </Box>
-          )}
         </FormControl>
       </Paper>
     </Box>

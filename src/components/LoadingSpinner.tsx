@@ -69,20 +69,36 @@ const LoadingSpinner = ({
   // Standard content spinner
   const content = (
     <Box
-      sx={{
+      sx={(theme) => ({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         p: 3,
-      }}
+        backgroundColor: theme.palette.mode === 'dark' 
+          ? 'rgba(18, 18, 18, 0.8)' 
+          : 'rgba(255, 255, 255, 0.9)',
+        borderRadius: 2,
+        boxShadow: theme.palette.mode === 'dark'
+          ? '0 8px 16px rgba(0,0,0,0.4)'
+          : '0 4px 12px rgba(0,0,0,0.1)',
+        border: theme.palette.mode === 'dark'
+          ? '1px solid rgba(255,255,255,0.1)'
+          : 'none',
+        backdropFilter: 'blur(4px)',
+      })}
     >
       <CircularProgress size={size} color={color} thickness={thickness} />
       {text && (
         <Typography
           variant="body2"
-          color="text.secondary"
-          sx={{ mt: 2, fontWeight: "medium" }}
+          sx={(theme) => ({ 
+            mt: 2, 
+            fontWeight: "medium",
+            color: theme.palette.mode === 'dark' 
+              ? 'rgba(255, 255, 255, 0.9)'
+              : theme.palette.text.secondary
+          })}
         >
           {text}
         </Typography>
@@ -94,7 +110,7 @@ const LoadingSpinner = ({
   if (fullPage) {
     return (
       <Box
-        sx={{
+        sx={(theme) => ({
           position: "fixed",
           top: 0,
           left: 0,
@@ -103,12 +119,16 @@ const LoadingSpinner = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: transparent
-            ? "rgba(255, 255, 255, 0.7)"
-            : "rgba(255, 255, 255, 0.9)",
+          backgroundColor: theme.palette.mode === 'dark'
+            ? transparent 
+              ? 'rgba(0, 0, 0, 0.75)'
+              : 'rgba(0, 0, 0, 0.85)'
+            : transparent
+              ? 'rgba(255, 255, 255, 0.75)'
+              : 'rgba(255, 255, 255, 0.9)',
           zIndex: 9999,
-          backdropFilter: "blur(3px)",
-        }}
+          backdropFilter: "blur(5px)",
+        })}
       >
         {content}
       </Box>

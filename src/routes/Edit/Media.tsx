@@ -1,4 +1,25 @@
-import { useParams } from "react-router-dom";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import ContactMailIcon from "@mui/icons-material/ContactMail";
+import DeleteIcon from "@mui/icons-material/Delete";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import {
   updatePropertyIdentificationDocumentInDB,
@@ -12,7 +33,7 @@ import {
 import useRealtyStore from "../../store/store";
 import { getFilenameFromUrl } from "../../utils/formatters";
 
-export default function Ownership() {
+export default function Media() {
   const { id } = useParams<{ id: string }>();
   const propertyId = id ?? "";
 
