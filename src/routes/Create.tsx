@@ -3,18 +3,16 @@ import {
   Box,
   Button,
   CircularProgress,
-  FormControl,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
   Tab,
   Tabs,
-  TextField,
   Typography,
 } from "@mui/material";
-import type { JSX } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import BasicAddressSearch from "../components/BasicAddressSearch";
+import GoogleMap from "../components/GoogleMap";
+import GoogleMapsProvider from "../components/GoogleMapsProvider";
+import PropertyCategorySelector from "../components/PropertyCategorySelector";
 import { updatePropertyDetailInDB } from "../database/details";
 import { createPropertyInDB } from "../database/property";
 import useRealtyStore from "../store/store";
@@ -25,20 +23,44 @@ export default function Create(): JSX.Element {
   const [propertyDetails, setPropertyDetails] = useState<{
     address: string;
     propertyCategory: "residential" | "commercial" | "land" | "rural" | "";
+    location?: { lat: number; lng: number };
   }>({
     address: "",
     propertyCategory: "",
   });
+  
+  // No need for loading state, handled by GoogleMapsProvider
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasValidAddress, setHasValidAddress] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPropertyDetails({ ...propertyDetails, [e.target.name]: e.target.value });
   };
 
+  // Handle address change (typing or selection without coordinates)
+  const handleAddressChange = (address: string) => {
+    setPropertyDetails({ ...propertyDetails, address });
+    // Reset valid address flag when user is typing
+    if (propertyDetails.address !== address) {
+      setHasValidAddress(false);
+    }
+  };
+
+  // Handle complete address selection with coordinates
+  const handleAddressSelected = (address: string, location: { lat: number; lng: number }) => {
+    setPropertyDetails({ ...propertyDetails, address, location });
+    setHasValidAddress(true);
+  };
+
   const handleContinue = async () => {
-    if (!propertyDetails.address || !propertyDetails.propertyCategory) {
-      setError("Please provide both an address and property category.");
+    if (!hasValidAddress) {
+      setError("Please select a valid address from the dropdown suggestions.");
+      return;
+    }
+    
+    if (!propertyDetails.propertyCategory) {
+      setError("Please select a property category.");
       return;
     }
 
@@ -65,6 +87,10 @@ export default function Create(): JSX.Element {
 
       // Step 3: Update property details in the database with property category
       // and pre-fill the contact details from the user's profile
+      const locationData = propertyDetails.location 
+        ? { location: propertyDetails.location }
+        : {};
+        
       const fetchedPropertyDetail = await updatePropertyDetailInDB(
         newProperty.id,
         {
@@ -72,6 +98,8 @@ export default function Create(): JSX.Element {
           contact_name: `${profile.first_name} ${profile.last_name}`.trim(),
           contact_email: profile.email,
           contact_phone: "", // We don't have phone in profile, so leaving it empty
+          // Don't store location in the description field
+          description: "",
         }
       );
 
@@ -90,7 +118,8 @@ export default function Create(): JSX.Element {
   };
 
   return (
-    <Box className="w-full">
+    <GoogleMapsProvider>
+      <Box className="w-full">
       {/* Sticky Tabs */}
       <div className="sticky top-0 z-50 shadow-md">
         <Tabs value={0} aria-label="Property details tab">
@@ -107,57 +136,37 @@ export default function Create(): JSX.Element {
           </Typography>
 
           <Box className="mt-4">
-            {/* Address Input */}
+            {/* Address Input with Autocomplete */}
             <Box className="mt-4 relative">
-              <TextField
-                fullWidth
-                label="Full Address"
-                name="address"
-                value={propertyDetails.address}
-                onChange={handleInputChange}
-                variant="outlined"
+              <BasicAddressSearch
+                address={propertyDetails.address}
+                onAddressChange={handleAddressChange}
+                onAddressSelected={handleAddressSelected}
                 disabled={loading}
               />
             </Box>
 
-            {/* Map Placeholder */}
-            <div className="mt-6 h-72 bg-gray-200 flex items-center justify-center rounded-md">
-              <Typography variant="body1">Map Placeholder</Typography>
-            </div>
+            {/* Google Map */}
+            <Box className="mt-6 h-72 rounded-md overflow-hidden">
+              <GoogleMap 
+                location={propertyDetails.location}
+                height={290}
+                zoom={propertyDetails.location ? 16 : 4} // Zoom in when location is selected
+              />
+            </Box>
 
             {/* Property Category Selection */}
-            <Typography variant="h6" className="mt-6">
-              What category of property are you looking to list?
-            </Typography>
-            <FormControl component="fieldset" className="mt-2">
-              <RadioGroup
-                row
-                name="propertyCategory"
+            <Box className="mt-6">
+              <Typography variant="h6" className="mb-4" fontWeight="500">
+                What category of property are you looking to list?
+              </Typography>
+              
+              <PropertyCategorySelector
                 value={propertyDetails.propertyCategory}
-                onChange={handleInputChange}
-              >
-                <FormControlLabel
-                  value="residential"
-                  control={<Radio disabled={loading} />}
-                  label="Residential"
-                />
-                <FormControlLabel
-                  value="commercial"
-                  control={<Radio disabled={loading} />}
-                  label="Commercial"
-                />
-                <FormControlLabel
-                  value="rural"
-                  control={<Radio disabled={loading} />}
-                  label="Rural"
-                />
-                <FormControlLabel
-                  value="land"
-                  control={<Radio disabled={loading} />}
-                  label="Land"
-                />
-              </RadioGroup>
-            </FormControl>
+                onChange={(category) => setPropertyDetails({...propertyDetails, propertyCategory: category})}
+                disabled={loading}
+              />
+            </Box>
           </Box>
         </div>
 
@@ -193,10 +202,10 @@ export default function Create(): JSX.Element {
       )}
 
       {/* Navigation Buttons */}
-      <div className="flex justify-between mt-6 p-6">
+      <Box className="mt-6 p-6" sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
         <Button
           color="inherit"
-          variant="contained"
+          variant="outlined"
           onClick={() => navigate("/")}
           disabled={loading}
         >
@@ -205,7 +214,7 @@ export default function Create(): JSX.Element {
         <Button
           variant="contained"
           onClick={handleContinue}
-          disabled={loading}
+          disabled={loading || !hasValidAddress || !propertyDetails.propertyCategory}
           sx={{ minWidth: "120px" }}
         >
           {loading ? (
@@ -217,7 +226,8 @@ export default function Create(): JSX.Element {
             "Continue"
           )}
         </Button>
-      </div>
-    </Box>
+      </Box>
+      </Box>
+    </GoogleMapsProvider>
   );
 }
