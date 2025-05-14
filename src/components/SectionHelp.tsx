@@ -24,15 +24,30 @@ export default function SectionHelp({ sectionIndex }: SectionHelpProps) {
       sx={{
         p: 3,
         borderRadius: 2,
-        boxShadow: 1,
+        boxShadow: 2,
+        bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(66, 66, 66, 0.8)' : 'background.paper',
+        border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? theme.palette.divider : 'transparent'}`,
       }}
     >
-      <Typography variant="h6" gutterBottom>
+      <Typography 
+        variant="h6" 
+        gutterBottom
+        sx={{
+          color: (theme) => theme.palette.primary.main,
+          fontWeight: 'bold',
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          pb: 1,
+        }}
+      >
         Section Help
       </Typography>
 
       {sectionHelpContent[sectionIndex] && (
-        <Typography variant="body2" color="text.secondary">
+        <Typography 
+          variant="body2" 
+          color="text.primary"
+          sx={{ mt: 2 }}
+        >
           {sectionHelpContent[sectionIndex]}
         </Typography>
       )}

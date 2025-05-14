@@ -201,7 +201,10 @@ export default function EnhancementsSummary({
 
   // Calculate total price of selected enhancements
   const totalPrice = selectedEnhancements.reduce((sum, enhancement) => {
-    return sum + enhancement.price;
+    // Find the enhancement data to get the correct numericPrice
+    const enhancementData = enhancementsData[enhancement.enhancement_type];
+    // Only add to sum if we have matching data
+    return enhancementData ? sum + enhancementData.numericPrice : sum;
   }, 0);
 
   const handleRemoveEnhancement = (enhancementId: string) => {
@@ -216,7 +219,7 @@ export default function EnhancementsSummary({
           position: isInSidebar ? "sticky" : "relative",
           top: isInSidebar ? 90 : undefined,
           borderRadius: 2,
-          mb: 3,
+          mb: 0,
           minWidth: isInSidebar ? 260 : "100%",
           width: "100%",
         }}
@@ -249,14 +252,13 @@ export default function EnhancementsSummary({
     <Card
       elevation={3}
       sx={{
-        position: isInSidebar ? "sticky" : "relative",
-        top: isInSidebar ? 90 : undefined,
+        position: isInSidebar ? "relative" : "relative",
         borderRadius: 2,
         overflow: "visible",
         mb: 3,
         width: "100%",
         maxWidth: "100%",
-        maxHeight: isInSidebar ? "calc(100vh - 180px)" : "none",
+        maxHeight: isInSidebar ? "60vh" : "none",
         overflowY: isInSidebar ? "auto" : "visible",
         overflowX: "hidden",
       }}
@@ -268,7 +270,7 @@ export default function EnhancementsSummary({
           justifyContent: "space-between",
           alignItems: "center",
           p: 2,
-          borderBottom: `1px solid ${theme.palette.divider}`,
+          //   borderBottom: `1px solid ${theme.palette.divider}`,
           backgroundColor: theme.palette.primary.main,
           color: "white",
           borderRadius: "8px 8px 0 0",
@@ -300,7 +302,7 @@ export default function EnhancementsSummary({
                     display: "flex",
                     flexDirection: "column",
                     py: 1,
-                    borderBottom: `1px solid ${theme.palette.divider}`,
+                    borderTop: `1px solid ${theme.palette.divider}`,
                   }}
                 >
                   <Box
@@ -322,7 +324,7 @@ export default function EnhancementsSummary({
                       >
                         {enhancementData.title}
                       </Typography>
-                      
+
                       <Box
                         sx={{
                           display: "flex",
@@ -339,11 +341,13 @@ export default function EnhancementsSummary({
                         >
                           {enhancementData.price}
                         </Typography>
-                        
+
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => handleRemoveEnhancement(enhancement.id)}
+                          onClick={() =>
+                            handleRemoveEnhancement(enhancement.id)
+                          }
                         >
                           <Close fontSize="small" />
                         </IconButton>

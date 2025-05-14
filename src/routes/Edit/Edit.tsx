@@ -509,82 +509,94 @@ export default function Edit() {
         {tabValue === 8 && <Packages />}
         {tabValue === 9 && <ListingEnhancements />}
         {tabValue === 10 && <Summary />}
-
-        {/* Standard note and navigation buttons */}
-        <Box
-          sx={{
-            mt: 3,
-            mb: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <Box sx={{ color: "text.secondary", fontStyle: "italic" }}>
-            You can skip this section and come back to it later
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: 2,
-            }}
-          >
-            <Button
-              variant="outlined"
-              sx={{ maxWidth: "150px" }}
-              onClick={handleBack}
-              size="large"
-              disabled={loading || tabValue === 0}
-            >
-              Back
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ maxWidth: "150px", minWidth: "120px" }}
-              size="large"
-              onClick={handleContinue}
-              disabled={loading || tabValue === 10}
-              data-feature-save
-            >
-              {loading && actionType === "save" ? (
-                <LoadingSpinner buttonMode text="Saving..." size={24} />
-              ) : (
-                "Continue"
-              )}
-            </Button>
-          </Box>
-        </Box>
       </Grid>
 
       {/* Right Sidebar Content */}
-      <Grid size={{ xs: 12, md: 3, lg: 3 }} p={3} sx={{ maxWidth: "100%" }}>
-        <Box sx={{ maxWidth: "100%", overflowX: "hidden" }}>
-          {showOrderSummary ? (
-            <OrderSummary
-              propertyId={propertyId || ""}
-              packageType={propertyDetail.property_package}
-              packagePrice={packagePrice}
-              enhancements={currentEnhancements}
-              publishOption={propertyDetail.publish_option || "immediately"}
-              publishDate={
-                propertyDetail.publish_date
-                  ? new Date(propertyDetail.publish_date)
-                  : null
-              }
-              handleFinalizeListing={handleFinalizeListing}
-            />
-          ) : tabValue === 9 ? (
-            <EnhancementsSummary
-              propertyId={propertyId || ""}
-              isInSidebar={true}
-            />
-          ) : (
-            <SectionHelp sectionIndex={tabValue} />
-          )}
+      <Grid
+        size={{ xs: 12, md: 3, lg: 3 }}
+        sx={{
+          position: "sticky",
+          top: 64, // Height of the tabs section
+          height: "calc(100vh - 64px)",
+          overflowY: "auto",
+          p: 2,
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+          transition: "transform 0.2s ease-out",
+          scrollBehavior: "smooth",
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: (theme) => theme.palette.background.default,
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: (theme) => theme.palette.divider,
+            borderRadius: "4px",
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            background: (theme) => theme.palette.text.disabled,
+          },
+        }}
+      >
+        {/* Help Content */}
+        {showOrderSummary ? (
+          <OrderSummary
+            propertyId={propertyId || ""}
+            packageType={propertyDetail.property_package}
+            packagePrice={packagePrice}
+            enhancements={currentEnhancements}
+            publishOption={propertyDetail.publish_option || "immediately"}
+            publishDate={
+              propertyDetail.publish_date
+                ? new Date(propertyDetail.publish_date)
+                : null
+            }
+            handleFinalizeListing={handleFinalizeListing}
+          />
+        ) : tabValue === 9 ? (
+          <EnhancementsSummary
+            propertyId={propertyId || ""}
+            isInSidebar={true}
+          />
+        ) : (
+          <SectionHelp sectionIndex={tabValue} />
+        )}
+
+        {/* Skip This Section Note */}
+        {tabValue !== 10 && (
+          <Box sx={{ color: "text.secondary", fontStyle: "italic", my: 0 }}>
+            You can skip this section and come back to it later
+          </Box>
+        )}
+
+        {/* Navigation Buttons */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 2 }}>
+          <Button
+            variant="outlined"
+            onClick={handleBack}
+            size="large"
+            disabled={loading || tabValue === 0}
+            fullWidth
+          >
+            Back
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleContinue}
+            size="large"
+            disabled={loading || tabValue === 10}
+            data-feature-save
+            fullWidth
+          >
+            {loading && actionType === "save" ? (
+              <LoadingSpinner buttonMode text="Saving..." size={24} />
+            ) : (
+              "Continue"
+            )}
+          </Button>
         </Box>
       </Grid>
 
