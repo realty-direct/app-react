@@ -1,4 +1,3 @@
-// src/routes/Edit/ListingEnhancements.tsx
 import {
   Apartment,
   Book,
@@ -43,7 +42,6 @@ import { useParams } from "react-router-dom";
 import type { PropertyEnhancement } from "../../store/slices/enhancements.slice";
 import useRealtyStore from "../../store/store";
 
-// Enhancement type with expanded properties for modal view
 interface Enhancement {
   id: string;
   category: string;
@@ -56,16 +54,12 @@ interface Enhancement {
   availability?: string;
   deliveryTime?: string;
   benefits?: string[];
-  // Flag to mark exclusive options in a group (like signboard types)
   exclusiveGroup?: string;
-  // Added fields for new pricing structure
   wholesaleCost?: number;
   margin?: string;
 }
 
-// Streamlined enhancement data with the updated services and pricing
 const enhancements: Enhancement[] = [
-  // Photography Services
   {
     id: "photography-12",
     category: "Photography Services",
@@ -288,7 +282,6 @@ const enhancements: Enhancement[] = [
     ],
   },
 
-  // Marketing Materials
   {
     id: "social-media-reels",
     category: "Marketing Materials",
@@ -404,7 +397,6 @@ const enhancements: Enhancement[] = [
     ],
   },
 
-  // Additional Exposure Options
   {
     id: "social-media-boost",
     category: "Additional Exposure",
@@ -473,7 +465,6 @@ const enhancements: Enhancement[] = [
     ],
   },
 
-  // Legal Services
   {
     id: "contract-preparation",
     category: "Legal Services",
@@ -527,7 +518,6 @@ export default function ListingEnhancements() {
   const { id } = useParams<{ id: string }>();
   const propertyId = id ?? "";
 
-  // Access Zustand store functions for enhancements
   const {
     propertyEnhancements,
     addPropertyEnhancement,
@@ -535,15 +525,12 @@ export default function ListingEnhancements() {
     getEnhancementsForProperty,
   } = useRealtyStore();
 
-  // Get enhancements for this property
   const propertySpecificEnhancements = getEnhancementsForProperty(propertyId);
 
-  // Extract enhancement types for selection checking
   const selectedEnhancements = propertySpecificEnhancements.map(
     (e) => e.enhancement_type
   );
 
-  // Local state for UI interactions
   const [openModal, setOpenModal] = useState(false);
   const [currentEnhancement, setCurrentEnhancement] =
     useState<Enhancement | null>(null);
@@ -551,28 +538,23 @@ export default function ListingEnhancements() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-  // Get unique categories for tab filtering
   const categories = Array.from(
     new Set(enhancements.map((enhancement) => enhancement.category))
   );
 
-  // Calculate total price of selected enhancements
   const totalPrice = propertySpecificEnhancements.reduce((sum, enhancement) => {
     return sum + enhancement.price;
   }, 0);
 
-  // Handle opening the modal with the selected enhancement
   const handleOpenModal = (enhancement: Enhancement) => {
     setCurrentEnhancement(enhancement);
     setOpenModal(true);
   };
 
-  // Handle closing the modal
   const handleCloseModal = () => {
     setOpenModal(false);
   };
 
-  // Handle toggle enhancement - ONLY manipulate Zustand store, no DB calls
   const handleToggleEnhancement = (enhancementId: string) => {
     try {
       const isCurrentlySelected = selectedEnhancements.includes(enhancementId);
@@ -581,27 +563,22 @@ export default function ListingEnhancements() {
       if (!enhancement) return;
 
       if (isCurrentlySelected) {
-        // Find the enhancement in the store to get its ID
         const enhancementToRemove = propertySpecificEnhancements.find(
           (e) => e.enhancement_type === enhancementId
         );
 
         if (enhancementToRemove?.id) {
-          // Remove from the Zustand store only - no DB call
           removePropertyEnhancement(enhancementToRemove.id);
 
           setSnackbarMessage(`${enhancement.title} removed from selections`);
           setSnackbarOpen(true);
         }
       } else {
-        // For exclusive groups (like signboards), remove any existing selections
         if (enhancement.exclusiveGroup) {
-          // Find all enhancements in the same exclusive group
           const sameGroupEnhancements = enhancements.filter(
             (e) => e.exclusiveGroup === enhancement.exclusiveGroup
           );
 
-          // Find and remove any selected enhancements from this group
           for (const groupEnhancement of sameGroupEnhancements) {
             if (selectedEnhancements.includes(groupEnhancement.id)) {
               const existingEnhancement = propertySpecificEnhancements.find(
@@ -609,16 +586,14 @@ export default function ListingEnhancements() {
               );
 
               if (existingEnhancement?.id) {
-                // Remove from the Zustand store only - no DB call
                 removePropertyEnhancement(existingEnhancement.id);
               }
             }
           }
         }
 
-        // Add the enhancement to the store - with a temporary ID
         const newEnhancement: PropertyEnhancement = {
-          id: `temp-${Date.now()}-${enhancementId}`, // Add a temporary ID
+          id: `temp-${Date.now()}-${enhancementId}`,
           property_id: propertyId,
           enhancement_type: enhancementId,
           price: enhancement.numericPrice,
@@ -643,14 +618,12 @@ export default function ListingEnhancements() {
     handleCloseModal();
   };
 
-  // Filter enhancements by active category
   const filteredEnhancements = activeCategory
     ? enhancements.filter(
         (enhancement) => enhancement.category === activeCategory
       )
     : enhancements;
 
-  // Group enhancements by category
   const enhancementsByCategory = filteredEnhancements.reduce(
     (acc, enhancement) => {
       if (!acc[enhancement.category]) {
@@ -676,7 +649,6 @@ export default function ListingEnhancements() {
         </Typography>
       </Paper>
 
-      {/* Category Filter Tabs */}
       <Box sx={{ mb: 4, display: "flex", flexWrap: "wrap", gap: 1 }}>
         <Button
           variant={activeCategory === null ? "contained" : "outlined"}
@@ -697,7 +669,6 @@ export default function ListingEnhancements() {
         ))}
       </Box>
 
-      {/* Render each category */}
       {Object.entries(enhancementsByCategory).map(([category, items]) => (
         <Box key={category} sx={{ mt: 4, mb: 6 }}>
           <Typography
@@ -844,7 +815,6 @@ export default function ListingEnhancements() {
         </Box>
       ))}
 
-      {/* Detail Modal */}
       <Dialog
         open={openModal}
         onClose={handleCloseModal}
@@ -873,7 +843,6 @@ export default function ListingEnhancements() {
 
             <DialogContent dividers>
               <Grid container spacing={3}>
-                {/* Icon and basic info */}
                 <Grid item xs={12} md={6}>
                   <Box
                     sx={{
@@ -921,7 +890,6 @@ export default function ListingEnhancements() {
                   </Box>
                 </Grid>
 
-                {/* Details and features */}
                 <Grid item xs={12} md={6}>
                   {currentEnhancement.availability && (
                     <Box sx={{ mb: 2 }}>
@@ -1007,7 +975,6 @@ export default function ListingEnhancements() {
         )}
       </Dialog>
 
-      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

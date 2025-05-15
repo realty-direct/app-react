@@ -5,10 +5,9 @@ import {
   TextField, 
   Typography 
 } from '@mui/material';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useGoogleMaps } from './GoogleMapsProvider';
 
-// Interface for a place prediction
 interface PlacePrediction {
   place_id: string;
   description: string;
@@ -18,7 +17,6 @@ interface PlacePrediction {
   };
 }
 
-// Component props
 interface SimpleAddressAutocompleteProps {
   value: string;
   onChange: (value: string) => void;
@@ -38,19 +36,17 @@ export default function SimpleAddressAutocomplete({
   disabled = false,
   label = 'Address',
   placeholder = 'Start typing an address...',
-  countryRestriction = 'au' // Default to Australia
+  countryRestriction = 'au'
 }: SimpleAddressAutocompleteProps) {
   const { isLoaded } = useGoogleMaps();
   const [options, setOptions] = useState<PlacePrediction[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   
-  // Refs for Google services
   const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
   const geocoderRef = useRef<google.maps.Geocoder | null>(null);
   const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
 
-  // Initialize services when Maps API is loaded
   useEffect(() => {
     if (isLoaded && window.google?.maps) {
       autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
@@ -59,14 +55,11 @@ export default function SimpleAddressAutocomplete({
     }
   }, [isLoaded]);
 
-  // Update input value when prop value changes (external control)
   useEffect(() => {
-    console.log('Value prop changed to:', value);
     setInputValue(value);
   }, [value]);
 
-  // Function to fetch address predictions
-  const fetchPredictions = async (input: string) => {
+  const fetchPredictions = useCallback(async (input: string) => {
     if (!input || input.length < 2 || !autocompleteServiceRef.current) {
       setOptions([]);
       return;
@@ -75,7 +68,6 @@ export default function SimpleAddressAutocomplete({
     setLoading(true);
 
     try {
-      // Create request with country restriction
       const request: google.maps.places.AutocompletionRequest = {
         input,
         sessionToken: sessionTokenRef.current || undefined,
@@ -86,7 +78,6 @@ export default function SimpleAddressAutocomplete({
         request.componentRestrictions = { country: countryRestriction };
       }
 
-      // Get predictions
       autocompleteServiceRef.current.getPlacePredictions(
         request,
         (predictions, status) => {
@@ -105,47 +96,32 @@ export default function SimpleAddressAutocomplete({
       setLoading(false);
       setOptions([]);
     }
-  };
+  }, [countryRestriction]);
 
-  // Handle geocoding of a selected place
-  const getGeocode = (placeId: string) => {
+  const getGeocode = useCallback((placeId: string) => {
     if (!geocoderRef.current) return;
 
-    geocoderRef.current.geocode(
-      { placeId },
-      (results, status) => {
-        if (status !== google.maps.GeocoderStatus.OK || !results || results.length === 0) {
-          console.warn('Geocoding failed:', status);
-          return;
-        }
-
-        const location = results[0].geometry.location;
-        
-        // Create coordinates object
-        const coordinates = {
-          lat: location.lat(),
-          lng: location.lng()
-        };
-        
-        // Call location select callback
-        if (onLocationSelect) {
-          onLocationSelect(coordinates);
-        }
-        
-        // Signal that we have a valid selection
-        if (onValidSelection) {
-          onValidSelection(true);
-        }
-        
-        // Create a new session token after selection
-        if (window.google?.maps?.places) {
-          sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
-        }
+    geocoderRef.current.geocode({ placeId }, (results, status) => {
+      if (status !== google.maps.GeocoderStatus.OK || !results?.[0]) {
+        console.warn('Geocoding failed:', status);
+        return;
       }
-    );
-  };
 
-  // Debounce input for predictions
+      const location = results[0].geometry.location;
+      const coordinates = {
+        lat: location.lat(),
+        lng: location.lng()
+      };
+      
+      onLocationSelect?.(coordinates);
+      onValidSelection?.(true);
+      
+      if (window.google?.maps?.places) {
+        sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
+      }
+    });
+  }, [onLocationSelect, onValidSelection]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       if (inputValue !== value) {
@@ -154,7 +130,7 @@ export default function SimpleAddressAutocomplete({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [inputValue, value]);
+  }, [inputValue, value, fetchPredictions]);
 
   return (
     <Autocomplete
@@ -164,49 +140,30 @@ export default function SimpleAddressAutocomplete({
       options={options}
       loading={loading}
       disabled={!isLoaded || disabled}
-      
-      // This is the value shown when an option is selected
       value={value}
-      
-      // This is what's in the input field during typing
       inputValue={inputValue}
-      
-      // Handle input text changes (typing)
       onInputChange={(_, newValue) => {
         setInputValue(newValue);
         
-        // When typing, mark this as not a valid selection
         if (onValidSelection && newValue !== value) {
           onValidSelection(false);
         }
       }}
-      
-      // Handle option selection
       onChange={(_, option) => {
         if (!option) return;
         
         if (typeof option === 'string') {
-          // Manual text entry (not selecting from dropdown)
           onChange(option);
-          console.log('String option selected:', option);
         } else {
-          // Selected from dropdown
           const address = option.description;
           onChange(address);
-          // Also update the input value to match
           setInputValue(address);
-          console.log('Dropdown option selected:', address);
           getGeocode(option.place_id);
         }
       }}
-      
-      // How to get the label for each option
-      getOptionLabel={(option) => {
-        if (typeof option === 'string') return option;
-        return option.description;
-      }}
-      
-      // How to render each option in the dropdown
+      getOptionLabel={(option) => 
+        typeof option === 'string' ? option : option.description
+      }
       renderOption={(props, option) => (
         <li {...props}>
           {option.structured_formatting ? (
@@ -223,8 +180,6 @@ export default function SimpleAddressAutocomplete({
           )}
         </li>
       )}
-      
-      // How to render the input
       renderInput={(params) => (
         <TextField
           {...params}
@@ -237,7 +192,7 @@ export default function SimpleAddressAutocomplete({
             ...params.InputProps,
             endAdornment: (
               <>
-                {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                {loading && <CircularProgress color="inherit" size={20} />}
                 {params.InputProps.endAdornment}
               </>
             ),

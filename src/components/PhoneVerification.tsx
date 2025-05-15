@@ -17,9 +17,9 @@ import LoadingSpinner from "./LoadingSpinner";
 interface PhoneVerificationProps {
   userId: string;
   phoneNumber: string;
-  onSuccess?: () => void; // Optional callback for successful verification
-  onCancel?: () => void; // Optional callback for cancellation
-  buttonText?: string; // Optional custom button text
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  buttonText?: string;
   buttonVariant?: "text" | "outlined" | "contained";
   fullWidth?: boolean;
 }
@@ -33,21 +33,13 @@ export default function PhoneVerification({
   buttonVariant = "contained",
   fullWidth = false,
 }: PhoneVerificationProps) {
-  // Dialog state
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<"request" | "verify">("request");
-
-  // Loading states
   const [loading, setLoading] = useState(false);
-
-  // Form state
   const [verificationCode, setVerificationCode] = useState("");
-
-  // Error handling
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Open the verification dialog
   const handleOpen = () => {
     setOpen(true);
     setError(null);
@@ -56,28 +48,26 @@ export default function PhoneVerification({
     setVerificationCode("");
   };
 
-  // Close the dialog and reset state
   const handleClose = () => {
     setOpen(false);
-    if (onCancel) {
-      onCancel();
-    }
+    onCancel?.();
   };
 
-  // Request verification code (SMS)
+  const formatPhoneNumber = (phone: string): string => {
+    const formattedPhone = phone.replace(/\s+/g, "");
+    return formattedPhone.startsWith("+")
+      ? formattedPhone
+      : formattedPhone.startsWith("0")
+        ? "+61" + formattedPhone.substring(1)
+        : "+" + formattedPhone;
+  };
+
   const handleRequestCode = async () => {
     setError(null);
     setLoading(true);
 
     try {
-      // Format phone number if needed (remove spaces, ensure + prefix)
-      const formattedPhone = phoneNumber.replace(/\s+/g, "");
-      const phoneWithPrefix = formattedPhone.startsWith("+")
-        ? formattedPhone
-        : formattedPhone.startsWith("0")
-          ? "+61" + formattedPhone.substring(1)
-          : "+" + formattedPhone;
-
+      const phoneWithPrefix = formatPhoneNumber(phoneNumber);
       const response = await startPhoneVerification(phoneWithPrefix);
 
       if (!response.success) {
@@ -97,7 +87,6 @@ export default function PhoneVerification({
     }
   };
 
-  // Verify the OTP code
   const handleVerifyCode = async () => {
     if (!verificationCode || verificationCode.length < 6) {
       setError("Please enter a valid verification code");
@@ -108,14 +97,7 @@ export default function PhoneVerification({
     setLoading(true);
 
     try {
-      // Format phone number if needed (remove spaces, ensure + prefix)
-      const formattedPhone = phoneNumber.replace(/\s+/g, "");
-      const phoneWithPrefix = formattedPhone.startsWith("+")
-        ? formattedPhone
-        : formattedPhone.startsWith("0")
-          ? "+61" + formattedPhone.substring(1)
-          : "+" + formattedPhone;
-
+      const phoneWithPrefix = formatPhoneNumber(phoneNumber);
       const response = await verifyPhoneOtp(
         phoneWithPrefix,
         verificationCode,
@@ -131,12 +113,9 @@ export default function PhoneVerification({
 
       setSuccess("Phone number verified successfully!");
 
-      // Give user time to see success message
       setTimeout(() => {
         setOpen(false);
-        if (onSuccess) {
-          onSuccess();
-        }
+        onSuccess?.();
       }, 1500);
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
@@ -147,7 +126,6 @@ export default function PhoneVerification({
 
   return (
     <>
-      {/* Verification Button */}
       <Button
         variant={buttonVariant}
         color="primary"
@@ -158,7 +136,6 @@ export default function PhoneVerification({
         {buttonText}
       </Button>
 
-      {/* Verification Dialog */}
       <Dialog
         open={open}
         onClose={loading ? undefined : handleClose}
@@ -172,7 +149,6 @@ export default function PhoneVerification({
         </DialogTitle>
 
         <DialogContent>
-          {/* Error/Success Alerts */}
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -185,7 +161,6 @@ export default function PhoneVerification({
             </Alert>
           )}
 
-          {/* Step 1: Request verification code */}
           {step === "request" && (
             <Box sx={{ py: 2 }}>
               <Typography variant="body1" sx={{ mb: 2 }}>
@@ -203,7 +178,6 @@ export default function PhoneVerification({
             </Box>
           )}
 
-          {/* Step 2: Verify the code */}
           {step === "verify" && (
             <Box sx={{ py: 2 }}>
               <Typography variant="body1" sx={{ mb: 3 }}>

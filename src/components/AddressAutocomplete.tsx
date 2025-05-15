@@ -1,9 +1,8 @@
 import { Autocomplete, CircularProgress, TextField } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
 import { useGoogleMaps } from "./GoogleMapsProvider";
 
-// Define the AddressAutocomplete props
 interface AddressAutocompleteProps {
   value: string;
   onChange: (address: string) => void;
@@ -12,7 +11,6 @@ interface AddressAutocompleteProps {
   label?: string;
 }
 
-// Define interface for Google Places prediction results
 interface Prediction {
   description: string;
   place_id: string;
@@ -29,23 +27,15 @@ const AddressAutocomplete = ({
   disabled = false,
   label = "Full Address",
 }: AddressAutocompleteProps) => {
-  // Get Google Maps loading state from context
   const { isLoaded } = useGoogleMaps();
-  
-  // Track the autocomplete service
-  const autocompleteServiceRef = useRef<google.maps.places.AutocompletionRequest | null>(null);
-  
-  // State for suggestions and loading
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   const [options, setOptions] = useState<Prediction[]>([]);
   
-  // Set initial value when component mounts or value changes
   useEffect(() => {
     setInputValue(value);
   }, [value]);
   
-  // Function to fetch address predictions using Places API
   const fetchSuggestions = async (query: string) => {
     if (!query || query.length < 2 || !isLoaded || !window.google?.maps?.places) {
       setOptions([]);
@@ -55,7 +45,6 @@ const AddressAutocomplete = ({
     setLoading(true);
     
     try {
-      // Create AutocompleteSuggestion object
       if (!window.google.maps.places.AutocompleteSuggestion) {
         console.error("AutocompleteSuggestion API not available");
         return;
@@ -63,15 +52,13 @@ const AddressAutocomplete = ({
       
       const autocompleteService = new window.google.maps.places.AutocompleteSuggestion();
       
-      // Request predictions
       const response = await autocompleteService.getPlacePredictions({
         input: query,
-        componentRestrictions: { country: "au" },  // Restrict to Australia only
-        types: ["address"],  // Only return addresses, not business names or points of interest
+        componentRestrictions: { country: "au" },
+        types: ["address"],
       });
       
-      const predictions = response.predictions || [];
-      setOptions(predictions as Prediction[]);
+      setOptions(response.predictions as Prediction[] || []);
     } catch (error) {
       console.error("Error fetching address suggestions:", error);
       setOptions([]);
@@ -80,12 +67,10 @@ const AddressAutocomplete = ({
     }
   };
   
-  // Function to handle input change with debounce
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
     onChange(newValue);
     
-    // Use setTimeout to debounce API calls
     const timeoutId = setTimeout(() => {
       fetchSuggestions(newValue);
     }, 300);
@@ -93,7 +78,6 @@ const AddressAutocomplete = ({
     return () => clearTimeout(timeoutId);
   };
   
-  // Handle address selection
   const handleSelect = async (address: string) => {
     if (!address) return;
     
@@ -102,14 +86,10 @@ const AddressAutocomplete = ({
     setOptions([]);
     
     try {
-      // Convert address to geocode and get lat/lng
       const results = await getGeocode({ address });
       const { lat, lng } = await getLatLng(results[0]);
-      
-      // Get the place details from the first response
       const placeDetails = results[0];
       
-      // Check if the address is in Australia - verify in the address_components
       const isAustralianAddress = placeDetails.address_components.some(component => 
         component.short_name === "AU" && component.types.includes("country")
       );
@@ -119,7 +99,6 @@ const AddressAutocomplete = ({
         return;
       }
       
-      // Call onLocationSelect callback if provided
       if (onLocationSelect) {
         onLocationSelect({ lat, lng });
       }
@@ -143,16 +122,18 @@ const AddressAutocomplete = ({
           handleSelect(address);
         }
       }}
-      getOptionLabel={(option) => {
-        return typeof option === "string" ? option : option.description;
-      }}
-      filterOptions={(x) => x} // Don't filter options, Google Places API already does that
+      getOptionLabel={(option) => 
+        typeof option === "string" ? option : option.description
+      }
+      filterOptions={(x) => x}
       disabled={!isLoaded || disabled}
       renderOption={(props, option) => (
         <li {...props}>
           {option.structured_formatting ? (
             <div>
-              <div style={{ fontWeight: 500 }}>{option.structured_formatting.main_text}</div>
+              <div style={{ fontWeight: 500 }}>
+                {option.structured_formatting.main_text}
+              </div>
               <div style={{ fontSize: '0.8em', color: '#666' }}>
                 {option.structured_formatting.secondary_text}
               </div>
@@ -174,7 +155,7 @@ const AddressAutocomplete = ({
             ...params.InputProps,
             endAdornment: (
               <>
-                {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                {loading && <CircularProgress color="inherit" size={20} />}
                 {params.InputProps.endAdornment}
               </>
             ),

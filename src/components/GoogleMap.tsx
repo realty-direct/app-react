@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import type { Location } from "../utils/locationUtils";
 import { useGoogleMaps } from "./GoogleMapsProvider";
 
-// Define the GoogleMap component props
 interface GoogleMapProps {
   location?: Location;
   zoom?: number;
@@ -13,14 +12,13 @@ interface GoogleMapProps {
   apiKey?: string;
 }
 
-// Default map center (Australia)
 const DEFAULT_CENTER = { lat: -25.2744, lng: 133.7751 };
 const DEFAULT_ZOOM = 4;
 const DEFAULT_AUSTRALIA_BOUNDS = {
-  north: -10.6681857235, // Northern tip of Australia
-  south: -43.6345972634, // Southern tip of Tasmania
-  west: 112.9511178909, // Western edge of Australia
-  east: 153.6394677328, // Eastern edge of Australia
+  north: -10.6681857235,
+  south: -43.6345972634,
+  west: 112.9511178909,
+  east: 153.6394677328,
 };
 
 const GoogleMap = ({
@@ -30,23 +28,11 @@ const GoogleMap = ({
   width = "100%",
   apiKey,
 }: GoogleMapProps) => {
-  // Get Google Maps loading state from context
   const { isLoaded, loadError, apiKey: contextApiKey } = useGoogleMaps();
-  
-  // Use API key from props or context
   const mapApiKey = apiKey || contextApiKey;
+  const center = useMemo(() => location || DEFAULT_CENTER, [location]);
+  const zoomLevel = useMemo(() => location ? zoom : DEFAULT_ZOOM, [location, zoom]);
 
-  // Center map on location or default to Australia
-  const center = useMemo(() => {
-    return location || DEFAULT_CENTER;
-  }, [location]);
-
-  // Dynamic zoom level - closer if location is specified
-  const zoomLevel = useMemo(() => {
-    return location ? zoom : DEFAULT_ZOOM;
-  }, [location, zoom]);
-
-  // Show loading state
   if (!isLoaded) {
     return (
       <Box
@@ -68,7 +54,6 @@ const GoogleMap = ({
     );
   }
 
-  // Show error state
   if (loadError) {
     return (
       <Box
@@ -93,14 +78,14 @@ const GoogleMap = ({
     <Box sx={{ height, width, borderRadius: 1, overflow: "hidden" }}>
       <APIProvider apiKey={mapApiKey || ''}>
         <Map
-          center={center} /* Use center instead of defaultCenter to update when location changes */
-          zoom={zoomLevel} /* Use zoom instead of defaultZoom to update when zoom changes */
+          center={center}
+          zoom={zoomLevel}
           mapId="property-map"
           gestureHandling="cooperative"
           style={{ width: "100%", height: "100%" }}
           defaultRestriction={{
             latLngBounds: DEFAULT_AUSTRALIA_BOUNDS,
-            strictBounds: false // Allow panning outside but with resistance
+            strictBounds: false
           }}
         >
           {location && (

@@ -22,7 +22,6 @@ import useRealtyStore from "../../store/store";
 import { formatCurrency } from "../../utils/formatters";
 import EditIcon from '@mui/icons-material/Edit';
 
-// SummarySection component to display property information in sections
 interface SummarySectionProps {
   title: string;
   tabIndex: number;
@@ -88,7 +87,6 @@ export default function Summary() {
   const propertyId = id ?? "";
   const navigate = useNavigate();
 
-  // Access store data
   const { 
     propertyDetails, 
     updatePropertyDetail, 
@@ -98,42 +96,33 @@ export default function Summary() {
     getEnhancementsForProperty
   } = useRealtyStore();
 
-  // Find the property and its details
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId
   );
   const property = properties.find((p) => p.id === propertyId);
   
-  // Get property features
   const features = propertyFeatures.filter((f) => f.property_id === propertyId);
   
-  // Get property inspections
   const inspections = propertyInspections.filter((i) => i.property_id === propertyId);
   
-  // Get property enhancements
   const enhancements = getEnhancementsForProperty(propertyId);
 
-  // Get values directly from the store - no local state
   const publishOption = propertyDetail?.publish_option || "immediately";
   const publishDateStr = propertyDetail?.publish_date;
   const publishDate = publishDateStr
     ? parse(publishDateStr, "yyyy-MM-dd", new Date())
     : null;
 
-  // Handle publish option change - update store directly
   const handlePublishOptionChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const newPublishOption = event.target.value;
 
-    // Update the store
     updatePropertyDetail(propertyId, {
       publish_option: newPublishOption,
     });
 
-    // If switching to scheduled, set a default date if none exists
     if (newPublishOption === "later" && !publishDate) {
-      // Set default to tomorrow
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -143,7 +132,6 @@ export default function Summary() {
     }
   };
 
-  // Handle publish date change - update store directly
   const handlePublishDateChange = (date: Date | null) => {
     updatePropertyDetail(propertyId, {
       publish_date: date ? format(date, "yyyy-MM-dd") : null,
@@ -157,7 +145,6 @@ export default function Summary() {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box sx={{ p: { xs: 2, sm: 6 } }}>
-        {/* Header */}
         <Typography
           variant="h5"
           gutterBottom
@@ -166,9 +153,7 @@ export default function Summary() {
           Review & Finalize
         </Typography>
 
-        {/* Main content */}
         <Box>
-          {/* Section: Property Details */}
           <SummarySection
             title="Property Details"
             tabIndex={0}
@@ -203,7 +188,6 @@ export default function Summary() {
             ]}
           />
 
-          {/* Section: Features */}
           <SummarySection
             title="Property Features"
             tabIndex={1}
@@ -218,7 +202,6 @@ export default function Summary() {
             }
           />
 
-          {/* Section: Price */}
           <SummarySection
             title="Price Information"
             tabIndex={2}
@@ -235,7 +218,6 @@ export default function Summary() {
             ]}
           />
 
-          {/* Section: Media */}
           <SummarySection
             title="Photos & Media"
             tabIndex={3}
@@ -248,7 +230,6 @@ export default function Summary() {
             ]}
           />
 
-          {/* Section: Ownership */}
           <SummarySection
             title="Ownership Information"
             tabIndex={4}
@@ -265,7 +246,6 @@ export default function Summary() {
             ]}
           />
 
-          {/* Section: Description */}
           <SummarySection
             title="Property Description"
             tabIndex={5}
@@ -286,7 +266,6 @@ export default function Summary() {
             ]}
           />
 
-          {/* Section: Contact */}
           <SummarySection
             title="Contact Information"
             tabIndex={6}
@@ -307,7 +286,6 @@ export default function Summary() {
             ]}
           />
 
-          {/* Section: Inspections */}
           <SummarySection
             title="Property Inspections"
             tabIndex={7}
@@ -322,7 +300,6 @@ export default function Summary() {
             }
           />
 
-          {/* Section: Package */}
           <SummarySection
             title="Listing Package"
             tabIndex={8}
@@ -335,7 +312,6 @@ export default function Summary() {
             ]}
           />
 
-          {/* Section: Enhancements */}
           <SummarySection
             title="Listing Enhancements"
             tabIndex={9}
@@ -353,7 +329,6 @@ export default function Summary() {
             }
           />
 
-          {/* Publish Timing */}
           <Paper elevation={2} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: "bold" }}>
@@ -399,7 +374,6 @@ export default function Summary() {
               />
             </RadioGroup>
 
-            {/* Date Picker (Only shown when "later" is selected) */}
             {publishOption === "later" && (
               <Box sx={{ pl: 4, mb: 2 }}>
                 <DatePicker

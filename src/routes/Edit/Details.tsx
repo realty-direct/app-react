@@ -12,20 +12,18 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { useState } from "react";
-import { useParams } from "react-router"; // ✅ Import useParams
-import useRealtyStore from "../../store/store"; // ✅ Import Zustand store
+import { useParams } from "react-router";
+import useRealtyStore from "../../store/store";
 import type { PropertyDetail } from "../../store/types";
 import { KingBed, Bathtub, DirectionsCar } from "@mui/icons-material";
 
 export default function DetailsTab() {
   const { id: propertyId } = useParams<{ id: string }>();
-  const { propertyDetails, updatePropertyDetail: updatePropertyDetailInStore } =
-    useRealtyStore(); // ✅ Changed function name to avoid confusion
+  const { propertyDetails, updatePropertyDetail } = useRealtyStore();
 
-  const [landUnit, setLandUnit] = useState("m²"); // ✅ Default to m²
-  const [houseUnit, setHouseUnit] = useState("m²"); // ✅ Default to m²
+  const [landUnit, setLandUnit] = useState("m²");
+  const [houseUnit, setHouseUnit] = useState("m²");
 
-  // ✅ Find the correct property details by `propertyId`
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId
   );
@@ -35,16 +33,13 @@ export default function DetailsTab() {
 
   const handleChange = (key: keyof PropertyDetail, value: string | number) => {
     if (!propertyId) return;
-    updatePropertyDetailInStore(propertyId, { [key]: value }); // ✅ Only updates Zustand, no network request
+    updatePropertyDetail(propertyId, { [key]: value });
   };
 
   const formatNumberInput = (value: string) =>
-    value.replace(/[^\d.]/g, "").replace(/^(\d*\.\d*)\./g, "$1"); // ✅ Allows only one decimal
+    value.replace(/[^\d.]/g, "").replace(/^(\d*\.\d*)\./, "$1");
 
-  const handleIntegerInput = (value: string) => {
-    // Only allow integers (no decimals)
-    return value.replace(/[^\d]/g, "");
-  };
+  const handleIntegerInput = (value: string) => value.replace(/[^\d]/g, "");
 
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>

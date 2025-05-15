@@ -8,7 +8,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
 import { useParams } from "react-router-dom";
 import useRealtyStore from "../../store/store";
 
@@ -21,36 +20,13 @@ export default function Contact() {
     (p) => p.property_id === propertyId
   );
 
-  // Use property details directly from store for initial values
-  const name = propertyDetail?.contact_name || "";
-  const email = propertyDetail?.contact_email || "";
-  const phone = propertyDetail?.contact_phone || "";
-  const [useFullEnquirySystem, setUseFullEnquirySystem] = useState(false);
 
-  // Validation function for email
   const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
-  // Direct update handlers - no local state needed for form fields
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFieldChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     if (propertyDetail && propertyId) {
       updatePropertyDetail(propertyId, {
-        contact_name: e.target.value,
-      });
-    }
-  };
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (propertyDetail && propertyId) {
-      updatePropertyDetail(propertyId, {
-        contact_email: e.target.value,
-      });
-    }
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (propertyDetail && propertyId) {
-      updatePropertyDetail(propertyId, {
-        contact_phone: e.target.value,
+        [field]: e.target.value,
       });
     }
   };
@@ -61,7 +37,6 @@ export default function Contact() {
 
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
-      {/* Header */}
       <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
         Contact Details for This Listing
       </Typography>
@@ -82,7 +57,7 @@ export default function Contact() {
             variant="outlined"
             fullWidth
             value={propertyDetail.contact_name || ""}
-            onChange={handleNameChange}
+            onChange={handleFieldChange('contact_name')}
             required
             InputProps={{
               startAdornment: (
@@ -98,7 +73,7 @@ export default function Contact() {
             variant="outlined"
             fullWidth
             value={propertyDetail.contact_email || ""}
-            onChange={handleEmailChange}
+            onChange={handleFieldChange('contact_email')}
             required
             error={
               propertyDetail.contact_email !== "" &&
@@ -124,7 +99,7 @@ export default function Contact() {
             variant="outlined"
             fullWidth
             value={propertyDetail.contact_phone || ""}
-            onChange={handlePhoneChange}
+            onChange={handleFieldChange('contact_phone')}
             required
             InputProps={{
               startAdornment: (
@@ -150,10 +125,7 @@ export default function Contact() {
 
         <FormControlLabel
           control={
-            <Radio
-              checked={useFullEnquirySystem}
-              onChange={(e) => setUseFullEnquirySystem(e.target.checked)}
-            />
+            <Radio checked={false} disabled />
           }
           label={
             <Box>

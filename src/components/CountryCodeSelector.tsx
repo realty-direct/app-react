@@ -8,7 +8,6 @@ import {
 } from "@mui/material";
 import { useMemo } from "react";
 
-// Common country codes with flags
 const countries = [
   { code: "AU", dialCode: "+61", name: "Australia", flag: "🇦🇺" },
   { code: "US", dialCode: "+1", name: "United States", flag: "🇺🇸" },
@@ -44,15 +43,11 @@ export default function CountryCodeSelector({
   onChange,
   disabled = false,
 }: CountryCodeSelectorProps) {
-  // Find the selected country by dial code, defaulting to Australia
   const selectedCountry = useMemo(() => {
-    if (!value) return countries[0]; // Default to Australia
+    if (!value) return countries[0];
 
-    // If the value is just the plus code, find by dial code
     const dialCode = value.startsWith("+") ? value : `+${value}`;
-    return (
-      countries.find((country) => country.dialCode === dialCode) || countries[0]
-    );
+    return countries.find((country) => country.dialCode === dialCode) || countries[0];
   }, [value]);
 
   const handleChange = (event: SelectChangeEvent<string>) => {

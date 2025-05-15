@@ -17,7 +17,7 @@ import { updatePropertyDetailInDB } from "../database/details";
 import { createPropertyInDB } from "../database/property";
 import useRealtyStore from "../store/store";
 
-export default function Create(): JSX.Element {
+export default function Create() {
   const navigate = useNavigate();
   const { addProperty, profile, createPropertyDetail } = useRealtyStore();
   const [propertyDetails, setPropertyDetails] = useState<{

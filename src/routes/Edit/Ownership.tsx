@@ -59,18 +59,14 @@ export default function Ownership() {
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Get filenames from URLs for display
   const getFilenameFromUrl = (url: string | null): string => {
     if (!url) return "";
     try {
-      // Extract the filename from the URL path
       const urlParts = url.split("/");
       const filenameWithId = urlParts[urlParts.length - 1];
 
-      // Extract just the filename portion after the UUID
       const parts = filenameWithId.split("-");
       if (parts.length > 1) {
-        // Return everything after the first dash
         return parts.slice(1).join("-");
       }
       return filenameWithId;
@@ -80,16 +76,13 @@ export default function Ownership() {
     }
   };
 
-  // Check file size and type before upload
   const validateFile = (file: File): boolean => {
-    // Limit to 10MB
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
       setErrorMessage("File is too large. Maximum size is 10MB.");
       return false;
     }
 
-    // Check valid file types
     const validTypes = ["application/pdf", "image/jpeg", "image/png"];
     if (!validTypes.includes(file.type)) {
       setErrorMessage(
@@ -101,7 +94,6 @@ export default function Ownership() {
     return true;
   };
 
-  // Handle file upload
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
     type: "rates" | "id"
@@ -109,13 +101,12 @@ export default function Ownership() {
     const files = event.target.files;
     if (!files || files.length === 0 || !propertyId) return;
 
-    // Prevent upload if documents are already verified
     if (propertyDetail.ownership_verified) {
       setErrorMessage("Your documents have already been verified. Please contact support if you need to update them.");
       return;
     }
 
-    const file = files[0]; // Only use the first file
+    const file = files[0];
 
     if (!validateFile(file)) {
       return;
@@ -164,14 +155,12 @@ export default function Ownership() {
     }
   };
 
-  // Handle file deletion
   const handleDeleteFile = async (
     fileUrl: string | null,
     type: "rates" | "id"
   ) => {
     if (!propertyId || !fileUrl) return;
     
-    // Prevent deletion if documents are verified
     if (propertyDetail.ownership_verified) {
       setErrorMessage("Verified documents cannot be deleted. Please contact support if you need to make changes.");
       return;
@@ -188,7 +177,7 @@ export default function Ownership() {
         if (type === "rates") {
           const updatedDetail = await updatePropertyOwnershipDocumentInDB(
             propertyId,
-            null // Changed from "" to null
+            null
           );
           if (updatedDetail) {
             updateOwnershipDocument(propertyId, null);
@@ -196,7 +185,7 @@ export default function Ownership() {
         } else {
           const updatedDetail = await updatePropertyIdentificationDocumentInDB(
             propertyId,
-            null // Changed from "" to null
+            null
           );
           if (updatedDetail) {
             updateIdentificationDocument(propertyId, null);
@@ -220,24 +209,20 @@ export default function Ownership() {
   if (!propertyDetail)
     return <Typography>No property details found.</Typography>;
     
-  // Add verification status information
   const isVerified = propertyDetail.ownership_verified || false;
 
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
-      {/* Header */}
       <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
         Ownership Verification
       </Typography>
 
-      {/* Error Message */}
       {errorMessage && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {errorMessage}
         </Alert>
       )}
 
-      {/* Description */}
       {isVerified ? (
         <Alert severity="success" sx={{ mb: 4 }}>
           <Typography variant="body1" sx={{ fontWeight: "medium" }}>
@@ -256,7 +241,6 @@ export default function Ownership() {
         </Typography>
       )}
 
-      {/* Rates Notice Section */}
       <Card sx={{ mb: 4, border: `1px solid ${theme.palette.divider}` }}>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 2 }}>
@@ -387,7 +371,6 @@ export default function Ownership() {
         </CardContent>
       </Card>
 
-      {/* Photo ID Section */}
       <Card sx={{ mb: 4, border: `1px solid ${theme.palette.divider}` }}>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 2 }}>
@@ -508,7 +491,6 @@ export default function Ownership() {
         </CardContent>
       </Card>
 
-      {/* Information about verification */}
       <Card
         sx={{
           border: `1px solid ${theme.palette.divider}`,
@@ -545,7 +527,6 @@ export default function Ownership() {
         </CardContent>
       </Card>
 
-      {/* Contact dialog */}
       <Dialog
         open={contactDialogOpen}
         onClose={() => setContactDialogOpen(false)}
@@ -577,7 +558,6 @@ export default function Ownership() {
         </DialogActions>
       </Dialog>
 
-      {/* Full page loading overlay */}
       {(isUploading || isDeleting) && (
         <LoadingSpinner
           fullPage

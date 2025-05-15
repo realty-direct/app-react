@@ -12,7 +12,6 @@ import type { FeatureType } from "../../store/slices/features.slice";
 import useRealtyStore from "../../store/store";
 import type { PropertyFeature } from "../../store/types";
 
-// ✅ All original features retained
 const features: Record<FeatureType, string[]> = {
   inside: [
     "Broadband Connection",
@@ -70,7 +69,6 @@ export default function FeaturesTab() {
 
   if (!propertyId) return <Typography>No property selected.</Typography>;
 
-  // ✅ Ensure correct feature structure is passed to Zustand
   const handleFeatureToggle = (
     featureName: string,
     featureType: FeatureType
@@ -86,7 +84,6 @@ export default function FeaturesTab() {
 
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
-      {/* Header */}
       <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
         Select Features for Your Property
       </Typography>
@@ -118,7 +115,9 @@ export default function FeaturesTab() {
                   {items.map((item) => {
                     const isChecked = propertyFeatures.some(
                       (f) =>
-                        f.property_id === propertyId && f.feature_name === item
+                        f.property_id === propertyId &&
+                        f.feature_type === featureType &&
+                        f.feature_name === item
                     );
 
                     return (

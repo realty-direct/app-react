@@ -14,16 +14,12 @@ interface LoadingSpinnerProps {
   text?: string;
   fullPage?: boolean;
   transparent?: boolean;
-  buttonMode?: boolean; // For inline button loading
-  inline?: boolean; // New prop for simpler inline loading without button styling
-  thickness?: number; // Control thickness of the spinner
-  delay?: number; // Optional delay before showing spinner (ms)
+  buttonMode?: boolean;
+  inline?: boolean;
+  thickness?: number;
+  delay?: number;
 }
 
-/**
- * A reusable loading spinner component that can be used throughout the application
- * to provide consistent loading indicators without causing UI flicker on quick operations.
- */
 const LoadingSpinner = ({
   size = 40,
   color = "primary",
@@ -35,24 +31,21 @@ const LoadingSpinner = ({
   thickness = 4,
   delay = 0,
 }: LoadingSpinnerProps) => {
-  // Add delayed rendering to prevent flicker for quick operations
-  if (delay > 0) {
-    const [show, setShow] = useState(false);
+  const [show, setShow] = useState(delay === 0);
 
-    useEffect(() => {
+  useEffect(() => {
+    if (delay > 0) {
       const timer = setTimeout(() => setShow(true), delay);
       return () => clearTimeout(timer);
-    }, [delay]);
+    }
+  }, [delay]);
 
-    if (!show) return null;
-  }
+  if (!show) return null;
 
-  // Inline mode (simplest version, just the spinner)
   if (inline) {
     return <CircularProgress size={size} color={color} thickness={thickness} />;
   }
 
-  // Button loading mode - for inline loading in buttons
   if (buttonMode) {
     return (
       <Box display="flex" alignItems="center" justifyContent="center">
@@ -66,7 +59,6 @@ const LoadingSpinner = ({
     );
   }
 
-  // Standard content spinner
   const content = (
     <Box
       sx={(theme) => ({
@@ -106,7 +98,6 @@ const LoadingSpinner = ({
     </Box>
   );
 
-  // For full page overlay loading spinner
   if (fullPage) {
     return (
       <Box
@@ -135,7 +126,6 @@ const LoadingSpinner = ({
     );
   }
 
-  // For inline loading spinner
   return content;
 };
 

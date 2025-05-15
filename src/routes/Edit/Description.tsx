@@ -7,7 +7,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
 import { useParams } from "react-router-dom";
 import useRealtyStore from "../../store/store";
 
@@ -20,14 +19,10 @@ export default function Description() {
     (p) => p.property_id === propertyId
   );
 
-  // Character limits
   const TITLE_LIMIT = 80;
   const DESCRIPTION_LIMIT = 5000;
 
-  // UI state only for the copywriting service option
-  const [useCopywritingService, setUseCopywritingService] = useState(false);
 
-  // Update property details in the store when form values change
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     if (newTitle.length <= TITLE_LIMIT && propertyDetail && propertyId) {
@@ -56,7 +51,6 @@ export default function Description() {
 
   return (
     <Box sx={{ p: { xs: 2, sm: 6 } }}>
-      {/* Header */}
       <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
         Property Description
       </Typography>
@@ -122,14 +116,8 @@ export default function Description() {
         </Typography>
       </Alert>
 
-      {/* Professional Copywriting Service */}
       <FormControlLabel
-        control={
-          <Radio
-            checked={useCopywritingService}
-            onChange={(e) => setUseCopywritingService(e.target.checked)}
-          />
-        }
+        control={<Radio checked={false} disabled />}
         label="Let our professional copywriters handle it! ($120.00)"
       />
     </Box>

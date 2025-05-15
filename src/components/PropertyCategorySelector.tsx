@@ -13,7 +13,6 @@ import {
 } from "@mui/icons-material";
 import React from "react";
 
-// Property category type
 type PropertyCategory = "residential" | "commercial" | "land" | "rural" | "";
 
 interface PropertyCategorySelectorProps {
@@ -27,19 +26,16 @@ const PropertyCategorySelector: React.FC<PropertyCategorySelectorProps> = ({
   onChange,
   disabled = false,
 }) => {
-  // Handle category change
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value as PropertyCategory);
   };
 
-  // Handle card click
   const handleCardClick = (category: PropertyCategory) => {
     if (!disabled) {
       onChange(category);
     }
   };
 
-  // Common styles for cards
   const getCardStyles = (category: PropertyCategory) => ({
     p: 2.5,
     cursor: disabled ? 'default' : 'pointer',
@@ -58,7 +54,6 @@ const PropertyCategorySelector: React.FC<PropertyCategorySelectorProps> = ({
     outlineOffset: '-2px',
   });
 
-  // Common styles for icon containers
   const getIconBoxStyles = (category: PropertyCategory) => ({
     display: 'flex',
     justifyContent: 'center',
@@ -71,7 +66,6 @@ const PropertyCategorySelector: React.FC<PropertyCategorySelectorProps> = ({
     transition: 'background-color 0.3s ease',
   });
 
-  // Common styles for icons
   const getIconStyles = (category: PropertyCategory) => ({
     fontSize: 28,
     color: value === category ? 'common.white' : 'text.secondary',
@@ -90,7 +84,6 @@ const PropertyCategorySelector: React.FC<PropertyCategorySelectorProps> = ({
           gap: 2,
         }}
       >
-        {/* Residential Property Card */}
         <Card 
           onClick={() => handleCardClick('residential')}
           sx={getCardStyles('residential')}
@@ -109,7 +102,6 @@ const PropertyCategorySelector: React.FC<PropertyCategorySelectorProps> = ({
           />
         </Card>
         
-        {/* Commercial Property Card */}
         <Card 
           onClick={() => handleCardClick('commercial')}
           sx={getCardStyles('commercial')}
@@ -128,7 +120,6 @@ const PropertyCategorySelector: React.FC<PropertyCategorySelectorProps> = ({
           />
         </Card>
         
-        {/* Rural Property Card */}
         <Card 
           onClick={() => handleCardClick('rural')}
           sx={getCardStyles('rural')}
@@ -147,7 +138,6 @@ const PropertyCategorySelector: React.FC<PropertyCategorySelectorProps> = ({
           />
         </Card>
         
-        {/* Land Property Card */}
         <Card 
           onClick={() => handleCardClick('land')}
           sx={getCardStyles('land')}

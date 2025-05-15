@@ -15,13 +15,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { type JSX, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { deleteProperty } from "../database/property";
 import useRealtyStore from "../store/store";
 
-export default function Home(): JSX.Element {
+export default function Home() {
   const navigate = useNavigate();
   const {
     properties,

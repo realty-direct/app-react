@@ -15,10 +15,8 @@ import {
 import { useParams } from "react-router-dom";
 import useRealtyStore from "../../store/store";
 
-// Package types - this should match your database type
 type PackageType = "ESSENTIAL" | "ADVANTAGE" | "PREMIUM" | null;
 
-// Package data
 const packages = [
   {
     id: "ESSENTIAL",
@@ -31,7 +29,7 @@ const packages = [
       "For Sale sign",
       "Automated enquiry system",
     ],
-    color: "#4caf50", // Green
+    color: "#4caf50",
   },
   {
     id: "ADVANTAGE",
@@ -45,7 +43,7 @@ const packages = [
       "Open home flyers",
       "Open home arrow board",
     ],
-    color: "#2196f3", // Blue
+    color: "#2196f3",
     recommended: true,
   },
   {
@@ -59,7 +57,7 @@ const packages = [
       "Listing on Juwai (China)",
       "Social media campaign",
     ],
-    color: "#9c27b0", // Purple
+    color: "#9c27b0",
   },
 ];
 
@@ -69,20 +67,16 @@ export default function Packages() {
   const propertyId = id ?? "";
   const { propertyDetails, updatePropertyDetail } = useRealtyStore();
 
-  // Find the current property
   const propertyDetail = propertyDetails.find(
     (p) => p.property_id === propertyId
   );
 
-  // Handle package selection - only update Zustand store
   const handlePackageSelect = (packageId: PackageType) => {
-    // Use type assertion to handle the property_package
     updatePropertyDetail(propertyId, {
       property_package: packageId,
     });
   };
 
-  // Format price as currency
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-AU", {
       style: "currency",
@@ -94,8 +88,6 @@ export default function Packages() {
     return <Typography>Property not found</Typography>;
   }
 
-  // Get the currently selected package from the store with type assertion
-  // @ts-ignore - Handle property_package that might not be in type definition
   const selectedPackage = propertyDetail.property_package as PackageType;
 
   return (
@@ -110,7 +102,6 @@ export default function Packages() {
         property's appeal.
       </Typography>
 
-      {/* Package Selection Cards */}
       <Grid container spacing={3} sx={{ mb: 6 }}>
         {packages.map((pkg) => (
           <Grid key={pkg.id} size={{ xs: 12, sm: 6, md: 4 }}>
@@ -216,7 +207,6 @@ export default function Packages() {
         ))}
       </Grid>
 
-      {/* Package Summary */}
       {selectedPackage && (
         <Paper elevation={3} sx={{ p: 3, mt: 4, borderRadius: 2 }}>
           <Typography variant="h6" gutterBottom>

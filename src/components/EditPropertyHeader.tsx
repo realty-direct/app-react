@@ -6,11 +6,9 @@ const HeaderWithBackButton = () => {
   const navigate = useNavigate();
 
   const handleNavigate = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault(); // Prevent default link behavior
-    navigate(-1); // Go
+    event.preventDefault();
+    navigate(-1);
   };
-
-  // TODO: Should make this a save and exit button maybe?
 
   return (
     <Box
@@ -26,9 +24,6 @@ const HeaderWithBackButton = () => {
         aria-label="go back"
       >
         <KeyboardReturn />
-        {
-          // TODO: Make this a save and exit button
-        }
       </IconButton>
     </Box>
   );

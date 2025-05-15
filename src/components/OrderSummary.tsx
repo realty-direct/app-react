@@ -1,4 +1,3 @@
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -17,7 +16,6 @@ import {
   useTheme,
 } from "@mui/material";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { formatCurrency } from "../utils/formatters";
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -51,7 +49,6 @@ const OrderSummary = ({
   handleFinalizeListing,
 }: OrderSummaryProps) => {
   const theme = useTheme();
-  const navigate = useNavigate();
 
   const [showPromoSection, setShowPromoSection] = useState(false);
   const [promoCode, setPromoCode] = useState("");
@@ -61,14 +58,6 @@ const OrderSummary = ({
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [showOrderSummary, setShowOrderSummary] = useState(true);
 
-  // Check if any signboard enhancement is selected
-  const hasSignboardEnhancement = enhancements.some((enhancement) =>
-    ["standard-signboard", "photo-signboard"].includes(
-      enhancement.enhancement_type
-    )
-  );
-
-  // Enhancement data lookup object to match the data in EnhancementSummary.tsx
   const enhancementsData: Record<string, { title: string; numericPrice: number }> = {
     "photography-12": { title: "Professional Photography (12 images)", numericPrice: 350 },
     "photography-20": { title: "Professional Photography (20 images)", numericPrice: 470 },
@@ -92,14 +81,10 @@ const OrderSummary = ({
     "conveyancing": { title: "Full Conveyancing Service", numericPrice: 880 },
   };
 
-  // Calculate totals based on the lookup values
-  const enhancementsTotal = enhancements.reduce(
-    (total, enhancement) => {
-      const enhancementData = enhancementsData[enhancement.enhancement_type];
-      return total + (enhancementData ? enhancementData.numericPrice : 0);
-    },
-    0
-  );
+  const enhancementsTotal = enhancements.reduce((total, enhancement) => {
+    const enhancementData = enhancementsData[enhancement.enhancement_type];
+    return total + (enhancementData ? enhancementData.numericPrice : 0);
+  }, 0);
 
   const subtotal = packagePrice + enhancementsTotal;
 
@@ -112,7 +97,6 @@ const OrderSummary = ({
   const discount = calculateDiscount();
   const total = subtotal - discount;
 
-  // Mock promo code validation
   const validatePromoCode = async (code: string): Promise<PromoCode | null> => {
     await new Promise((resolve) => setTimeout(resolve, 800));
 
@@ -127,7 +111,6 @@ const OrderSummary = ({
       : null;
   };
 
-  // Apply promo code
   const handleApplyPromoCode = async () => {
     if (!promoCode.trim()) {
       setPromoError("Please enter a promo code");
@@ -146,7 +129,7 @@ const OrderSummary = ({
           ...validPromo,
           discountAmount: Number(discountAmount.toFixed(2)),
         });
-        setPromoCode(""); // Clear input after successful application
+        setPromoCode("");
       } else {
         setPromoError("Invalid promo code");
       }
@@ -157,21 +140,14 @@ const OrderSummary = ({
     }
   };
 
-  // Remove applied promo code
   const handleRemovePromo = () => {
     setAppliedPromo(null);
   };
 
-  // Handle finalizing listing
   const handleFinalize = async () => {
     setIsFinalizing(true);
     await handleFinalizeListing();
     setIsFinalizing(false);
-  };
-
-  // Navigate to add signboard enhancement
-  const handleAddSignboard = () => {
-    navigate(`/property/${propertyId}/edit`, { state: { tabIndex: 9 } }); // 9 is the Enhancements tab
   };
 
   return (
@@ -184,7 +160,6 @@ const OrderSummary = ({
         maxHeight: "100%",
       }}
     >
-      {/* Card Header with expand/collapse toggle for mobile */}
       <Box
         sx={{
           display: "flex",
@@ -209,264 +184,251 @@ const OrderSummary = ({
         </IconButton>
       </Box>
 
-      {/* Content */}
-        <Box 
-          sx={{ 
-            p: 3
+      <Box sx={{ p: 3 }}>
+        <Typography fontWeight="medium" sx={{ mb: 1 }}>
+          Selected Package
+        </Typography>
+
+        {packageType ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              mb: 2,
+              p: 1,
+              backgroundColor: "background.default",
+              borderRadius: 1,
+            }}
+          >
+            <Typography>{packageType} Package</Typography>
+            <Typography fontWeight="medium">
+              {formatCurrency(packagePrice)}
+            </Typography>
+          </Box>
+        ) : (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            No package selected
+          </Alert>
+        )}
+
+        {enhancements.length > 0 && (
+          <>
+            <Typography fontWeight="medium" sx={{ mt: 3, mb: 1 }}>
+              Listing Enhancements
+            </Typography>
+
+            {enhancements.map((enhancement) => (
+              <Box
+                key={enhancement.id || enhancement.enhancement_type}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  mb: 1,
+                  p: 1,
+                  backgroundColor: "background.default",
+                  borderRadius: 1,
+                }}
+              >
+                <Typography variant="body2">
+                  {enhancementsData[enhancement.enhancement_type]?.title || 
+                   enhancement.enhancement_type
+                    .split("-")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                </Typography>
+                <Typography variant="body2" fontWeight="medium">
+                  {formatCurrency(enhancementsData[enhancement.enhancement_type]?.numericPrice || 0)}
+                </Typography>
+              </Box>
+            ))}
+          </>
+        )}
+
+        <Divider sx={{ my: 3 }} />
+
+        <Box
+          onClick={() => setShowPromoSection(!showPromoSection)}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            mb: 2,
+            cursor: "pointer",
           }}
         >
-          {/* Package section */}
-          <Typography fontWeight="medium" sx={{ mb: 1 }}>
-            Selected Package
+          <LocalOfferIcon sx={{ mr: 1, color: "primary.main" }} />
+          <Typography color="primary.main" fontWeight="medium">
+            {appliedPromo ? "Promo code applied" : "Add promo code"}
           </Typography>
+          <IconButton size="small">
+            {showPromoSection ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          </IconButton>
+        </Box>
 
-          {packageType ? (
+        <Collapse in={showPromoSection}>
+          {appliedPromo ? (
             <Box
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
+                alignItems: "center",
+                p: 2,
                 mb: 2,
-                p: 1,
-                backgroundColor: "background.default",
+                backgroundColor: "success.light",
+                color: "success.contrastText",
                 borderRadius: 1,
               }}
             >
-              <Typography>{packageType} Package</Typography>
-              <Typography fontWeight="medium">
-                {formatCurrency(packagePrice)}
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <CheckCircleIcon sx={{ mr: 1 }} />
+                <Typography fontWeight="medium">
+                  {appliedPromo.code} ({appliedPromo.discount}% off)
+                </Typography>
+              </Box>
+              <Button
+                size="small"
+                variant="outlined"
+                sx={{
+                  borderColor: "success.contrastText",
+                  color: "success.contrastText",
+                  padding: "4px 12px",
+                  minWidth: "80px",
+                  fontWeight: 500,
+                  "&:hover": {
+                    borderColor: "success.contrastText",
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                  },
+                }}
+                onClick={handleRemovePromo}
+              >
+                Remove
+              </Button>
             </Box>
           ) : (
-            <Alert severity="warning" sx={{ mb: 2 }}>
-              No package selected
-            </Alert>
-          )}
-
-          {/* Enhancements section */}
-          {enhancements.length > 0 && (
-            <>
-              <Typography fontWeight="medium" sx={{ mt: 3, mb: 1 }}>
-                Listing Enhancements
-              </Typography>
-
-              {enhancements.map((enhancement) => (
-                <Box
-                  key={enhancement.id || enhancement.enhancement_type}
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mb: 1,
-                    p: 1,
-                    backgroundColor: "background.default",
-                    borderRadius: 1,
-                  }}
-                >
-                  <Typography variant="body2">
-                    {enhancementsData[enhancement.enhancement_type]?.title || 
-                     enhancement.enhancement_type
-                      .split("-")
-                      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                      .join(" ")}
-                  </Typography>
-                  <Typography variant="body2" fontWeight="medium">
-                    {formatCurrency(enhancementsData[enhancement.enhancement_type]?.numericPrice || 0)}
-                  </Typography>
-                </Box>
-              ))}
-            </>
-          )}
-
-          <Divider sx={{ my: 3 }} />
-
-          {/* Promo code section */}
-          <Box
-            onClick={() => setShowPromoSection(!showPromoSection)}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              mb: 2,
-              cursor: "pointer",
-            }}
-          >
-            <LocalOfferIcon sx={{ mr: 1, color: "primary.main" }} />
-            <Typography color="primary.main" fontWeight="medium">
-              {appliedPromo ? "Promo code applied" : "Add promo code"}
-            </Typography>
-            <IconButton size="small">
-              {showPromoSection ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-            </IconButton>
-          </Box>
-
-          <Collapse in={showPromoSection}>
-            {appliedPromo ? (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  p: 2,
-                  mb: 2,
-                  backgroundColor: "success.light",
-                  color: "success.contrastText",
-                  borderRadius: 1,
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                variant="outlined"
+                fullWidth
+                placeholder="Enter promo code"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                error={!!promoError}
+                helperText={promoError}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Button
+                        variant="contained"
+                        size="small"
+                        disabled={isApplyingPromo || !promoCode.trim()}
+                        onClick={handleApplyPromoCode}
+                        sx={{ 
+                          minWidth: 80,
+                          py: 0.7,
+                          fontWeight: 500
+                        }}
+                      >
+                        {isApplyingPromo ? (
+                          <LoadingSpinner inline size={20} />
+                        ) : (
+                          "Apply"
+                        )}
+                      </Button>
+                    </InputAdornment>
+                  ),
                 }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <CheckCircleIcon sx={{ mr: 1 }} />
-                  <Typography fontWeight="medium">
-                    {appliedPromo.code} ({appliedPromo.discount}% off)
-                  </Typography>
-                </Box>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  sx={{
-                    borderColor: "success.contrastText",
-                    color: "success.contrastText",
-                    padding: "4px 12px",
-                    minWidth: "80px",
-                    fontWeight: 500,
-                    "&:hover": {
-                      borderColor: "success.contrastText",
-                      backgroundColor: "rgba(255,255,255,0.1)",
-                    },
-                  }}
-                  onClick={handleRemovePromo}
-                >
-                  Remove
-                </Button>
-              </Box>
-            ) : (
-              <Box sx={{ mb: 3 }}>
-                <TextField
-                  variant="outlined"
-                  fullWidth
-                  placeholder="Enter promo code"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  error={!!promoError}
-                  helperText={promoError}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Button
-                          variant="contained"
-                          size="small"
-                          disabled={isApplyingPromo || !promoCode.trim()}
-                          onClick={handleApplyPromoCode}
-                          sx={{ 
-                            minWidth: 80,
-                            py: 0.7,
-                            fontWeight: 500
-                          }}
-                        >
-                          {isApplyingPromo ? (
-                            <LoadingSpinner inline size={20} />
-                          ) : (
-                            "Apply"
-                          )}
-                        </Button>
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{ mb: 1 }}
-                />
-              </Box>
-            )}
-          </Collapse>
+                sx={{ mb: 1 }}
+              />
+            </Box>
+          )}
+        </Collapse>
 
-          {/* Totals */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            mb: 1,
+          }}
+        >
+          <Typography>Subtotal:</Typography>
+          <Typography>{formatCurrency(subtotal)}</Typography>
+        </Box>
+
+        {appliedPromo && (
           <Box
             sx={{
               display: "flex",
               justifyContent: "space-between",
               mb: 1,
+              color: "success.main",
             }}
           >
-            <Typography>Subtotal:</Typography>
-            <Typography>{formatCurrency(subtotal)}</Typography>
+            <Typography>Discount ({appliedPromo.discount}%):</Typography>
+            <Typography>-{formatCurrency(discount)}</Typography>
           </Box>
+        )}
 
-          {appliedPromo && (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                mb: 1,
-                color: "success.main",
-              }}
-            >
-              <Typography>Discount ({appliedPromo.discount}%):</Typography>
-              <Typography>-{formatCurrency(discount)}</Typography>
-            </Box>
-          )}
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              fontWeight: "bold",
-              fontSize: "1.2rem",
-              mt: 2,
-            }}
-          >
-            <Typography fontWeight="bold">Total:</Typography>
-            <Typography fontWeight="bold">{formatCurrency(total)}</Typography>
-          </Box>
-
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ mt: 1, display: "block" }}
-          >
-            Includes GST
-          </Typography>
-
-
-
-          {/* Finalize Button */}
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            size="large"
-            disabled={
-              isFinalizing ||
-              (publishOption === "later" && !publishDate) ||
-              !packageType
-            }
-            onClick={handleFinalize}
-            sx={{ 
-              mt: 2, 
-              py: 1.5, 
-              fontSize: "1rem",
-              fontWeight: "bold",
-              boxShadow: (theme) => `0 4px 12px ${theme.palette.primary.main}40`,
-              '&:hover': {
-                boxShadow: (theme) => `0 6px 14px ${theme.palette.primary.main}60`,
-              }
-            }}
-          >
-            {isFinalizing ? (
-              <LoadingSpinner buttonMode text="Processing..." />
-            ) : (
-              "Finalize & Pay Now"
-            )}
-          </Button>
-
-          {/* Validation warnings */}
-          {!packageType && (
-            <Alert severity="warning" sx={{ mt: 2 }}>
-              Please select a package before proceeding
-            </Alert>
-          )}
-
-          {publishOption === "later" && !publishDate && (
-            <Alert severity="warning" sx={{ mt: 2 }}>
-              Please select a publish date
-            </Alert>
-          )}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            fontWeight: "bold",
+            fontSize: "1.2rem",
+            mt: 2,
+          }}
+        >
+          <Typography fontWeight="bold">Total:</Typography>
+          <Typography fontWeight="bold">{formatCurrency(total)}</Typography>
         </Box>
+
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ mt: 1, display: "block" }}
+        >
+          Includes GST
+        </Typography>
+
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          size="large"
+          disabled={
+            isFinalizing ||
+            (publishOption === "later" && !publishDate) ||
+            !packageType
+          }
+          onClick={handleFinalize}
+          sx={{ 
+            mt: 2, 
+            py: 1.5, 
+            fontSize: "1rem",
+            fontWeight: "bold",
+            boxShadow: (theme) => `0 4px 12px ${theme.palette.primary.main}40`,
+            '&:hover': {
+              boxShadow: (theme) => `0 6px 14px ${theme.palette.primary.main}60`,
+            }
+          }}
+        >
+          {isFinalizing ? (
+            <LoadingSpinner buttonMode text="Processing..." />
+          ) : (
+            "Finalize & Pay Now"
+          )}
+        </Button>
+
+        {!packageType && (
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            Please select a package before proceeding
+          </Alert>
+        )}
+
+        {publishOption === "later" && !publishDate && (
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            Please select a publish date
+          </Alert>
+        )}
+      </Box>
     </Card>
   );
 };

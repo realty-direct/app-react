@@ -37,7 +37,6 @@ export default function Inspections() {
   const { id } = useParams<{ id: string }>();
   const propertyId = id ?? "";
 
-  // Get inspections data and methods directly from Zustand
   const {
     propertyInspections,
     addPropertyInspection,
@@ -45,7 +44,6 @@ export default function Inspections() {
     deletePropertyInspection,
   } = useRealtyStore();
 
-  // Filter inspections for this property directly when needed
   const openHouseInspections = propertyInspections.filter(
     (insp) =>
       insp.property_id === propertyId && insp.inspection_type === "public"
@@ -56,7 +54,6 @@ export default function Inspections() {
       insp.property_id === propertyId && insp.inspection_type === "private"
   );
 
-  // Add new inspection slot
   const handleAddOpenHouse = () => {
     addPropertyInspection({
       property_id: propertyId,
@@ -77,7 +74,6 @@ export default function Inspections() {
     });
   };
 
-  // Update inspection date
   const handleDateChange = (inspectionId: string, newDate: Date | null) => {
     if (!newDate) return;
 
@@ -88,7 +84,6 @@ export default function Inspections() {
     });
   };
 
-  // Update inspection time with automatic adjustment
   const handleTimeChange = (
     inspectionId: string,
     field: "start_time" | "end_time",
@@ -99,8 +94,6 @@ export default function Inspections() {
     const formattedCurrentStartTime = formatDbTime(currentStartTime);
     const formattedCurrentEndTime = formatDbTime(currentEndTime);
 
-    // If changing start time to be later than end time,
-    // automatically adjust end time to be 15 minutes later
     if (field === "start_time" && value >= formattedCurrentEndTime) {
       const newEndTime = getNextTimeOption(value);
 
@@ -109,21 +102,15 @@ export default function Inspections() {
         end_time: newEndTime,
       });
     }
-    // If changing end time to be earlier than start time,
-    // don't allow it (this shouldn't happen with UI controls, but just in case)
     else if (field === "end_time" && value <= formattedCurrentStartTime) {
-      // Not updating since this would create an invalid time range
       return;
-    }
-    // Normal update for a single field
-    else {
+    } else {
       updatePropertyInspection(inspectionId, {
         [field]: value,
       });
     }
   };
 
-  // Delete inspection
   const handleDeleteInspection = (inspectionId: string) => {
     deletePropertyInspection(inspectionId);
   };
@@ -131,7 +118,6 @@ export default function Inspections() {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box sx={{ p: { xs: 2, sm: 6 } }}>
-        {/* Header */}
         <Typography
           variant="h5"
           gutterBottom
@@ -140,7 +126,6 @@ export default function Inspections() {
           Property Inspections
         </Typography>
 
-        {/* Summary of scheduled inspections */}
         <Paper
           elevation={2}
           sx={{
@@ -221,7 +206,6 @@ export default function Inspections() {
           </Box>
         </Paper>
 
-        {/* Open House Section */}
         <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
             <HouseIcon sx={{ mr: 1, color: "primary.main" }} />
@@ -233,7 +217,6 @@ export default function Inspections() {
             property simultaneously.
           </Typography>
 
-          {/* Only show times if there are any */}
           {openHouseInspections.length > 0 && (
             <Box sx={{ mb: 3 }}>
               {openHouseInspections.map((inspection) => (
@@ -421,7 +404,6 @@ export default function Inspections() {
           </Button>
         </Paper>
 
-        {/* Private Inspection Section */}
         <Paper elevation={1} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
             <PersonIcon sx={{ mr: 1, color: "secondary.main" }} />
@@ -455,7 +437,6 @@ export default function Inspections() {
             </Typography>
           </Box>
 
-          {/* Only show times if there are any */}
           {privateInspections.length > 0 && (
             <Box sx={{ mb: 3 }}>
               {privateInspections.map((inspection) => (

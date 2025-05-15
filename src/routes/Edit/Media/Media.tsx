@@ -52,7 +52,6 @@ export default function Media() {
       )
     : [];
 
-  // Loading states with more specific types
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [loadingType, setLoadingType] = useState<"images" | "floorPlans" | "">(
@@ -86,7 +85,6 @@ export default function Media() {
             ? [...images, ...uploadedFiles]
             : [...floorPlans, ...uploadedFiles];
 
-        // Update DB and store
         const updatedData =
           type === "images"
             ? await updatePropertyImagesInDB(propertyId, updatedList)
@@ -132,8 +130,6 @@ export default function Media() {
     setLoadingType(type);
 
     try {
-      // This calls our enhanced deletePropertyImageFromDB function
-      // which now properly removes files from storage
       const success = await deletePropertyImageFromDB(fileUrl);
 
       if (success) {
@@ -177,7 +173,6 @@ export default function Media() {
     }
   };
 
-  // Handle Drag and Drop Sorting - no loading indicator needed for this
   const handleDragEnd = async (
     event: DragEndEvent,
     type: "images" | "floorPlans"
@@ -191,14 +186,12 @@ export default function Media() {
       const newIndex = list.findIndex((item) => item.url === over.id);
       const reorderedList = arrayMove(list, oldIndex, newIndex);
 
-      // Update local state first for immediate feedback
       if (type === "images") {
         updateImageOrder(propertyId, reorderedList);
       } else {
         updatePropertyDetail(propertyId, { floor_plans: reorderedList });
       }
 
-      // Update DB in the background (no loading state needed)
       const updatedData =
         type === "images"
           ? await updatePropertyImagesInDB(propertyId, reorderedList)
@@ -217,7 +210,6 @@ export default function Media() {
             typeof file.url === "string"
         );
 
-        // Update again with server data if needed
         if (JSON.stringify(validFiles) !== JSON.stringify(reorderedList)) {
           if (type === "images") updateImageOrder(propertyId, validFiles);
           else updatePropertyDetail(propertyId, { floor_plans: validFiles });
@@ -383,7 +375,6 @@ export default function Media() {
         </SortableContext>
       </DndContext>
 
-      {/* Full page loading overlay only for uploads and deletions which take time */}
       {(isUploading || isDeleting) && (
         <LoadingSpinner fullPage text={getLoadingText()} transparent />
       )}

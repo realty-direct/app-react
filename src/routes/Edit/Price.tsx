@@ -26,10 +26,8 @@ export default function Price() {
     propertyDetail?.show_price ?? true
   );
   
-  // State to handle the formatted price display
   const [formattedPrice, setFormattedPrice] = useState("");
 
-  // Format the price with thousand separators when property details load or change
   useEffect(() => {
     if (propertyDetail?.price) {
       setFormattedPrice(formatNumberWithCommas(propertyDetail.price));
@@ -38,28 +36,18 @@ export default function Price() {
     }
   }, [propertyDetail?.price]);
 
-  // Function to format number with commas for thousand separators
   const formatNumberWithCommas = (value: number | string) => {
-    // Remove any existing commas or non-numeric characters
     const numericValue = String(value).replace(/[^\d]/g, "");
     
     if (!numericValue) return "";
     
-    // Format with commas for thousand separators
     return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  // Handle price input change with formatting
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
-    
-    // Strip commas to get the raw number for database
     const rawValue = inputValue.replace(/,/g, "");
-    
-    // Update the formatted display value
     setFormattedPrice(formatNumberWithCommas(rawValue));
-    
-    // Store the raw numeric value in the database
     updatePropertyDetail(propertyId, { price: rawValue });
   };
 
