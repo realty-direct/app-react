@@ -98,14 +98,12 @@ If you encounter issues:
    const router = createBrowserRouter([...], { basename: basePath });
    ```
 
-3. Check that index.html references correct compiled JS file:
+3. Check that index.html references compiled JS file, not TSX:
    ```html
-   <script type="module" src="./assets/index.js"></script>
+   <script type="module" src="./main.js"></script>
    ```
 
 4. For 404 errors on routes, ensure the 404.html file is created and properly redirects to index.html
-
-5. GitHub Pages and Jekyll: Make sure a `.nojekyll` file exists in your build output to prevent GitHub Pages from processing your files with Jekyll, which can cause MIME type issues. The deploy script adds this file automatically.
 
 ## Development
 
