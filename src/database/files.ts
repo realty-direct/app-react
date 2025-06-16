@@ -418,6 +418,8 @@ export const deletePropertyImageFromDB = async (
   }
 };
 
+
+
 /**
  * Cleans up all files in a storage bucket for a specific property ID
  * Enhanced with better error handling and verification

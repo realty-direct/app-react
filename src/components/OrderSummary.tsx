@@ -18,6 +18,9 @@ import {
 import { useState } from "react";
 import { formatCurrency } from "../utils/formatters";
 import LoadingSpinner from "./LoadingSpinner";
+import { createCheckoutSession, redirectToCheckout } from "../services/stripe";
+import useRealtyStore from "../store/store";
+import { showNotification } from "../lib/notifications";
 
 interface PromoCode {
   code: string;
@@ -49,6 +52,7 @@ const OrderSummary = ({
   handleFinalizeListing,
 }: OrderSummaryProps) => {
   const theme = useTheme();
+  const { profile } = useRealtyStore();
 
   const [showPromoSection, setShowPromoSection] = useState(false);
   const [promoCode, setPromoCode] = useState("");
@@ -57,6 +61,7 @@ const OrderSummary = ({
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [showOrderSummary, setShowOrderSummary] = useState(true);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const enhancementsData: Record<string, { title: string; numericPrice: number }> = {
     "photography-12": { title: "Professional Photography (12 images)", numericPrice: 350 },
@@ -148,6 +153,38 @@ const OrderSummary = ({
     setIsFinalizing(true);
     await handleFinalizeListing();
     setIsFinalizing(false);
+  };
+
+  const handlePayment = async () => {
+    if (!profile?.id) {
+      showNotification("Please sign in to continue", "error");
+      return;
+    }
+
+    setIsProcessingPayment(true);
+
+    try {
+      // Create Stripe checkout session
+      const session = await createCheckoutSession({
+        propertyId,
+        packageType: packageType || "",
+        packagePrice,
+        enhancements: enhancements.map(e => ({
+          enhancement_type: e.enhancement_type,
+          price: e.price,
+        })),
+        userId: profile.id,
+        promoCode: appliedPromo?.code,
+      });
+
+      // Redirect to Stripe Checkout
+      await redirectToCheckout(session.sessionId);
+    } catch (error) {
+      console.error("Payment error:", error);
+      showNotification("Payment failed. Please try again.", "error");
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   return (
@@ -394,11 +431,12 @@ const OrderSummary = ({
           fullWidth
           size="large"
           disabled={
+            isProcessingPayment ||
             isFinalizing ||
             (publishOption === "later" && !publishDate) ||
             !packageType
           }
-          onClick={handleFinalize}
+          onClick={handlePayment}
           sx={{ 
             mt: 2, 
             py: 1.5, 
@@ -410,10 +448,10 @@ const OrderSummary = ({
             }
           }}
         >
-          {isFinalizing ? (
-            <LoadingSpinner buttonMode text="Processing..." />
+          {isProcessingPayment ? (
+            <LoadingSpinner buttonMode text="Processing Payment..." />
           ) : (
-            "Finalize & Pay Now"
+            "Proceed to Payment"
           )}
         </Button>
 

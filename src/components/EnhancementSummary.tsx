@@ -20,15 +20,17 @@ import {
   Card,
   IconButton,
   Typography,
+  useMediaQuery,
   useTheme,
 } from "@mui/material";
 import useRealtyStore from "../store/store";
 
 interface EnhancementsSummaryProps {
   propertyId: string;
-  isInSidebar?: boolean;
+  isInSidebar?: boolean; // New prop to determine positioning
 }
 
+// Enhancement type to match the data structure
 interface Enhancement {
   id: string;
   title: string;
@@ -37,6 +39,7 @@ interface Enhancement {
   icon: React.ReactNode;
 }
 
+// This matches the enhancements from ListingEnhancements.tsx with correct icons
 const enhancementsData: Record<string, Enhancement> = {
   "photography-12": {
     id: "photography-12",
@@ -190,8 +193,11 @@ export default function EnhancementsSummary({
 
   const selectedEnhancements = getEnhancementsForProperty(propertyId);
 
+  // Calculate total price of selected enhancements
   const totalPrice = selectedEnhancements.reduce((sum, enhancement) => {
+    // Find the enhancement data to get the correct numericPrice
     const enhancementData = enhancementsData[enhancement.enhancement_type];
+    // Only add to sum if we have matching data
     return enhancementData ? sum + enhancementData.numericPrice : sum;
   }, 0);
 
@@ -212,6 +218,7 @@ export default function EnhancementsSummary({
           height: "auto",
         }}
       >
+        {/* Header */}
         <Box
           sx={{
             p: 2,
@@ -224,6 +231,7 @@ export default function EnhancementsSummary({
           <Typography variant="h6">Selected Enhancements</Typography>
         </Box>
 
+        {/* Empty state content */}
         <Box sx={{ p: 3, pb: 4 }}>
           <Typography variant="body2" color="text.secondary">
             No enhancements selected yet. Choose from the options to add
@@ -249,6 +257,7 @@ export default function EnhancementsSummary({
         overflowX: "hidden",
       }}
     >
+      {/* Header */}
       <Box
         sx={{
           display: "flex",
@@ -263,102 +272,106 @@ export default function EnhancementsSummary({
         <Typography variant="h6">Selected Enhancements</Typography>
       </Box>
 
-      <Box sx={{ p: 3 }}>
-        <Box sx={{ mb: 2 }}>
-          {selectedEnhancements.map((enhancement) => {
-            const enhancementData =
-              enhancementsData[enhancement.enhancement_type];
-            return enhancementData ? (
-              <Box
-                key={enhancement.id}
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  py: 1,
-                  borderTop: `1px solid ${theme.palette.divider}`,
-                }}
-              >
+      {/* Content */}
+        <Box sx={{ p: 3 }}>
+          {/* List selected enhancements */}
+          <Box sx={{ mb: 2 }}>
+            {selectedEnhancements.map((enhancement) => {
+              const enhancementData =
+                enhancementsData[enhancement.enhancement_type];
+              return enhancementData ? (
                 <Box
+                  key={enhancement.id}
                   sx={{
                     display: "flex",
-                    alignItems: "flex-start",
-                    width: "100%",
+                    flexDirection: "column",
+                    py: 1,
+                    borderTop: `1px solid ${theme.palette.divider}`,
                   }}
                 >
-                  <Box sx={{ mr: 1.5, pt: 0.5, flexShrink: 0 }}>
-                    {enhancementData.icon}
-                  </Box>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography
-                      sx={{
-                        fontSize: { xs: "0.875rem", sm: "1rem" },
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {enhancementData.title}
-                    </Typography>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mt: 0.5,
-                      }}
-                    >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      width: "100%",
+                    }}
+                  >
+                    <Box sx={{ mr: 1.5, pt: 0.5, flexShrink: 0 }}>
+                      {enhancementData.icon}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
                       <Typography
-                        fontWeight="bold"
                         sx={{
                           fontSize: { xs: "0.875rem", sm: "1rem" },
+                          wordBreak: "break-word",
                         }}
                       >
-                        {enhancementData.price}
+                        {enhancementData.title}
                       </Typography>
 
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() =>
-                          handleRemoveEnhancement(enhancement.id)
-                        }
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          mt: 0.5,
+                        }}
                       >
-                        <Close fontSize="small" />
-                      </IconButton>
+                        <Typography
+                          fontWeight="bold"
+                          sx={{
+                            fontSize: { xs: "0.875rem", sm: "1rem" },
+                          }}
+                        >
+                          {enhancementData.price}
+                        </Typography>
+
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() =>
+                            handleRemoveEnhancement(enhancement.id)
+                          }
+                        >
+                          <Close fontSize="small" />
+                        </IconButton>
+                      </Box>
                     </Box>
                   </Box>
                 </Box>
-              </Box>
-            ) : null;
-          })}
-        </Box>
+              ) : null;
+            })}
+          </Box>
 
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            pt: 2,
-            borderTop: `2px solid ${theme.palette.divider}`,
-          }}
-        >
-          <Typography variant="h6">Total</Typography>
-          <Typography variant="h6" color="primary" fontWeight="bold">
-            ${totalPrice}
+          {/* Total */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              pt: 2,
+              borderTop: `2px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Typography variant="h6">Total</Typography>
+            <Typography variant="h6" color="primary" fontWeight="bold">
+              ${totalPrice}
+            </Typography>
+          </Box>
+
+          {/* Info text */}
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              mt: 2,
+              fontStyle: "italic",
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+            }}
+          >
+            Your selected enhancements have been saved. They will be included in
+            your final listing package when you proceed to checkout.
           </Typography>
         </Box>
-
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            mt: 2,
-            fontStyle: "italic",
-            fontSize: { xs: "0.75rem", sm: "0.875rem" },
-          }}
-        >
-          Your selected enhancements have been saved. They will be included in
-          your final listing package when you proceed to checkout.
-        </Typography>
-      </Box>
     </Card>
   );
 }

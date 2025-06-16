@@ -21,6 +21,7 @@ import Orders from "./routes/Orders";
 import Property from "./routes/Property";
 import Signin from "./routes/Signin";
 import Signup from "./routes/Signup";
+import PaymentSuccess from "./routes/PaymentSuccess";
 
 const router = createBrowserRouter([
   {
@@ -64,6 +65,7 @@ const router = createBrowserRouter([
               { path: "orders", element: <Orders /> },
               { path: "forms", element: <Forms /> },
               { path: "enquiries", element: <Enquiries /> },
+              { path: "payment-success", element: <PaymentSuccess /> },
             ],
           },
           {
