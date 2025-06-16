@@ -24,7 +24,7 @@ import Signup from "./routes/Signup";
 import PaymentSuccess from "./routes/PaymentSuccess";
 
 // Get base path from environment variable
-const basePath = import.meta.env.BASE_URL || '/rd-dashboard-react/';
+const basePath = import.meta.env.BASE_URL || '/app-react/';
 
 const router = createBrowserRouter([
   {
