@@ -519,7 +519,6 @@ export default function ListingEnhancements() {
   const propertyId = id ?? "";
 
   const {
-    propertyEnhancements,
     addPropertyEnhancement,
     removePropertyEnhancement,
     getEnhancementsForProperty,
@@ -542,9 +541,6 @@ export default function ListingEnhancements() {
     new Set(enhancements.map((enhancement) => enhancement.category))
   );
 
-  const totalPrice = propertySpecificEnhancements.reduce((sum, enhancement) => {
-    return sum + enhancement.price;
-  }, 0);
 
   const handleOpenModal = (enhancement: Enhancement) => {
     setCurrentEnhancement(enhancement);

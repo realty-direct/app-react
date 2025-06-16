@@ -19,7 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import {
   updatePropertyIdentificationDocumentInDB,
@@ -39,7 +39,6 @@ export default function Media() {
 
   const {
     propertyDetails,
-    updatePropertyDetail,
     updateOwnershipDocument,
     updateIdentificationDocument,
   } = useRealtyStore();
@@ -220,14 +219,14 @@ export default function Media() {
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <InsertDriveFileIcon sx={{ mr: 1 }} />
               <Typography sx={{ flexGrow: 1 }}>
-                <Link
+                <a
                   href={propertyDetail.ownership_document}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   {getFilenameFromUrl(propertyDetail.ownership_document) ||
                     "Rates notice document"}
-                </Link>
+                </a>
               </Typography>
               <Button
                 startIcon={<DeleteIcon />}
@@ -316,14 +315,14 @@ export default function Media() {
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <InsertDriveFileIcon sx={{ mr: 1 }} />
               <Typography sx={{ flexGrow: 1 }}>
-                <Link
+                <a
                   href={propertyDetail.identification_document}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   {getFilenameFromUrl(propertyDetail.identification_document) ||
                     "Identification document"}
-                </Link>
+                </a>
               </Typography>
               <Button
                 startIcon={<DeleteIcon />}
@@ -432,9 +431,9 @@ export default function Media() {
           </Typography>
           <Typography sx={{ mb: 2 }}>
             Please contact our support team at{" "}
-            <Link href="mailto:admin@realtydirect.com.au">
+            <a href="mailto:admin@realtydirect.com.au">
               admin@realtydirect.com.au
-            </Link>{" "}
+            </a>{" "}
             or call us at <strong>+61 406 371 630</strong> to discuss
             alternative options.
           </Typography>

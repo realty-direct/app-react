@@ -31,18 +31,15 @@ import Summary from "./Summary";
 export default function Edit() {
   const { id: propertyId } = useParams();
   const {
-    updatePropertyDetail,
     propertyDetails,
     propertyFeatures,
     propertyInspections,
-    propertyEnhancements,
     getEnhancementsForProperty,
   } = useRealtyStore();
 
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [actionType, setActionType] = useState<"save" | "navigate" | "">("");
-  const [isFinalizing, setIsFinalizing] = useState(false);
 
   const [snapshots, setSnapshots] = useState({
     propertyDetailSnapshot: "",
@@ -275,53 +272,7 @@ export default function Edit() {
       ? packagePricing[propertyDetail.property_package]
       : 0;
 
-  const hasSignboardEnhancement = currentEnhancements.some((enhancement) =>
-    ["standard-signboard", "photo-signboard"].includes(
-      enhancement.enhancement_type
-    )
-  );
 
-  const handleFinalizeListing = async () => {
-    if (!propertyId || !propertyDetail) return;
-
-    if (hasUnsavedChanges()) {
-      const saveSuccess = await saveChanges();
-      if (!saveSuccess) return;
-    }
-
-    setIsFinalizing(true);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      const currentPublishOption =
-        propertyDetail?.publish_option || "immediately";
-
-      updatePropertyDetail(propertyId, {
-        listing_status:
-          currentPublishOption === "immediately" ? "active" : "scheduled",
-        payment_status: "completed",
-        payment_date: new Date().toISOString().split("T")[0],
-      });
-
-      await updatePropertyDetailInDB(propertyId, {
-        listing_status:
-          currentPublishOption === "immediately" ? "active" : "scheduled",
-        payment_status: "completed",
-        payment_date: new Date().toISOString().split("T")[0],
-      });
-
-      window.location.href = `/property/${propertyId}`;
-    } catch (error) {
-      console.error("Error finalizing listing:", error);
-      showNotification(
-        "Failed to finalize listing. Please try again.",
-        "error"
-      );
-    } finally {
-      setIsFinalizing(false);
-    }
-  };
 
   const handleTabChange = async (
     _event: React.SyntheticEvent,
@@ -487,7 +438,6 @@ export default function Edit() {
                 ? new Date(propertyDetail.publish_date)
                 : null
             }
-            handleFinalizeListing={handleFinalizeListing}
           />
         ) : tabValue === 9 ? (
           <EnhancementsSummary
