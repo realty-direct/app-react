@@ -10,16 +10,5 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['react', 'react-dom']
-  },
-  build: {
-    outDir: 'dist',
-    emptyOutDir: true,
-    sourcemap: false,
-    // Ensure TS files are properly processed
-    rollupOptions: {
-      input: {
-        main: './index.html',
-      },
-    }
   }
 })
