@@ -8,7 +8,7 @@ import type { Inspection, PropertyInspectionsState } from "../types";
 
 export const createPropertyInspectionsSlice: StateCreator<
   PropertyInspectionsState
-> = (set, get) => ({
+> = (set) => ({
   propertyInspections: [],
 
   setPropertyInspections: (inspections: Inspection[]) => {

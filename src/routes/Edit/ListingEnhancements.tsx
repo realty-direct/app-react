@@ -843,7 +843,7 @@ export default function ListingEnhancements() {
 
             <DialogContent dividers>
               <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Box
                     sx={{
                       display: "flex",
@@ -890,7 +890,7 @@ export default function ListingEnhancements() {
                   </Box>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   {currentEnhancement.availability && (
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="subtitle2" fontWeight="bold">

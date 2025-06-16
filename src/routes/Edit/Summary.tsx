@@ -2,8 +2,6 @@ import {
   Alert,
   Box,
   Button,
-  Card,
-  CardContent,
   Divider,
   FormControlLabel,
   Grid,
@@ -11,7 +9,6 @@ import {
   Radio,
   RadioGroup,
   Typography,
-  useTheme,
 } from "@mui/material";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -34,7 +31,6 @@ interface SummarySectionProps {
 
 function SummarySection({ title, tabIndex, propertyId, data }: SummarySectionProps) {
   const navigate = useNavigate();
-  const theme = useTheme();
   
   const handleEdit = () => {
     navigate(`/property/${propertyId}/edit`, { state: { tabIndex } });
@@ -65,7 +61,7 @@ function SummarySection({ title, tabIndex, propertyId, data }: SummarySectionPro
       
       <Grid container spacing={2}>
         {data.map((item, index) => (
-          <Grid item xs={12} sm={6} key={index}>
+          <Grid size={{ xs: 12, sm: 6 }} key={index}>
             <Box sx={{ mb: 2 }}>
               <Typography variant="body2" color="text.secondary">
                 {item.label}
@@ -82,10 +78,8 @@ function SummarySection({ title, tabIndex, propertyId, data }: SummarySectionPro
 }
 
 export default function Summary() {
-  const theme = useTheme();
   const { id } = useParams<{ id: string }>();
   const propertyId = id ?? "";
-  const navigate = useNavigate();
 
   const { 
     propertyDetails, 
@@ -166,7 +160,7 @@ export default function Summary() {
               {
                 label: "Property Type",
                 value: propertyDetail.property_type
-                  ? `${propertyDetail.property_category?.charAt(0).toUpperCase() + propertyDetail.property_category?.slice(1)} • ${propertyDetail.property_type.charAt(0).toUpperCase() + propertyDetail.property_type.slice(1)}`
+                  ? `${propertyDetail.property_category ? propertyDetail.property_category.charAt(0).toUpperCase() + propertyDetail.property_category.slice(1) : 'Property'} • ${propertyDetail.property_type.charAt(0).toUpperCase() + propertyDetail.property_type.slice(1)}`
                   : "Not specified",
               },
               {
@@ -179,11 +173,11 @@ export default function Summary() {
               },
               {
                 label: "Land Size",
-                value: propertyDetail.land_size ? `${propertyDetail.land_size} m²` : "Not specified",
+                value: propertyDetail.land_area ? `${propertyDetail.land_area} ${propertyDetail.land_unit || 'm²'}` : "Not specified",
               },
               {
-                label: "Year Built",
-                value: propertyDetail.year_built || "Not specified",
+                label: "House Area",
+                value: propertyDetail.house_area ? `${propertyDetail.house_area} ${propertyDetail.house_unit || 'm²'}` : "Not specified",
               },
             ]}
           />
@@ -195,8 +189,8 @@ export default function Summary() {
             data={
               features.length > 0
                 ? features.map(feature => ({
-                    label: feature.feature_category || "Feature",
-                    value: feature.feature_value ? `${feature.feature_name}: ${feature.feature_value}` : feature.feature_name
+                    label: feature.feature_name || "Feature",
+                    value: feature.feature_name || "Not specified"
                   }))
                 : [{ label: "Features", value: "No features specified" }]
             }
@@ -237,7 +231,7 @@ export default function Summary() {
             data={[
               {
                 label: "Owner Name",
-                value: propertyDetail.owner_name || "Not specified",
+                value: propertyDetail.contact_name || "Not specified",
               },
               {
                 label: "Verification Status",
@@ -253,7 +247,7 @@ export default function Summary() {
             data={[
               {
                 label: "Title",
-                value: propertyDetail.title || "Not specified",
+                value: propertyDetail.listing_title || "Not specified",
               },
               {
                 label: "Description",

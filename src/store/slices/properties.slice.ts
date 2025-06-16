@@ -2,8 +2,7 @@ import type { StateCreator } from "zustand";
 import type { PropertiesState, Property } from "../types";
 
 export const createPropertiesSlice: StateCreator<PropertiesState> = (
-  set,
-  get
+  set
 ) => ({
   properties: [],
 

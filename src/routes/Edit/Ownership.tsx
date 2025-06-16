@@ -44,7 +44,6 @@ export default function Ownership() {
 
   const {
     propertyDetails,
-    updatePropertyDetail,
     updateOwnershipDocument,
     updateIdentificationDocument,
   } = useRealtyStore();
@@ -101,7 +100,7 @@ export default function Ownership() {
     const files = event.target.files;
     if (!files || files.length === 0 || !propertyId) return;
 
-    if (propertyDetail.ownership_verified) {
+    if (propertyDetail?.ownership_verified) {
       setErrorMessage("Your documents have already been verified. Please contact support if you need to update them.");
       return;
     }
@@ -161,7 +160,7 @@ export default function Ownership() {
   ) => {
     if (!propertyId || !fileUrl) return;
     
-    if (propertyDetail.ownership_verified) {
+    if (propertyDetail?.ownership_verified) {
       setErrorMessage("Verified documents cannot be deleted. Please contact support if you need to make changes.");
       return;
     }

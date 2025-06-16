@@ -23,6 +23,11 @@ import {
 import useRealtyStore from "../../../store/store";
 import { SortableImage } from "./SortableImage";
 
+type MediaUpdateData = {
+  images?: { url: string }[];
+  floor_plans?: { url: string }[];
+};
+
 export default function Media() {
   const { id } = useParams<{ id: string }>();
   const propertyId = id ?? "";
@@ -91,13 +96,8 @@ export default function Media() {
             : await updatePropertyFloorPlansInDB(propertyId, updatedList);
 
         if (updatedData) {
-          type MediaUpdateData = {
-            images?: { url: string }[];
-            floor_plans?: { url: string }[];
-          };
-
           const validFiles = (
-            (updatedData as MediaUpdateData)[
+            (updatedData as unknown as MediaUpdateData)[
               type === "images" ? "images" : "floor_plans"
             ] || []
           ).filter(
@@ -144,13 +144,8 @@ export default function Media() {
             : await updatePropertyFloorPlansInDB(propertyId, updatedFiles);
 
         if (updatedData) {
-          type MediaUpdateData = {
-            images?: { url: string }[];
-            floor_plans?: { url: string }[];
-          };
-
           const validFiles = (
-            (updatedData as MediaUpdateData)[
+            (updatedData as unknown as MediaUpdateData)[
               type === "images" ? "images" : "floor_plans"
             ] || []
           ).filter(

@@ -34,9 +34,6 @@ export default function Create() {
   const [error, setError] = useState<string | null>(null);
   const [hasValidAddress, setHasValidAddress] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPropertyDetails({ ...propertyDetails, [e.target.name]: e.target.value });
-  };
 
   // Handle address change (typing or selection without coordinates)
   const handleAddressChange = (address: string) => {
@@ -87,9 +84,6 @@ export default function Create() {
 
       // Step 3: Update property details in the database with property category
       // and pre-fill the contact details from the user's profile
-      const locationData = propertyDetails.location 
-        ? { location: propertyDetails.location }
-        : {};
         
       const fetchedPropertyDetail = await updatePropertyDetailInDB(
         newProperty.id,

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Autocomplete, CircularProgress, TextField } from '@mui/material';
 import { useGoogleMaps } from './GoogleMapsProvider';
 

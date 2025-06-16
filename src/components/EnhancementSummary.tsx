@@ -20,7 +20,6 @@ import {
   Card,
   IconButton,
   Typography,
-  useMediaQuery,
   useTheme,
 } from "@mui/material";
 import useRealtyStore from "../store/store";
@@ -330,7 +329,7 @@ export default function EnhancementsSummary({
                           size="small"
                           color="error"
                           onClick={() =>
-                            handleRemoveEnhancement(enhancement.id)
+                            handleRemoveEnhancement(enhancement.id || '')
                           }
                         >
                           <Close fontSize="small" />

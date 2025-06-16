@@ -5,7 +5,7 @@ import {
   TextField, 
   Typography 
 } from '@mui/material';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGoogleMaps } from './GoogleMapsProvider';
 
 interface PlacePrediction {

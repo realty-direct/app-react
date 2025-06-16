@@ -3,8 +3,7 @@ import type { Json } from "../../database/database_types";
 import type { PropertyDetail, PropertyDetailsState } from "../types";
 
 export const createPropertyDetailsSlice: StateCreator<PropertyDetailsState> = (
-  set,
-  get
+  set
 ) => ({
   propertyDetails: [],
 

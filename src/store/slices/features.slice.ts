@@ -9,7 +9,7 @@ export type FeatureType =
 
 export const createPropertyFeaturesSlice: StateCreator<
   PropertyFeaturesState
-> = (set, get) => ({
+> = (set) => ({
   propertyFeatures: [],
 
   // ✅ Updates only the relevant property’s features

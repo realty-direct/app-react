@@ -14,12 +14,6 @@ interface GoogleMapProps {
 
 const DEFAULT_CENTER = { lat: -25.2744, lng: 133.7751 };
 const DEFAULT_ZOOM = 4;
-const DEFAULT_AUSTRALIA_BOUNDS = {
-  north: -10.6681857235,
-  south: -43.6345972634,
-  west: 112.9511178909,
-  east: 153.6394677328,
-};
 
 const GoogleMap = ({
   location,
@@ -83,10 +77,6 @@ const GoogleMap = ({
           mapId="property-map"
           gestureHandling="cooperative"
           style={{ width: "100%", height: "100%" }}
-          defaultRestriction={{
-            latLngBounds: DEFAULT_AUSTRALIA_BOUNDS,
-            strictBounds: false
-          }}
         >
           {location && (
             <Marker 

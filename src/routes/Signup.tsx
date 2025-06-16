@@ -290,7 +290,7 @@ export default function Signup() {
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
               {/* Name fields */}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   label="First Name"
                   fullWidth
@@ -309,7 +309,7 @@ export default function Signup() {
                   }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   label="Last Name"
                   fullWidth
@@ -330,7 +330,7 @@ export default function Signup() {
               </Grid>
 
               {/* Email field */}
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <TextField
                   label="Email Address"
                   type="email"
@@ -352,7 +352,7 @@ export default function Signup() {
               </Grid>
 
               {/* Phone field with country code */}
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <CountryCodeSelector
                     value={countryCode}
@@ -384,7 +384,7 @@ export default function Signup() {
               </Grid>
 
               {/* Password fields */}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   label="Password"
                   type={showPassword ? "text" : "password"}
@@ -414,7 +414,7 @@ export default function Signup() {
                   }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   label="Confirm Password"
                   type={showConfirmPassword ? "text" : "password"}
@@ -453,7 +453,7 @@ export default function Signup() {
 
               {/* Password Strength Indicator */}
               {password && (
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" gutterBottom>
                       Password Strength
@@ -504,7 +504,7 @@ export default function Signup() {
               )}
 
               {/* Terms and Conditions */}
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -539,7 +539,7 @@ export default function Signup() {
               </Grid>
 
               {/* Submit button */}
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <Button
                   type="submit"
                   variant="contained"

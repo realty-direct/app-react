@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { updatePropertyDetailInDB } from "../database/details";
-import LoadingSpinner from "../components/LoadingSpinner";
 import { Box, Typography, Button } from "@mui/material";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import useRealtyStore from "../store/store";

@@ -293,7 +293,7 @@ export default function AccountManagement() {
           ))}
 
         <Grid container spacing={3}>
-          <Grid md={6} sm={6} xs={12}>
+          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
             <TextField
               label="First Name"
               value={firstName}
@@ -317,7 +317,7 @@ export default function AccountManagement() {
               }}
             />
           </Grid>
-          <Grid md={6} sm={6} xs={12}>
+          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
             <TextField
               label="Last Name"
               value={lastName}
@@ -341,7 +341,7 @@ export default function AccountManagement() {
               }}
             />
           </Grid>
-          <Grid xs={12}>
+          <Grid size={12}>
             <TextField
               label="Email Address"
               value={profile?.email}
@@ -357,7 +357,7 @@ export default function AccountManagement() {
               }}
             />
           </Grid>
-          <Grid xs={12}>
+          <Grid size={12}>
             <TextField
               label="Phone Number"
               value={phone}
@@ -401,7 +401,7 @@ export default function AccountManagement() {
               </Box>
             )}
           </Grid>
-          <Grid xs={12}>
+          <Grid size={12}>
             <Button
               variant="contained"
               color="primary"

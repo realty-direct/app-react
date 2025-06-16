@@ -117,7 +117,7 @@ export const fetchUserProfile = async (userId: string) => {
 // ✅ Verify phone with OTP
 export const startPhoneVerification = async (phoneNumber: string) => {
   try {
-    const { data, error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       phone: phoneNumber,
     });
 
@@ -143,7 +143,7 @@ export const verifyPhoneOtp = async (
 ) => {
   try {
     // Verify the OTP
-    const { data, error } = await supabase.auth.verifyOtp({
+    const { error } = await supabase.auth.verifyOtp({
       phone: phoneNumber,
       token: otp,
       type: "sms",

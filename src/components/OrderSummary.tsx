@@ -39,7 +39,6 @@ interface OrderSummaryProps {
   }>;
   publishOption: string;
   publishDate: Date | null;
-  handleFinalizeListing: () => Promise<void>;
 }
 
 const OrderSummary = ({
@@ -49,7 +48,6 @@ const OrderSummary = ({
   enhancements,
   publishOption,
   publishDate,
-  handleFinalizeListing,
 }: OrderSummaryProps) => {
   const theme = useTheme();
   const { profile } = useRealtyStore();
@@ -59,7 +57,6 @@ const OrderSummary = ({
   const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
   const [promoError, setPromoError] = useState("");
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
-  const [isFinalizing, setIsFinalizing] = useState(false);
   const [showOrderSummary, setShowOrderSummary] = useState(true);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
@@ -147,12 +144,6 @@ const OrderSummary = ({
 
   const handleRemovePromo = () => {
     setAppliedPromo(null);
-  };
-
-  const handleFinalize = async () => {
-    setIsFinalizing(true);
-    await handleFinalizeListing();
-    setIsFinalizing(false);
   };
 
   const handlePayment = async () => {
@@ -432,7 +423,6 @@ const OrderSummary = ({
           size="large"
           disabled={
             isProcessingPayment ||
-            isFinalizing ||
             (publishOption === "later" && !publishDate) ||
             !packageType
           }

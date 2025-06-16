@@ -23,7 +23,7 @@ export default function Price() {
   );
 
   const [showPrice, setShowPrice] = useState(
-    propertyDetail?.show_price ?? true
+    propertyDetail?.price_display === "show" ? true : false
   );
   
   const [formattedPrice, setFormattedPrice] = useState("");
@@ -48,7 +48,7 @@ export default function Price() {
     const inputValue = e.target.value;
     const rawValue = inputValue.replace(/,/g, "");
     setFormattedPrice(formatNumberWithCommas(rawValue));
-    updatePropertyDetail(propertyId, { price: rawValue });
+    updatePropertyDetail(propertyId, { price: rawValue ? Number(rawValue) : null });
   };
 
   if (!propertyDetail)
@@ -95,7 +95,7 @@ export default function Price() {
             onChange={(e) => {
               setShowPrice(e.target.value === "true");
               updatePropertyDetail(propertyId, {
-                show_price: e.target.value === "true",
+                price_display: e.target.value === "true" ? "show" : "hide",
               });
             }}
           >

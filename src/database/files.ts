@@ -28,7 +28,7 @@ export const uploadFile = async (
   const filePath = `${propertyId}/${uniqueId}-${safeFileName}`;
 
   // Upload to the specified bucket
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from(bucketName)
     .upload(filePath, file, { cacheControl: "3600", upsert: false });
 
@@ -166,7 +166,7 @@ export const deleteFileFromStorage = async (
         return true; // Consider it a success if there's no error
       }
 
-      const failedItems = data.filter((item) => item.error);
+      const failedItems = data.filter((item: any) => item.error);
 
       if (failedItems.length > 0) {
         console.error("❌ Some files failed to delete:", failedItems);
@@ -230,7 +230,7 @@ export const deleteFloorPlan = async (fileUrl: string): Promise<boolean> => {
     }
 
     // Attempt deletion with the precise file path
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("property-floorplans")
       .remove([`${propertyId}/${fileName}`]);
 
@@ -283,7 +283,7 @@ export const directFloorPlanDelete = async (
 
     // Approach 1: Standard removal
     try {
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from("property-floorplans")
         .remove([pathPart]);
 
@@ -305,7 +305,7 @@ export const directFloorPlanDelete = async (
           .map((segment) => encodeURIComponent(segment))
           .join("/");
 
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
           .from("property-floorplans")
           .remove([encodedPath]);
 
@@ -327,7 +327,7 @@ export const directFloorPlanDelete = async (
           const propertyId = segments[0];
           const fileName = segments.slice(1).join("/");
 
-          const { data, error } = await supabase.storage
+          const { error } = await supabase.storage
             .from("property-floorplans")
             .remove([`${propertyId}/${fileName}`]);
 
@@ -458,7 +458,7 @@ export const cleanupStorageBucket = async (
       const filePaths = files.map((file) => `${propertyId}/${file.name}`);
 
       // Delete all files in the property folder
-      const { data: deleteData, error: deleteError } = await supabase.storage
+      const { data: _deleteData, error: deleteError } = await supabase.storage
         .from(bucketName)
         .remove(filePaths);
 
@@ -529,7 +529,7 @@ export const directCleanupFloorPlans = async (
 
     for (const path of filePaths) {
       try {
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
           .from("property-floorplans")
           .remove([path]);
 
@@ -607,25 +607,22 @@ export const cleanupAllPropertyFiles = async (
   propertyId: string
 ): Promise<boolean> => {
   // First cleanup property_photographs
-  let photosResult = false;
   try {
-    photosResult = await cleanupPropertyPhotographs(propertyId);
+    await cleanupPropertyPhotographs(propertyId);
   } catch (error) {
     console.error(`❌ Error cleaning up photographs: ${error}`);
   }
 
   // Use the direct method for floor plans
-  let floorPlansResult = false;
   try {
-    floorPlansResult = await directCleanupFloorPlans(propertyId);
+    await directCleanupFloorPlans(propertyId);
   } catch (error) {
     console.error(`❌ Error cleaning up floor plans: ${error}`);
   }
 
   // Cleanup ownership documents
-  let ownershipResult = false;
   try {
-    ownershipResult = await cleanupStorageBucket(
+    await cleanupStorageBucket(
       propertyId,
       "property-ownership"
     );
@@ -634,9 +631,8 @@ export const cleanupAllPropertyFiles = async (
   }
 
   // Cleanup identification documents
-  let identificationResult = false;
   try {
-    identificationResult = await cleanupStorageBucket(
+    await cleanupStorageBucket(
       propertyId,
       "property-identification"
     );
