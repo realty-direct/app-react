@@ -15,11 +15,17 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: false,
-    // Ensure TS files are properly processed
+    assetsDir: 'assets',
+    // Ensure proper file output
     rollupOptions: {
       input: {
-        main: './index.html',
+        index: './index.html',
       },
+      output: {
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name].[ext]'
+      }
     }
   }
 })
