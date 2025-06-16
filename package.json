@@ -12,7 +12,8 @@
     "prepare": "husky",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "deploy": "npm run build && cp dist/index.html dist/404.html"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [
