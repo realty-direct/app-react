@@ -23,9 +23,6 @@ import Signin from "./routes/Signin";
 import Signup from "./routes/Signup";
 import PaymentSuccess from "./routes/PaymentSuccess";
 
-// Get base path from environment variable
-const basePath = import.meta.env.BASE_URL || '/rd-dashboard-react/';
-
 const router = createBrowserRouter([
   {
     element: <App />,
@@ -80,9 +77,7 @@ const router = createBrowserRouter([
       },
     ],
   },
-], 
-  { basename: basePath }
-);
+]);
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
